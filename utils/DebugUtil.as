@@ -36,7 +36,7 @@ public class DebugUtil
 			new LocalConnection().connect("__forceGC");
 		}
 		catch(e:Error){
-			ETSystem.output("garbage collection is running");
+			trace("garbage collection is running");
 		}
 	}
 	
