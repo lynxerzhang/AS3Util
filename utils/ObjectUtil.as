@@ -2,7 +2,6 @@ package utils
 {
 import flash.utils.describeType;
 import flash.utils.getQualifiedClassName;
-	
 /**
  * 
  */ 	

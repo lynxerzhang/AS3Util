@@ -2,6 +2,7 @@ package utils
 {
 import flash.display.Bitmap;
 import flash.display.BitmapData;
+import flash.display.BitmapDataChannel;
 import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
 import flash.display.Loader;
@@ -12,9 +13,11 @@ import flash.display.Sprite;
 import flash.display.Stage;
 import flash.events.Event;
 import flash.events.EventPhase;
+import flash.geom.ColorTransform;
 import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
+import flash.geom.Transform;
 import flash.text.TextField;
 import flash.text.TextFieldAutoSize;
 import flash.text.TextFormat;
@@ -22,40 +25,65 @@ import flash.utils.Dictionary;
 
 /**
  * 
+ * offser some displayobject's utils method
  */
 public class DisplayObjectUtil 
 {	
 	/**
 	 * remove all children in give the container
 	 * 
-	 * @param d  			  the displayObjectContainer
+	 * @param d  				 the displayObjectContainer
 	 * @param isRecursive     recursive run the fun
 	 */
 	public static function removeAll(d:DisplayObjectContainer, isRecursive:Boolean = false):void {
 		if(!d){
 			return;
 		}
+		
 		var len:int = d.numChildren;
 		if(d is MovieClip){
 			(d as MovieClip).stop();
 		}
+		
+		var s:DisplayObject;
 		while (--len > -1) {
-			var s:DisplayObject = d.removeChildAt(len);
-			if(s is SimpleButton){
-				var btn:SimpleButton = s as SimpleButton;
-				btn.upState = null;
-				btn.downState = null;
-				btn.overState = null;
-				btn.hitTestState = null;
-			}
-			else if(s is Bitmap){
-				var bitmap:Bitmap = s as Bitmap;
+			if(d is Loader){
 				try{
-					bitmap.bitmapData.dispose();
-					bitmap.bitmapData = null;
+					(d as Loader).close();
 				}
 				catch(e:Error){
-					
+					//slience
+				}
+				(d as Loader).unloadAndStop();
+			}
+			else{
+				//TODO, 多帧问题
+//				if(d is MovieClip && (d as MovieClip).totalFrames > 1){
+//						
+//				}
+//				else{
+//					
+//				}
+				s = d.removeChildAt(len);
+			}
+			
+			if(!s){
+				return;
+			}
+			
+			if(s is SimpleButton){
+				(s as SimpleButton).upState = null;
+				(s as SimpleButton).downState = null;
+				(s as SimpleButton).overState = null;
+				(s as SimpleButton).hitTestState = null;
+			}
+			else if(s is Bitmap){
+				try{
+					(s as Bitmap).bitmapData.dispose();
+					(s as Bitmap).bitmapData = null;
+				}
+				catch(e:Error){
+					//slience
 				}
 			}
 			else if(s is Shape){
@@ -69,6 +97,16 @@ public class DisplayObjectUtil
 		}
 	}
 
+	/**
+	 * just remove, no dispose or kill
+	 */ 
+	public static function removeChildren(container:DisplayObjectContainer):void{
+		var len:int = container.numChildren;
+		while(--len > -1){
+			container.removeChildAt(len);
+		}
+	}
+	
 	/**
 	 * remove and dispose the displayobject container's bitmap children
 	 * 
@@ -209,6 +247,74 @@ public class DisplayObjectUtil
 	}
 	
 	/**
+	 * TODO
+	 */ 
+	public static function getCopy(dis:DisplayObject, sx:Number = 1.0, sy:Number = 1.0):BitmapData{
+		if(dis.width <= 0 || dis.height <= 0){
+			return null;
+		}
+		if(dis is Loader){
+			if(!((dis as Loader).contentLoaderInfo.childAllowsParent)){
+				return null;
+			}
+		}
+		var wh:Rectangle = getActualSize(dis);
+		var c:ColorTransform = dis.transform.colorTransform;
+		var len:int = dis.filters.length;
+		var p:Point = getLeftTopPosition(dis, sx, sy);
+		var b:Rectangle = new Rectangle(0, 0, wh.width, wh.height);
+		if(len > 0){
+			for(var i:int = 0; i < len; i ++){
+				var temp:BitmapData = new BitmapData(wh.width, wh.height, true, 0);
+				var tempRect:Rectangle = temp.generateFilterRect(temp.rect, dis.filters[i]);
+				b = b.union(tempRect);
+				temp.dispose();
+			}
+		}
+		var mt:Matrix = new Matrix(sx, 0, 0, sy, -b.x + p.x, -b.y + p.y);
+		var dt:BitmapData = new BitmapData(b.width, b.height, true, 0);
+		dt.draw(dis, mt, c);
+		return dt;
+	}
+	
+	/**
+	 * TODO
+	 */ 
+	public static function getCopySprite(dis:DisplayObject, sx:Number = 1.0, sy:Number = 1.0):Sprite{
+		if(dis.width <= 0 || dis.height <= 0){
+			return null;
+		}
+		if(dis is Loader){
+			if(!((dis as Loader).contentLoaderInfo.childAllowsParent)){
+				return null;
+			}
+		}
+		var wh:Rectangle = getActualSize(dis);
+		var c:ColorTransform = dis.transform.colorTransform;
+		var len:int = dis.filters.length;
+		var p:Point = getLeftTopPosition(dis, sx, sy);
+		var b:Rectangle = new Rectangle(0, 0, wh.width, wh.height);
+		if(len > 0){
+			for(var i:int = 0; i < len; i ++){
+				var temp:BitmapData = new BitmapData(wh.width, wh.height, true, 0);
+				var tempRect:Rectangle = temp.generateFilterRect(temp.rect, dis.filters[i]);
+				b = b.union(tempRect);
+				temp.dispose();
+			}
+		}
+		var mt:Matrix = new Matrix(sx, 0, 0, sy, -b.x + p.x, -b.y + p.y);
+		var dt:BitmapData = new BitmapData(b.width, b.height, true, 0);
+		dt.draw(dis, mt, c);
+		var s:Sprite = new Sprite();
+		var bt:Bitmap = new Bitmap(dt);
+		s.addChild(bt);
+		bt.x = b.x - p.x;
+		bt.y = b.y - p.y;
+		return s;
+	}
+
+	
+	/**
 	 * get real bitmapdata (remove transparent area - (in as3 is rectangle))
 	 * 
 	 * @param d   the displayobject
@@ -307,14 +413,12 @@ public class DisplayObjectUtil
 	 * @param w
 	 * @return
 	 */
-	public static function createSpecWidthTextField(w:Number = NaN):TextField {
+	public static function createSpecWidthTextField(enabled:Boolean = false, w:Number = NaN):TextField {
 		var t:TextField = new TextField();
 		t.autoSize = TextFieldAutoSize.LEFT;
-		//be careful set this property, when w is NaN, this property maybe set false
-		//(let's text is show in single line)
 		t.wordWrap = true; 
-		t.selectable = false;
-		t.mouseEnabled = false;
+		t.selectable = enabled;
+		t.mouseEnabled = enabled;
 		if (!isNaN(w)) {
 			t.width = w;
 		}
@@ -679,13 +783,14 @@ public class DisplayObjectUtil
 	 * 中的shape.parent 为null.., 因此无法继续获取了改按钮了, 不确定是否是sdk版本的关系。
 	 * 
 	 * @issue 
+	 * 
 	 * in adobe document
 	 *   Starting with Player version 11.2 / AIR version 3.2, the parent property of the 
 	 * states of a SimpleButton object will report null if queried.
 	 * 
 	 *   getObjectsUnderPoint 这个方法貌似在11.2以后不但是SimpleButton, 
 	 * 即便是一个buttonMode为true的模拟按钮行为的MovieClip也取不到,看来全局
-	 * 取SimpleButton在11.2之后是不行了
+	 * 使用getObjectsUnderPoint取SimpleButton在11.2之后是不行了
 	 * 
 	 */ 
 	public static function getDisObjectUnderPoint(container:DisplayObjectContainer, 
@@ -785,7 +890,8 @@ public class DisplayObjectUtil
 		if(!range || ((range.width >= dis.width) && (range.height >= dis.height))){
 			return DisplayObjectUtil.getBitmapData(dis);
 		}
-		var rect:Rectangle = dis.transform.pixelBounds;
+		//var rect:Rectangle = dis.transform.pixelBounds;
+		var rect:Rectangle = dis.getBounds(dis);
 		var s:Number;
 		if(range.width < dis.width){
 			dis.width = range.width;
@@ -909,6 +1015,125 @@ public class DisplayObjectUtil
 		return c.some(function(dis:DisplayObject, ...args):Boolean{
 			return customCheck(dis);
 		});
+	}
+	
+	/**
+	 * 获取真实的制定显示对象的长宽（不受是否在舞台, 或者ScrollRect属性的影响，或者scaleX, scaleY的设置）
+	 * 
+	 * 直接获取dis.transform.pixelBounds 获取的是经过设置过scaleX, scaleY的长宽, 
+	 * 如不在舞台需要除以5以获取实际值(原因不明), getBounds目前测试是不受任何影响, 
+	 * 包括了不在舞台的情况, 获得的均是原始值
+	 * 
+	 * @param dis 
+	 */ 
+	public static function getActualSize(dis:DisplayObject):Rectangle{		
+//		var rect:Rectangle = dis.transform.pixelBounds.clone();
+//		if(!dis.stage){
+//			//maybe a bug issue?? this version could work, 
+//			//but why divide by five? maybe the "twips"???
+//			rect.width /= 5;
+//			rect.height /= 5; //
+//		}
+//		return rect;
+		
+		//TODO, 特例, pixelBounds无法返回文本的长宽, 只能返回对应坐标
+		if(dis is TextField){
+			return dis.getBounds(dis);
+		}
+		
+		//solution two
+		//inspiration from joe@usecake.com and senocular.com
+		var currentTransform:Transform = dis.transform;
+		var currentMatrix:Matrix = currentTransform.matrix;
+		var globalMatrix:Matrix = currentTransform.concatenatedMatrix;
+		
+		globalMatrix.invert();
+		globalMatrix.concat(currentMatrix);
+		currentTransform.matrix = globalMatrix;
+		
+		var rect:Rectangle = currentTransform.pixelBounds;
+		currentTransform.matrix = currentMatrix; //reset the position, scale and skew value
+		return rect;
+	}
+	
+	/**
+	 * 
+	 * @param resource 指定需要将注册点调整至左上角位置的显示对象
+	 * 将指定显示对象的注册点调整为左上角(top-left)以方便定位 (只是嵌套一层Sprite)
+	 */ 
+	public static function handleResetTopLeftPos(resource:Sprite):Sprite{
+		var s:Sprite = new Sprite();
+		resource.parent.addChildAt(s, resource.parent.getChildIndex(resource));
+		s.addChild(resource.parent.removeChild(resource));
+		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(resource);
+		var originX:Number = resource.x;
+		var originY:Number = resource.y;
+		resource.x = leftTop.x;
+		resource.y = leftTop.y;
+		s.x = -leftTop.x + originX;
+		s.y = -leftTop.y + originY;
+		return s;
+	}
+	
+
+	/**
+	 * inspired from showbox (a air game develop tool) and grantskiner's js tool
+	 * TODO
+	 * 将美术资源的png转换为2块jpg格式(原rgb, alpha, 缩小整体文件大小, 加载2张图片后再使用copyChannel方法合并为透明图片)
+	 */ 
+	public static function combinePng(rgbBd:BitmapData, alphaBd:BitmapData):BitmapData{
+		var rgbCom:BitmapData = rgbBd.clone();
+		var alp:BitmapData = alphaBd.clone();
+		rgbCom.copyChannel(alp, rgbCom.rect, new Point(0, 0), BitmapDataChannel.RED, BitmapDataChannel.ALPHA);
+		rgbCom.copyChannel(alp, rgbCom.rect, new Point(0, 0), BitmapDataChannel.GREEN, BitmapDataChannel.ALPHA);
+		rgbCom.copyChannel(alp, rgbCom.rect, new Point(0, 0), BitmapDataChannel.BLUE, BitmapDataChannel.ALPHA);
+		return rgbCom;
+	}
+	
+	
+	/**
+	 * TODO
+	 */ 
+	public static function getAlphaChannel(data:BitmapData):BitmapData{
+		var alp:BitmapData = new BitmapData(data.width, data.height, true, 0);
+		alp.fillRect(alp.rect, 0xFF000000);
+		alp.copyChannel(data, alp.rect, new Point(0, 0), BitmapDataChannel.ALPHA, BitmapDataChannel.RED);
+		alp.copyChannel(data, alp.rect, new Point(0, 0), BitmapDataChannel.ALPHA, BitmapDataChannel.GREEN);
+		alp.copyChannel(data, alp.rect, new Point(0, 0), BitmapDataChannel.ALPHA, BitmapDataChannel.BLUE);
+		return alp;
+	}
+	
+	/**
+	 * TODO
+	 */ 
+	public static function copyBitmapChannel(raw:BitmapData, channel:uint):BitmapData{
+		var d:BitmapData = new BitmapData(raw.width, raw.height, true, 0xFF000000);
+		d.copyChannel(raw, d.rect, new Point(0, 0), channel, channel);
+		return d;
+	}
+	
+	
+	/**
+	 * TODO
+	 */ 
+	public static function getAlphaChannelPixel(data:BitmapData):BitmapData{
+		var alp:BitmapData = new BitmapData(data.width, data.height, true, 0);
+		var w:Number = data.width;
+		var h:Number = data.height;
+		var alpixel:uint;
+		var alpha:int;
+		var newPixel:int;
+		alp.lock();
+		for(var i:int = 0; i < w; i ++){
+			for(var j:int = 0; j < h; j ++){
+				alpixel = data.getPixel32(i, j);
+				alpha = (alpixel >> 24) & 0xFF;
+				newPixel = alpha << 16 | alpha << 8 | alpha;			
+				alp.setPixel(i, j, newPixel);
+			}
+		}
+		alp.unlock();
+		return alp;
 	}
 	
 }

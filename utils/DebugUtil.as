@@ -13,22 +13,16 @@ import flash.utils.Dictionary;
 import flash.utils.getQualifiedClassName;
 import flash.utils.getTimer;
 
+import tool.ResourcePool;
+
 /**
- *
+ * 
+ * offer some userful debug method
  */ 
 public class DebugUtil
-{
-	public function DebugUtil()
-	{
-	}
-	
+{	
 	/**
-	 * show this debug library version 
-	 */ 
-	public static const version:String = "beta 0.1";
-	
-	/**
-	 * grantskinner's hack method, so do not use in release version
+	 * grantskinner's hack method, do not use in release version
 	 */ 
 	public static function gc():void{
 		try{
@@ -48,6 +42,15 @@ public class DebugUtil
 	}
 	
 	/**
+	 * check variable is whether null
+	 */ 
+	public static function isNull(value:*):Boolean{
+		var s:String = getQualifiedClassName(value);
+		return s == "null" || s == "void" || s == "undefined";
+	}
+	
+	
+	/**
 	 * just used in debugPlayer's Test version
 	 */ 
 	public static function getExecuteChain():String{
@@ -56,7 +59,7 @@ public class DebugUtil
 			throw new Error("__GetExecuteChain");
 		}
 		catch(e:Error){
-			s = e.getStack//trace();
+			s = e.getStackTrace();
 		}
 		return s;
 	}
@@ -119,23 +122,119 @@ public class DebugUtil
 	 * @param fun the function to delay run with specified frames
 	 * @param frames the specfied frames
 	 */ 
-	public static function runFramesDelay(fun:Function, frames:uint, ...funArgs):void{
+	public static function runFramesDelay(fun:Function, frames:uint, ...funArgs):Function{
 		frames = Math.max(1, frames);
 		
-		var s:Shape = new Shape();
+		var s:Shape = ResourcePool.instance.getResource(Shape);
 		var count:uint = 0;
-		
 		preventGC[s] = true;
 		
-		s.addEventListener(Event.ENTER_FRAME, function(evt:Event):void{
+		var t:Function = function(evt:Event):void{
 			if(++count == frames){
-				
 				preventGC[s] = undefined;
 				delete preventGC[s];
-				
-				s.removeEventListener(Event.ENTER_FRAME, arguments.callee);
+				s.removeEventListener(Event.ENTER_FRAME, t);
+				ResourcePool.instance.dispose(s);
 				s = null;
+				delete runFramesDelayDict[t];
 				
+				if(fun != null){
+					fun.apply(null, funArgs);
+				}
+			}
+		}
+		s.addEventListener(Event.ENTER_FRAME, t);
+		runFramesDelayDict[t] = s;
+		return t;
+	}
+
+	
+	private static const runFramesDelayDict:Dictionary = new Dictionary(false);
+	
+	public static function cancelRunFramesDelay(fun:Function):void{
+		if(fun in runFramesDelayDict){
+			var s:Shape = runFramesDelayDict[fun];
+			s.removeEventListener(Event.ENTER_FRAME, fun);
+			delete runFramesDelayDict[fun];
+		}
+	}
+	
+	/**
+	 * 
+	 * @see 方法 checkTimesDelay
+	 * @see 常量 checkTimesDelayDict
+	 */ 
+	public static function deleteCheckTimesDelay(fun:Function):void{
+		if(fun in checkTimesDelayDict){
+			var f:Function = checkTimesDelayDict[fun] as Function;
+			if(f != null){
+				f();
+			}
+		}
+	}
+	
+	private static const checkTimesDelayDict:Dictionary = new Dictionary(false);
+	
+	/**
+	 * @see runTimesDelay
+	 * 
+	 * 和runTimesDelay功能一样, 当中添加半途终止的处理, 可以查看deleteCheckTimesDelay方法
+	 */ 
+	public static function checkTimesDelay(fun:Function, time:Number, ...funArgs):void{
+		var s:Shape = ResourcePool.instance.getResource(Shape);
+		var d:Number = getTimer();
+		var t:Number;
+		preventGC[s] = true;
+		
+		var ended:Function = function(runFun:Boolean):void{
+			preventGC[s] = undefined;
+			delete preventGC[s];
+			
+			s.removeEventListener(Event.ENTER_FRAME, enterFrame);
+			ResourcePool.instance.dispose(s);
+			s = null;
+			
+			checkTimesDelayDict[fun] = undefined;
+			delete checkTimesDelayDict[fun];
+			
+			if(fun != null && runFun){
+				fun.apply(null, funArgs);
+			}
+		}
+			
+		var deleteS:Function = function():void{
+			ended(false);	
+		}
+			
+		var enterFrame:Function = function(evt:Event):void{
+			t = (getTimer() - d) * .001;
+			if(t >= time){			
+				ended(true);
+			}
+		}
+		
+		s.addEventListener(Event.ENTER_FRAME, enterFrame);
+		checkTimesDelayDict[fun] = deleteS;
+	}
+	
+	/**
+	 * @param fun  the function to delay run with specified elapsed seconds
+	 * @param time the seconds elapsed will run the function
+	 */ 
+	public static function runTimesDelay(fun:Function, time:Number, ...funArgs):void{
+		var s:Shape = ResourcePool.instance.getResource(Shape);
+		var d:Number = getTimer();
+		var t:Number;
+		
+		preventGC[s] = true;
+		s.addEventListener(Event.ENTER_FRAME, function(evt:Event):void{
+			t = (getTimer() - d) * .001;
+			if(t >= time){
+				preventGC[s] = undefined;
+				delete preventGC[s];
+				s.removeEventListener(Event.ENTER_FRAME, arguments.callee);
+				ResourcePool.instance.dispose(s);
+				s = null;
 				if(fun != null){
 					fun.apply(null, funArgs);
 				}
@@ -144,34 +243,30 @@ public class DebugUtil
 	}
 	
 	/**
-	 * @param fun  the function to delay run with specified elapsed seconds
-	 * @param time the seconds elapsed will run the function
+	 * TODO
+	 * 
+	 * @param s   		  the displayObject to handle the render event
+	 * @param fun 		  the listener
+	 * @param ...funArgs  the function's argument
 	 */ 
-	public static function runTimesDelay(fun:Function, time:Number, ...funArgs):void{
-		var s:Shape = new Shape();
-		var d:Number = getTimer();
-		var t:Number;
+	public static function renderInvalid(s:DisplayObject, fun:Function, ...funArgs):void{
+		if(!s || !s.stage){
+			trace("do not execute specfied listener, because your displayObject is null or not on the stage");
+			return;
+		}
 		
 		preventGC[s] = true;
 		
-		s.addEventListener(Event.ENTER_FRAME, function(evt:Event):void{
-			t = (getTimer() - d) * .001;
-			
-			if(t >= time){
-				
-				preventGC[s] = undefined;
-				delete preventGC[s];
-				
-				s.removeEventListener(Event.ENTER_FRAME, arguments.callee);
-				s = null;
-				if(fun != null){
-					fun.apply(null, funArgs);
-				}
-				
-				
+		s.addEventListener(Event.RENDER, function(evt:Event):void{
+			preventGC[s] = undefined;
+			delete preventGC[s];
+			s.removeEventListener(Event.RENDER, arguments.callee);
+			if(fun != null){
+				fun.apply(null, funArgs);
 			}
-			
 		});
+		
+		s.stage.invalidate();
 	}
 	
 	private static var preventGC:Dictionary = new Dictionary(false);
@@ -187,7 +282,7 @@ public class DebugUtil
 		var check:BitmapData;
 		
 		if(d){
-			var c:Shape = new Shape();
+			var c:Shape = ResourcePool.instance.getResource(Shape);
 			var count:int = 1;	
 			preventGC[c] = true;
 			
@@ -200,6 +295,7 @@ public class DebugUtil
 					c.removeEventListener(Event.ENTER_FRAME, arguments.callee);
 					check = DisplayObjectUtil.getOpaqueDisObj(dis);
 					result =  DisplayObjectUtil.checkBitmapDataIsEqual(d, check);
+					ResourcePool.instance.dispose(c);
 					
 					d.dispose();
 					check.dispose();
@@ -209,9 +305,7 @@ public class DebugUtil
 						notifyFun(result);
 					}
 				}
-				
 			});
-			
 		}
 		else{
 			
@@ -261,7 +355,7 @@ public class DebugUtil
 	
 	/**
 	 * 
-	 * get the same type as specfied parameter type
+	 * get the fucking same type as specfied parameter type
 	 * 
 	 */ 
 	public static function getChildByType(container:DisplayObjectContainer, type:Class):Array{

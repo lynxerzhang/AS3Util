@@ -9,11 +9,6 @@ import flash.utils.describeType;
  */
 public class TraceUtil
 {
-	public function TraceUtil()
-	{
-	}
-	
-	
 	/**
 	 * get repeat string
 	 *
@@ -36,8 +31,7 @@ public class TraceUtil
 		return s;
 		//*/
 	}
-	
-	
+		
 	/**
 	 * check param o whether has none property
 	 * @param o
@@ -50,8 +44,7 @@ public class TraceUtil
 		}
 		return Boolean(item == 0);
 	}
-	
-	
+
 	/**
 	 * get object's type
 	 * @param o
@@ -145,9 +138,7 @@ public class TraceUtil
 	}
 }
 }
-
 import flash.utils.Dictionary;
-
 /**
  * TODO
  * 

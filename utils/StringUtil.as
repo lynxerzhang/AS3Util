@@ -6,7 +6,8 @@ import flash.text.TextFormat;
 /**
  * 
  */ 
-public class StringUtil {
+public class StringUtil 
+{
 	
 	/**
 	 * @example
