@@ -1,12 +1,8 @@
 package utils
-{
+{	
 import flash.utils.describeType;
+import flash.utils.getQualifiedClassName;
 
-/**
- * TODO
- * 
- * TrackUtil for debug purpose
- */
 public class TraceUtil
 {
 	/**
@@ -17,21 +13,13 @@ public class TraceUtil
 	 * @return
 	 */
 	public static function getRepeat(str:String, repeat:int):String {
-		//*
-		var s:Array = [];
-		for (var i:int = 1; i <= repeat; i ++) {
-			s[s.length] = str;
-		}
-		return s.join("");
-		/*/
 		var s:String = "";
 		for(var i:int = 1; i <= repeat; i ++){
 			s += str;
 		}
 		return s;
-		//*/
 	}
-		
+	
 	/**
 	 * check param o whether has none property
 	 * @param o
@@ -42,9 +30,9 @@ public class TraceUtil
 		for (var i:* in o) {
 			item ++;
 		}
-		return Boolean(item == 0);
+		return item == 0;
 	}
-
+	
 	/**
 	 * get object's type
 	 * @param o
@@ -57,7 +45,6 @@ public class TraceUtil
 		var xml:XML = RecordCache.get(o);
 		return String(xml.@name);
 	}
-	
 	
 	/**
 	 * prefix to format output data (we need prefix is tab space) 
@@ -84,69 +71,60 @@ public class TraceUtil
 	}
 	
 	private static var outputstr:String = "";
+	private static var _timeStamp:Date;
+	private static var _title:String;
 	
 	/**
 	 * dump the generic object for debug
 	 * this method only run the 'trace' method to dump, not return any value
 	 * @param o
 	 */
-	public static function dump(o:Object):void {
-		outputstr = "";
-		outputstr += "beginDump ----> {" + "\n";
+	public static function dump(o:Object, title:String = null):void {
+		_title = title == null ? "" : title;
+		outputstr += (_title + "\n");
+		outputstr += ("begin Dump ------> " + "{" + "\n");
 		outputstr += rdump(o);
-		outputstr += "endDump <-----}";
+		outputstr += ("end Dump ------>" + "}" + "\n");
 		output(outputstr);
-	}//
+		outputstr = "";
+	}
 	
 	/**
 	 * this method return dump string
 	 */ 
-	public static function rdump(o:Object, r:int = 1):String {
-		//*
+	private static function rdump(o:Object, r:int = 1):String {
 		var s:String = "";
 		var pre:String = getRepeat(prefix, r);
+		var k:int;
 		for (var item:* in o) {
-			if (typeof(o[item]) == "object" && isDynamic(o[item])) {
-				s += pre + String(item) + " : " + getType(o[item]) + "{" + "\n";
-				var k:int = r;
+			if (typeof(o[item]) == "object") {
+				s += pre + String(item) + " : " + type(o[item]) + "{" + "\n";
+				k = r;
 				s += rdump(o[item], ++k);
 				s += pre + "}" + "\n";
 			}
 			else {
-				s += pre + String(item) + " : " + String(o[item]) + " <" + getType(o[item]) + "> " + "\n";
+				s += pre + String(item) + " : " + String(o[item]) + " <" + type(o[item]) + "> " + "\n";
 			}
 		}
-		return s; //1645
-		
-		/*/
-		var ary:Array = [];
-		var pre:String = getRepeat(prefix, r);
-		for (var item:* in o) {
-			if (typeof(o[item]) == "object" && isDynamic(o[item])) {
-				ary.push(pre + String(item) + " : " + getType(o[item]) + "{");
-				
-				var k:int = r;
-				ary.push(rdump(o[item], ++k));
-				ary.push(pre + "}");
-			}
-			else {
-				ary.push(pre + String(item) + " : " + String(o[item]) + " <" + getType(o[item]) + "> ");
-			}
-		}
-		return ary.join("\n");
-		//*/
+		return s;
+	}
+	
+	private static function type(d:Object):String{
+		return getQualifiedClassName(d);
 	}
 }
 }
+
 import flash.utils.Dictionary;
+
 /**
  * TODO
  * 
  * this class cache "describeType" 's xml
  */ 
-internal class RecordCache{
-	public function RecordCache():void{
-	}
+internal class RecordCache
+{
 	private static var cache:Dictionary = new Dictionary(true);
 	public static function add(o:Object, xml:XML):void{
 		if(has(o)){

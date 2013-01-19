@@ -2,9 +2,6 @@ package utils
 {
 import flash.utils.getQualifiedClassName;
 
-/**
- * 
- */ 
 public class NumberUtil
 {
 	public function NumberUtil()
@@ -108,6 +105,10 @@ public class NumberUtil
 	private static function getFrictionPoint(ns:Number):int{
 		var s:String = String(ns);
 		return s.slice(s.lastIndexOf(".") + 1).length;
+	}
+	
+	public static function getFrictionCount(ns:Number):int{
+		return getFrictionPoint(ns);
 	}
 }
 }

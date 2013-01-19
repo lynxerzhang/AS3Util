@@ -3,9 +3,6 @@ package utils
 import flash.text.TextField;
 import flash.text.TextFormat;
 	
-/**
- * 
- */ 
 public class StringUtil 
 {
 	
@@ -115,6 +112,34 @@ public class StringUtil
 	public static function trim(s:String):String{
 		return s.replace(/^\s*|\s*$/g, "");
 	}
+	
+	/**
+	 * check string is whether empty
+	 */ 
+	public static function isEmptyBuffer(s:String):Boolean{
+		return trim(s) == "";
+	}
+	
+	/**
+	 * check contain specfied string
+	 */ 
+	public static function contain(str:String, mathStr:String):Boolean{
+		var fi:int = str.indexOf(mathStr);
+		if(fi != -1){
+			return str.substr(fi, mathStr.length) == mathStr;
+		}
+		return false;
+	}
+	
+	/**
+	 * TODO
+	 * from google search
+	 */ 
+	public static function isNotChineseWord(str:String):Boolean{
+		return chineseWordReg.test(str);
+	}
+	
+	private static var chineseWordReg:RegExp = /[^\u4e00-\u9fa5]/g;
 	
 }
 }

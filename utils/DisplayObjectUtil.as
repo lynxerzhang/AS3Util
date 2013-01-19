@@ -1,5 +1,6 @@
 package utils
 {
+
 import flash.display.Bitmap;
 import flash.display.BitmapData;
 import flash.display.BitmapDataChannel;
@@ -20,13 +21,8 @@ import flash.geom.Rectangle;
 import flash.geom.Transform;
 import flash.text.TextField;
 import flash.text.TextFieldAutoSize;
-import flash.text.TextFormat;
-import flash.utils.Dictionary;
 
-/**
- * 
- * offser some displayobject's utils method
- */
+
 public class DisplayObjectUtil 
 {	
 	/**
@@ -39,61 +35,84 @@ public class DisplayObjectUtil
 		if(!d){
 			return;
 		}
-		
-		var len:int = d.numChildren;
 		if(d is MovieClip){
-			(d as MovieClip).stop();
+			__disposeMovieClip(MovieClip(d));
 		}
-		
+		else if(d is Loader){
+			__disposeLoader(Loader(d));
+			return;
+		}
 		var s:DisplayObject;
+		var len:int = d.numChildren;
 		while (--len > -1) {
-			if(d is Loader){
-				try{
-					(d as Loader).close();
-				}
-				catch(e:Error){
-					//slience
-				}
-				(d as Loader).unloadAndStop();
-			}
-			else{
-				//TODO, 多帧问题
-//				if(d is MovieClip && (d as MovieClip).totalFrames > 1){
-//						
-//				}
-//				else{
-//					
-//				}
-				s = d.removeChildAt(len);
-			}
-			
-			if(!s){
-				return;
-			}
-			
+			s = d.removeChildAt(len);
 			if(s is SimpleButton){
-				(s as SimpleButton).upState = null;
-				(s as SimpleButton).downState = null;
-				(s as SimpleButton).overState = null;
-				(s as SimpleButton).hitTestState = null;
+				__disposeSimpleButton(SimpleButton(s));
 			}
 			else if(s is Bitmap){
-				try{
-					(s as Bitmap).bitmapData.dispose();
-					(s as Bitmap).bitmapData = null;
-				}
-				catch(e:Error){
-					//slience
-				}
+				__disposeBitmap(Bitmap(s));
 			}
 			else if(s is Shape){
-				(s as Shape).graphics.clear();
+				__disposeShape(Shape(s));
 			}
 			else if(s is DisplayObjectContainer){
 				if(isRecursive){
 					DisplayObjectUtil.removeAll(s as DisplayObjectContainer, isRecursive);
 				}
 			}
+		}
+	}
+	
+	private static function __disposeMovieClip(mc:MovieClip):void{
+		mc.stop();
+		//maybe have some dynamic method in specfied mc instance
+		for(var item:* in mc){
+			mc[item] = undefined;
+			delete mc[item];
+		}
+	}
+	
+	private static function __disposeShape(s:Shape):void{
+		s.graphics.clear();
+	}
+	
+	private static function __disposeBitmap(b:Bitmap):void{
+		try{
+			b.bitmapData.dispose();
+			b.bitmapData = null;
+		}
+		catch(e:Error){
+			//slience
+		}
+	}
+	
+	private static function __disposeSimpleButton(btn:SimpleButton):void{
+		btn.upState = null;
+		btn.downState = null;
+		btn.overState = null;
+		btn.hitTestState = null;
+	}
+	
+	private static function __disposeLoader(loader:Loader):void{
+		try{
+			loader.close();
+		}
+		catch(e:Error){
+			//slience
+		}
+		loader.unloadAndStop();
+	}
+	
+	
+	/**
+	 * 设置子对象的可见性 
+	 * @param d
+	 * @param visible
+	 */
+	public static function setChildrenVisible(d:DisplayObjectContainer, visible:Boolean):void{
+		var len:int = d.numChildren;
+		while(--len > -1){
+			d.getChildAt(len).visible = visible;
 		}
 	}
 
@@ -117,14 +136,14 @@ public class DisplayObjectUtil
 			return;
 		}
 		var len:int = d.numChildren;
+		var bp:Bitmap;
 		while(--len > -1){
 			var c:DisplayObject = d.getChildAt(len);
 			if(c is Bitmap){
-				try{
-					(c as Bitmap).bitmapData.dispose();
-					(c as Bitmap).bitmapData = null;
-				}
-				catch(e:Error){
+				bp = Bitmap(c);
+				if(bp.bitmapData){
+					bp.bitmapData.dispose();
+					bp.bitmapData = null;
 				}
 			}
 		}
@@ -168,9 +187,8 @@ public class DisplayObjectUtil
 	
 	/**
 	 * get the displayobject's topleft position
-	 *
+	 * the displayobject's scaleX scaleY maybe have problem
 	 * @param d
-	 * 
 	 * @return point
 	 */
 	public static function getLeftTopPosition(d:DisplayObject, scaleX:Number = NaN, scaleY:Number = NaN):Point {
@@ -182,9 +200,6 @@ public class DisplayObjectUtil
 		}
 		var rect:Rectangle = d.getBounds(d);
 		var m:Matrix = d.transform.matrix;
-		/**
-		 * the displayobject's scaleX scaleY maybe have problem
-		 */
 		var scaleX:Number = m.a;
 		var scaleY:Number = m.d;
 		var rx:Number, ry:Number;
@@ -199,10 +214,13 @@ public class DisplayObjectUtil
 	 * @param d     the displayobject
 	 * @return      the sprite wrap the bitmapdata
 	 */ 
-	public static function getBitmapSprite(d:DisplayObject, alignTopLeft:Boolean = false,  scaleX:Number = 1.0, scaleY:Number = 1.0):Sprite{
+	public static function getBitmapSprite(d:DisplayObject, alignTopLeft:Boolean = false,  scaleX:Number = 1.0, scaleY:Number = 1.0, isSmooth:Boolean = false):Sprite{
 		var offset:Point = getLeftTopPosition(d, scaleX, scaleY);
 		var b:BitmapData = getBitmapData(d, scaleX, scaleY);
 		var bitmap:Bitmap = new Bitmap(b);
+		if(isSmooth){
+			bitmap.smoothing = isSmooth;
+		}
 		var s:Sprite = new Sprite();
 		s.addChild(bitmap);
 		if(!alignTopLeft){
@@ -234,10 +252,8 @@ public class DisplayObjectUtil
 		if(d.width <= 0 || d.height <= 0){
 			return null;
 		}
-		if(d is Loader){
-			if(!((d as Loader).contentLoaderInfo.childAllowsParent)){
-				return null;
-			}
+		if(!__checkDraw(d)){
+			return null;
 		}
 		var offset:Point = getLeftTopPosition(d, scaleX, scaleY);
 		var bitmapData:BitmapData = new BitmapData(d.width, d.height, true, 0);
@@ -248,15 +264,14 @@ public class DisplayObjectUtil
 	
 	/**
 	 * TODO
+	 * @see getBitmapData (这里将ColorTransform, filters 计算在内)
 	 */ 
 	public static function getCopy(dis:DisplayObject, sx:Number = 1.0, sy:Number = 1.0):BitmapData{
 		if(dis.width <= 0 || dis.height <= 0){
 			return null;
 		}
-		if(dis is Loader){
-			if(!((dis as Loader).contentLoaderInfo.childAllowsParent)){
-				return null;
-			}
+		if(!__checkDraw(dis)){
+			return null;
 		}
 		var wh:Rectangle = getActualSize(dis);
 		var c:ColorTransform = dis.transform.colorTransform;
@@ -279,15 +294,14 @@ public class DisplayObjectUtil
 	
 	/**
 	 * TODO
+	 * @see getSprite (这里将ColorTransform, filters 计算在内)
 	 */ 
 	public static function getCopySprite(dis:DisplayObject, sx:Number = 1.0, sy:Number = 1.0):Sprite{
 		if(dis.width <= 0 || dis.height <= 0){
 			return null;
 		}
-		if(dis is Loader){
-			if(!((dis as Loader).contentLoaderInfo.childAllowsParent)){
-				return null;
-			}
+		if(!__checkDraw(dis)){
+			return null;
 		}
 		var wh:Rectangle = getActualSize(dis);
 		var c:ColorTransform = dis.transform.colorTransform;
@@ -324,10 +338,8 @@ public class DisplayObjectUtil
 		if(d.width <= 0 || d.height <= 0){
 			return null;
 		}
-		if(d is Loader){
-			if(!((d as Loader).contentLoaderInfo.childAllowsParent)){
-				return null;
-			}
+		if(!__checkDraw(d)){
+			return null;
 		}
 		var bitmapData:BitmapData = getBitmapData(d);
 		var unTransparentArea:Rectangle = bitmapData.getColorBoundsRect(0xFF000000, 0x00000000, false);
@@ -594,7 +606,7 @@ public class DisplayObjectUtil
 		return c;
 	}
 	
-
+	
 	/**
 	 * center specfied disObj in it's parent
 	 * 
@@ -642,11 +654,11 @@ public class DisplayObjectUtil
 	 * @param refer            reference displayobject
 	 * 
 	 */ 
-	public static function centerInSpecfiedParent(disObj:DisplayObject, refer:DisplayObject):void{
+	public static function centerInSpecfiedParent(disObj:DisplayObject, refer:DisplayObject, posX:Number = NaN, posY:Number = NaN):void{
 		if(disObj && refer){			
 			var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(refer);
 			
-			var t:Point = refer.parent.localToGlobal(new Point(refer.x, refer.y));
+			var t:Point = refer.parent.localToGlobal(new Point(isNaN(posX) ? refer.x : posX, isNaN(posY) ? refer.y : posY));
 			t.x -= topLeft.x;
 			t.y -= topLeft.y;
 		
@@ -660,42 +672,6 @@ public class DisplayObjectUtil
 			disObj.x = t.x;
 			disObj.y = t.y;
 		}
-	}
-	
-	
-	/**
-	 * create a sprite, and internal to draw every pixel with check the specfied bitmapdata
-	 * 
-	 * @param bitmapData         this argument should be a 'real' bitmapData(then I couldn't to check you specfied the 
-	 *                  		bitmapData is whether a 'real' bitmapdata)
-	 * 
-	 * @param isAutoDispose      when operation is end, whether dispose this argument
-	 * 
-	 * @see getRealBitmapData
-	 */
-	public static function getRealSpriteFromBitmapData(bitmapData:BitmapData, isAutoDispose:Boolean = false):Sprite{
-		var s:Sprite = new Sprite();
-		var w:int = bitmapData.width;
-		var h:int = bitmapData.height;
-		
-		//simple test use getTimer(), (width-159 heigth-140) bitmapData use 21 millseconds
-		bitmapData.lock();
-		for(var i:int = 0; i < w; i ++){
-			for(var j:int = 0; j < h; j ++){
-				var pixel:uint = bitmapData.getPixel32(i, j);
-				var alpha:int = (pixel >> 24) & 0xFF;
-				if(alpha != 0){
-					s.graphics.beginFill(pixel & 0xFFFFFF, alpha / 0xFF);
-					s.graphics.drawRect(i, j, 1, 1);
-					s.graphics.endFill();
-				}
-			}
-		}
-		bitmapData.unlock();
-		if(isAutoDispose){
-			bitmapData.dispose();
-		}
-		return s;
 	}
 	
 	/**
@@ -748,6 +724,7 @@ public class DisplayObjectUtil
 	/**
 	 * @param mc 				 the movieclip
 	 * @param rawMethodName  the movieclip's method 
+	 * 对指定影片剪辑及其子集影片剪辑调用指定方法
 	 */
 	public static function runMethodInMovie(mc:MovieClip, rawMethodName:String, ...args):void{
 		if(!mc || !mc.hasOwnProperty(rawMethodName)){
@@ -882,10 +859,8 @@ public class DisplayObjectUtil
 		if((dis.width == 0) || (dis.height == 0)){
 			return null;
 		}
-		if(dis is Loader){
-			if(!((dis as Loader).contentLoaderInfo.childAllowsParent)){
-				return null;
-			}
+		if(!__checkDraw(dis)){
+			return null;
 		}
 		if(!range || ((range.width >= dis.width) && (range.height >= dis.height))){
 			return DisplayObjectUtil.getBitmapData(dis);
@@ -908,28 +883,18 @@ public class DisplayObjectUtil
 		bd.draw(dis, new Matrix(s, 0, 0, s, topLeft.x, topLeft.y));
 		return bd;
 	}
+	
+	private static function __checkDraw(dis:DisplayObject):Boolean{
+		if(dis is Loader){
+			return (dis as Loader).contentLoaderInfo.childAllowsParent;
+		}
+		return true;
+	}
 
 	/**
-	 * get the specfied displayobject's range (return a rectangle)
-	 * 
-	 * @dis		the dis is which want to get it's range    
-	 * @refer   the refer is which the dis's coordinate reference
-	 */ 
-	public static function getRange(dis:DisplayObject, refer:DisplayObject):Rectangle{
-		var rect:Rectangle = dis.transform.pixelBounds;//return in global coordinate
-		if(dis != refer){
-			var p:Point = new Point(rect.x, rect.y);
-			p = refer.globalToLocal(p);
-			rect.x = p.x;
-			rect.y = p.y;
-		}
-		return rect;
-	}
-	
-	/**
-	 * 
 	 * @param dis     the dis to check    the dis for check is whether hitTest itself  
 	 * @param point   the specfied point  the stage point
+	 * @see checkPointIsTransParent
 	 */ 
 	public static function checkUnderPointTransParent(dis:DisplayObject, point:Point):Boolean{
 		if(!dis.parent){
@@ -1090,9 +1055,8 @@ public class DisplayObjectUtil
 		return rgbCom;
 	}
 	
-	
 	/**
-	 * TODO
+	 * 获取指定位图对象的透明通道
 	 */ 
 	public static function getAlphaChannel(data:BitmapData):BitmapData{
 		var alp:BitmapData = new BitmapData(data.width, data.height, true, 0);
@@ -1104,7 +1068,9 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * TODO
+	 * 返回指定位图的指定通道位图对象
+	 * @param raw
+	 * @param channel
 	 */ 
 	public static function copyBitmapChannel(raw:BitmapData, channel:uint):BitmapData{
 		var d:BitmapData = new BitmapData(raw.width, raw.height, true, 0xFF000000);
@@ -1112,28 +1078,51 @@ public class DisplayObjectUtil
 		return d;
 	}
 	
-	
 	/**
 	 * TODO
+	 * @param dis
+	 * @param point
 	 */ 
-	public static function getAlphaChannelPixel(data:BitmapData):BitmapData{
-		var alp:BitmapData = new BitmapData(data.width, data.height, true, 0);
-		var w:Number = data.width;
-		var h:Number = data.height;
-		var alpixel:uint;
-		var alpha:int;
-		var newPixel:int;
-		alp.lock();
-		for(var i:int = 0; i < w; i ++){
-			for(var j:int = 0; j < h; j ++){
-				alpixel = data.getPixel32(i, j);
-				alpha = (alpixel >> 24) & 0xFF;
-				newPixel = alpha << 16 | alpha << 8 | alpha;			
-				alp.setPixel(i, j, newPixel);
-			}
-		}
-		alp.unlock();
-		return alp;
+	public static function getStagePoint(dis:DisplayObject, point:Point):Point{
+		var p:Point = dis.localToGlobal(point.clone());
+		return dis.globalToLocal(p);
+	}
+	
+	/**
+	 * TODO hack method to redraw specfied displayobject immediately
+	 * 
+	 * 设置了scrollRect, 又或者移除舞台，而后添加至舞台, 会导致可视长宽无法及时获得, 
+	 * 需要延迟一帧才能获得 (移除舞台到添加至舞台, 添加至舞台到移除舞台，具体表现还不一致)
+	 * 似乎也可以使用draw绘制当前可视范围, 但也需要注意当前显示对象如果为loader,可能会
+	 * 导致安全报错
+	 * 
+	 * getBounds 只对设置过的scrollRect 起作用, 对内部visible为false始终保持原始的该区域的值
+	 */ 
+	public static function invalidateRedraw(dis:DisplayObject):void{
+		var area:Rectangle = dis.scrollRect;
+		dis.scrollRect = null;
+		__redraw(dis);
+		dis.scrollRect = area;
+		__redraw(dis);
+	}
+	
+	private static function __redraw(d:DisplayObject):void{
+		var bd:BitmapData = new BitmapData(1, 1, true, 0);
+		bd.draw(d);
+		bd.dispose();
+	}
+	
+	/**
+	 * 获取指定的显示对象和指定长宽返回可拖拽区域
+	 * @param dis
+	 * @param areaWidth
+	 * @param areaHeight
+	 * 
+	 * @see 
+	 */ 
+	public static function getWHDragLimitRect(dis:DisplayObject, areaWidth:Number, areaHeight:Number):Rectangle{
+		var bounds:Rectangle = dis.getBounds(dis);
+		return new Rectangle(-bounds.x, -bounds.y, areaWidth - dis.width, areaHeight - dis.height);
 	}
 	
 }
