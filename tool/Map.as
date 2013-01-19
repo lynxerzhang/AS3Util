@@ -3,10 +3,7 @@ package tool
 import flash.sampler.getSize;
 import flash.utils.Dictionary;
 
-/**
- * 
- * TODO
- */ 
+
 public class Map
 {
 	/**
@@ -134,6 +131,13 @@ public class Map
 	}
 	
 	/**
+	 * check empty
+	 */ 
+	public function isEmpty():Boolean{
+		return getLen() == 0;
+	}
+	
+	/**
 	 * for each key is specfied function's arguments
 	 */ 
 	public function someKey(fun:Function):void{
@@ -192,7 +196,9 @@ public class Map
 	public function forEachKeyWithFilter(fun:Function, check:Function, unMatch:Function = null):void{
 		for(var item:* in map){
 			if(check(item)){
-				fun(item);
+				if(fun != null){
+					fun(item);
+				}
 			}
 			else{
 				if(unMatch != null){
@@ -212,7 +218,9 @@ public class Map
 	public function forEachValueWithFilter(fun:Function, check:Function, unMatch:Function = null):void{
 		for each(var item:* in map){
 			if(check(item)){
-				fun(item);
+				if(fun != null){
+					fun(item);
+				}
 			}
 			else{
 				if(unMatch != null){
@@ -223,7 +231,9 @@ public class Map
 	}
 	
 	/**
-	 * TODO
+	 * 返回对应指定value的所有键名
+	 * 
+	 * @param value 返回指定value的所有key值
 	 */ 
 	public function getValueToKey(value:*):Array{
 		var k:Array = [];
@@ -236,7 +246,9 @@ public class Map
 	}
 	
 	/**
-	 * TODO
+	 * 删除指定value的所有键
+	 * 
+	 * @param value 指定的存储在该map中的value
 	 */ 
 	public function removeValue(value:*):void{
 		var key:Array = getValueToKey(value);

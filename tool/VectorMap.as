@@ -1,31 +1,27 @@
 package tool
 {
+import flash.display.MovieClip;
 import flash.utils.Dictionary;
 import flash.utils.getDefinitionByName;
 import flash.utils.getQualifiedClassName;
 	
-/**
- * 
- * inspired from as 3 entity system
- * 
- * TODO
- */ 
+
 public class VectorMap
 {
 	/**
 	 * 
 	 */ 
-	private static const VECTOR:String = getQualifiedClassName(Vector);
+	protected static const VECTOR:String = getQualifiedClassName(Vector);
 	
 	/**
 	 * 
 	 */ 
-	private var record:Dictionary = new Dictionary();
+	protected var record:Dictionary = new Dictionary();
 	
 	/**
 	 * 
 	 */ 
-	private var vector:*;
+	protected var vector:*;
 	
 	/**
 	 * @param type   the type you want to build
@@ -35,6 +31,12 @@ public class VectorMap
 		var e:String = VECTOR　+ ".<" + getQualifiedClassName(type) + ">";
 		var typeClass:Class = getDefinitionByName(e) as Class;
 		vector = new typeClass();
+		objectType = type;
+	}
+	
+	private var objectType:Class;
+	public function getType():Class{
+		return objectType;
 	}
 	
 	/**
@@ -107,7 +109,14 @@ public class VectorMap
 	 * no check the 
 	 */ 
 	public function getContent(index:int):*{
-		return this.vector[index];
+		var value:*;
+		try{
+			value = this.vector[index];
+		}
+		catch(e:RangeError){
+			
+		}
+		return value;
 	}
 	
 	/**
@@ -115,6 +124,32 @@ public class VectorMap
 	 */ 
 	public function getVector():*{
 		return this.vector;
+	}
+	
+	/**
+	 * execute with every VectorMap's content
+	 */ 
+	public function forEach(execute:Function):void{
+		if(getLen() > 0){
+			var c:* = this.vector.concat();
+			c.forEach(function(item:*, ...args):void{
+				execute(item);
+			});
+		}
+	}
+	
+	/**
+	 * TODO
+	 */ 
+	public function map(listenerName:String, ...args):void{
+		if(getLen() > 0){
+			var c:* = this.vector.concat();
+			c.forEach(function(item:*, ...args):void{
+				if(Object(item).hasOwnProperty(listenerName)){
+					item[listenerName].apply(item, args);
+				}
+			});
+		}
 	}
 }
 }

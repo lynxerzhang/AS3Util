@@ -1,24 +1,9 @@
 package tool
 {
+import flash.errors.IllegalOperationError;
 import flash.utils.Dictionary;
 import flash.utils.getQualifiedClassName;
 
-/**
- * 
- * @example
- * 
- * use this verify class, you must create a static propery 'instance' to get your class's single object
- * 
- * class singleton{
- * 	  public function singleton(){
- * 		   new SingletonVerify(this, singleton);
- * 	  }
- * 	
- * 	  public static var instance:singleton = new singleton();
- * }
- * 
- * 
- */ 
 public class SingletonVerify
 {
 	/**
@@ -46,8 +31,12 @@ public class SingletonVerify
 		}
 		else{
 			reference[cd] = true;
-		}
-		
+		}	
+	}
+	
+	public static const singletonMessage:String = "do no use 'new' to get instance, use this class's static property 'instance'";
+	public static function singletonErrorHandle(c:Object):void{
+		throw new IllegalOperationError("<" + getQualifiedClassName(c) + ">" + " is singleton class, " + SingletonVerify.singletonMessage);
 	}
 }
 }

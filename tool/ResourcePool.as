@@ -1,25 +1,27 @@
 package tool
 {
+import flash.errors.IllegalOperationError;
 import flash.utils.Dictionary;
 import flash.utils.getDefinitionByName;
 import flash.utils.getQualifiedClassName;
 
-/**
- * 
- * a resourcePool (the 'resource' maybe create, remove frequently, so use the pool to improve performance)
- * 
- */ 
+import utils.DebugUtil;
+import utils.ObjectUtil;
+import utils.SingletonVerify;
+
 public class ResourcePool
 {
 	public function ResourcePool()
 	{
-		new SingletonVerify(this, ResourcePool);
+		if(instance){
+			throw new IllegalOperationError(SingletonVerify.singletonMessage);
+		}
 	}
 	
 	/**
 	 * 
 	 */ 
-	public static var instance:ResourcePool = new ResourcePool();
+	public static const instance:ResourcePool = new ResourcePool();
 	
 	/**
 	 * 
@@ -29,74 +31,111 @@ public class ResourcePool
 	/**
 	 * get pool with specfied type (the type is class or object)
 	 */ 
-	public function getPool(d:*):Array{
+	public function getPool(d:*):VectorMap{
 		var c:Class = getType(d);
-		return c in poolDict ? poolDict[c] as Array : poolDict[c] = [];
+		return c in poolDict ? poolDict[c] as VectorMap : poolDict[c] = new VectorMap(c);
 	}
 	
 	/**
 	 * get specfied type's object
 	 */ 
 	public function getResource(d:*, ...args):*{
-		var k:Array = getPool(d);
-		if(k.length > 0){
-			return k.pop();
+		var k:VectorMap = getPool(d);
+		if(k.getLen() > 0){
+			var t:* = k.getContent(k.getLen() - 1);
+			if(ObjectUtil.checkIsImplementsInterface(getClass(t), IResourcePoolSetter)){
+				IResourcePoolSetter(t).reset.apply(t, args);
+			}
+			k.remove(t);
+			return t;
 		}
 		var c:Class = getType(d);
 		return construct(c, args);
 	}
 	
-	public function disposeAll(d:*):void{
-		var k:Array = getPool(d);
+	/**
+	 * get specfied instance's pool is sufficient
+	 */ 
+	public function isSuffi(d:*):Boolean{
+		return getPool(d).getLen() > 0;
+	} 
+	
+	/**
+	 * dispose specfied instance's pool 
+	 */ 
+	public function disposeAll(d:*, func:Function = null):void{
+		var c:Class = getType(d);
+		var k:VectorMap = getPool(c);
 		if(k){
-			k.length = 0;
-			var c:Class = getType(d);
+			if(func != null){
+			  k.forEach(func);
+			}
+			k.removeAll();
 			poolDict[c] = undefined;
 			delete poolDict[c];
 		}
 	}
 	
+	/**
+	 * @param d get parameter's Class definition 
+	 */ 
 	private function getType(d:*):Class{
-		var c:Class = d is Class ? d as Class : getDefinitionByName(getQualifiedClassName(d)) as Class;
-		return c;
+		return d is Class ? d as Class : getClass(d);
+	}
+	
+	/**
+	 * @param d assume parameter is instance
+	 */ 
+	private function getClass(d:*):Class{
+		if(ObjectUtil.isInternalClass(d)){
+			return Object(d).constructor;
+		}
+		return getDefinitionByName(getQualifiedClassName(d)) as Class;
 	}
 	
 	/**
 	 * this construct method maybe look bad smell, 
 	 * but now I could't found a better way to 'dynamic' construct a class
+	 * 
+	 * construct method couldn't use function's method 'apply' or 'call'
+	 * 
 	 */ 
 	private function construct(c:Class, args:Array):*{
-		var len:int = args.length;
-		var o:*;
-		switch(len){
-			case 0: o = new c(); break;
-			case 1: o = new c(args[0]); break;
-			case 2: o = new c(args[0], args[1]); break;
-			case 3: o = new c(args[0], args[1], args[2]); break;
-			case 4: o = new c(args[0], args[1], args[2], args[3]); break;
-			case 5: o = new c(args[0], args[1], args[2], args[3], args[4]); break;
-			case 6: o = new c(args[0], args[1], args[2], args[3], args[4], args[5]); break;
-			case 7: o = new c(args[0], args[1], args[2], args[3], args[4], args[5], args[6]); break;
-			case 8: o = new c(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);	break;
-			case 9: o = new c(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]); break;
-			case 10: o = new c(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]); break;
+		var d:*;
+		switch(args.length){
+			case 0: d = new c(); break;
+			case 1: d = new c(args[0]); break;
+			case 2: d = new c(args[0], args[1]); break;
+			case 3: d = new c(args[0], args[1], args[2]); break;
+			case 4: d = new c(args[0], args[1], args[2], args[3]); break;
+			case 5: d = new c(args[0], args[1], args[2], args[3], args[4]); break;
+			case 6: d = new c(args[0], args[1], args[2], args[3], args[4], args[5]); break;
+			case 7: d = new c(args[0], args[1], args[2], args[3], args[4], args[5], args[6]); break;
+			case 8: d = new c(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7]);	break;
+			case 9: d = new c(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8]); break;
+			case 10: d = new c(args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9]); break;
 			default:
-				trace("you specfied class's construct's method's arguments length more than 10,"  + 
-								  "so check 'construct' method in ResourcePool");
+				trace("you specfied class's construct's method's arguments length more than 10, so check 'construct' method in ResourcePool");
 				break;
 		}
-		return o;
+		return d;
 	}
 	
 	
 	/**
 	 * dispose a object to specfied pool （the lastIndexOf method maybe bring a performance issue）
 	 */ 
-	public function dispose(d:*):void{
-		var k:Array = getPool(d);
-		if(k.lastIndexOf(d) == -1){
-			k.push(d);
-		} 
+	public function dispose(d:*, fun:Function = null):void{
+		if(!d){
+			return;
+		}
+		var k:VectorMap = getPool(d);
+		if(!k.contain(d)){
+			if(fun != null){
+				fun(d);
+			}
+			k.add(d);
+		}
 	}
 }
 }

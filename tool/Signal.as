@@ -1,14 +1,6 @@
 package tool
 {
-import flash.sampler.getSize;
-/**
- * TODO
- * 
- * this is a simple observe pattern
- * 
- * but I think richardLord's Signal is wonderful (as3 flint system's author, it's inspired from robertpenner's Signal) 
- * 
- */ 
+
 public class Signal
 {
 	private var container:VectorMap;
@@ -20,23 +12,20 @@ public class Signal
 	/**
 	 * add specific observe function
 	 */ 
-	public function addObserver(fun:Function):Boolean{
+	public function addObserver(fun:Function):void{
 		if(containObserve(fun)){
-			return false;
+			return;
 		}
 		container.add(fun);
-		return true;
 	}
 	
 	/**
 	 * remove specific observe function
 	 */ 
-	public function removeObserver(fun:Function):Boolean{
+	public function removeObserver(fun:Function):void{
 		if(containObserve(fun)){
 			container.remove(fun);
-			return true;
 		}
-		return false;
 	}
 	
 	/**
@@ -50,19 +39,21 @@ public class Signal
 	 * get len in this signal
 	 */ 
 	public function getLen():int{
-		if(container){
-			return container.getLen();
-		}
-		return -1;
+		return container.getLen();
+	}
+	
+	/**
+	 * check this signal container is empty
+	 */ 
+	public function isEmpty():Boolean{
+		return getLen() == 0;
 	}
 	
 	/**
 	 * remove all observer
 	 */ 
 	public function removeAll():void{
-		if(container){
-			container.removeAll();
-		}
+		container.removeAll();
 	}
 	
 	/**
@@ -72,13 +63,9 @@ public class Signal
 		if(container.isEmpty()){
 			return;
 		}
-		var c:Vector.<Function> = container.getVector() as Vector.<Function>;
-		if(c && c.length > 0){
-			c = c.concat();
-			c.forEach(function(item:Function, ...d):void{
-				item.apply(null, args);
-			});
-		}
+		container.forEach(function(item:Function):void{
+			item.apply(null, args);
+		});
 	}
 }
 }

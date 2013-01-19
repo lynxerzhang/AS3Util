@@ -5,7 +5,9 @@ import flash.display.DisplayObjectContainer;
 import flash.display.MovieClip;
 import flash.display.SimpleButton;
 import flash.display.Sprite;
+import flash.events.Event;
 import flash.text.TextField;
+import flash.text.TextFieldType;
 import flash.utils.Dictionary;
 import flash.utils.getQualifiedClassName;
 
@@ -43,11 +45,19 @@ public class GetResourceManager
 	/**
 	 * get a internal textfield
 	 */ 
-	public function getTextField(name:String, slience:Boolean = true):TextField{
+	public function getTextField(name:String, slience:Boolean = true, removing:Boolean = true):TextField{
 		var t:TextField = this.content.getChildByName(name) as TextField;
 		if(t){
-			t.mouseEnabled = !slience;
-			t.text = "";
+			if(t.type == TextFieldType.DYNAMIC){
+				t.mouseEnabled = !slience;
+				t.selectable = !slience;
+			}
+			else if(t.type == TextFieldType.INPUT){
+				
+			}
+			if(removing){
+				t.text = "";
+			}
 		}
 		return t;
 	}
@@ -61,7 +71,7 @@ public class GetResourceManager
 			t.mouseEnabled = !slience;
 			t.mouseChildren = !slience;
 		}
-		if(t.totalFrames > 1){
+		if(t && t.totalFrames > 1){
 			t.gotoAndStop(1);
 		}
 		return t;
@@ -107,6 +117,11 @@ public class GetResourceManager
 		s.mouseChildren = s.mouseEnabled = false;
 		return s;
 	}
+	
+//	clickOpenShopBuyDecorationHandler
+//	public static function addListener(name:String, listener:Function, eventType:Event):void{
+//		
+//	}
 	
 }
 }

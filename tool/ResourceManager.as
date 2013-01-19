@@ -1,19 +1,15 @@
 package tool
 {
+import flash.display.DisplayObject;
+import flash.display.Loader;
 import flash.errors.IllegalOperationError;
 import flash.system.ApplicationDomain;
 import flash.utils.getQualifiedClassName;
 
-/**
- * 
- * TODO
- */ 
+import tool.VectorMap;
+
 public class ResourceManager
 {
-	public function ResourceManager()
-	{
-		//nothing to do
-	}
 	
 	/**
 	 * current applicationdomain container reference
@@ -147,5 +143,113 @@ public class ResourceManager
 		return getResourceName(o, true);
 	}
 	
+	//below are get child applicationDomain's resource
+	//****************************************************************
+	/**
+	 * @param className class's name
+	 * @param loader    loader
+	 */ 
+	public static function getResourceByDomain(className:String, loader:Loader):*{
+		var currentDomain:ApplicationDomain = loader.contentLoaderInfo.applicationDomain;
+		if(currentDomain && currentDomain.hasDefinition(className)){
+			var cl:Class = currentDomain.getDefinition(className) as Class;
+			return cl(new cl());
+		}
+	    trace("getResourceByDomain could not be found this resource", className);
+		return null;
+	}
+	
+	/**
+	 * @param className class's name
+	 * @param loader    loader
+	 */ 
+	public static function getDefinitionByDomain(className:String, loader:Loader):Class{
+		var currentDomain:ApplicationDomain = loader.contentLoaderInfo.applicationDomain;
+		if(currentDomain && currentDomain.hasDefinition(className)){
+			return currentDomain.getDefinition(className) as Class;
+		}
+		trace("getDefinitionByDomain could not be found this resource", className);
+		return null;
+	}
+	
+	
+	//below are child of applicationDomain
+	//*****************************************************************
+	private static const loaderMap:Map = new Map();
+	/**
+	 * add a specfied loader
+	 */ 
+	public static function setLoader(url:String, loader:Loader):void{
+		if(loaderMap.contains(url)){
+			trace("setLoader encounter a predefined problem", url);
+		}
+		loaderMap.add(url, loader);
+	}
+	/**
+	 * get a specfied loader
+	 */ 
+	public static function getLoader(url:String):Loader{
+		if(loaderMap.contains(url)){
+			return loaderMap.get(url) as Loader;
+		}
+		trace("getLoader could not be found url", url);
+		return null;
+	}
+	/**
+	 * dispose specfied loader
+	 * @param url          the url 
+	 * @param selfRemove   the selfRemove 
+	 */ 
+	public static function disposeLoader(url:String, selfRemove:Boolean = false):void{
+		if(loaderMap.contains(url)){
+			if(loaderMap.get(url) is Loader){
+				if(selfRemove){
+					try{
+						(loaderMap.get(url) as Loader).close();
+					}
+					catch(e:Error){
+					}
+					(loaderMap.get(url) as Loader).unloadAndStop();
+				}
+				loaderMap.remove(url);
+			}
+		}
+	}
+	/**
+	 * get resource by specfied url
+	 */ 
+	public static function getResourceByURL(url:String, className:String):*{
+		var currentDomain:ApplicationDomain = getDomain(url);
+		if(currentDomain && currentDomain.hasDefinition(className)){
+			var cl:Class = currentDomain.getDefinition(className) as Class;
+			return cl(new cl());
+		}
+		trace("getResourceByURL could not be found this resource", url, className);
+		return null;
+	}
+	/**
+	 * get definition by specfied url
+	 * 
+	 */ 
+	public static function getDefinitionByURL(url:String, className:String):Class{
+		var currentDomain:ApplicationDomain = getDomain(url);
+		if(currentDomain && currentDomain.hasDefinition(className)){
+			return currentDomain.getDefinition(className) as Class;
+		}
+		trace("getDefinitionByURL could not be found this resource", url, className);
+		return null;
+	}
+	/**
+	 * get specfied application domain
+	 */ 
+	public static function getDomain(url:String):ApplicationDomain{
+		var loader:Loader = getLoader(url);
+		if(loader){
+			return loader.contentLoaderInfo.applicationDomain;
+		}
+		trace("getDomain could not be found url", url);
+		return null;
+	}
+	//*****************************************************************
 }
 }
