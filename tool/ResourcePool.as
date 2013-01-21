@@ -7,7 +7,7 @@ import flash.utils.getQualifiedClassName;
 
 import utils.DebugUtil;
 import utils.ObjectUtil;
-import utils.SingletonVerify;
+import tool.SingletonVerify;
 
 public class ResourcePool
 {
