@@ -10,7 +10,6 @@ import common.tool.ListenerManager;
 import common.tool.Signal;
 
 import common.utils.DisplayObjectUtil;
-import utils.SingletonVerify;
 
 
 public class DragManager

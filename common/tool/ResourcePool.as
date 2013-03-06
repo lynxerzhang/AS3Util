@@ -14,7 +14,7 @@ public class ResourcePool
 	public function ResourcePool()
 	{
 		if(instance){
-			throw new IllegalOperationError(SingletonVerify.singletonMessage);
+			SingletonVerify.singletonErrorHandle(this);
 		}
 	}
 	

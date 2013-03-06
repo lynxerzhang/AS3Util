@@ -14,7 +14,9 @@ public class FontRiseMotion
 {
 	public function FontRiseMotion()
 	{
-		new SingletonVerify(this, FontRiseMotion);
+		if(instance){
+			SingletonVerify.singletonErrorHandle(this);
+		}
 	}
 	
 	private static var instance:FontRiseMotion = new FontRiseMotion();

@@ -10,9 +10,7 @@ public class EnterFrameTicker
 {
 	public function EnterFrameTicker()
 	{
-		if(instance){
-			throw new IllegalOperationError(SingletonVerify.singletonMessage);
-		}
+		if(instance) SingletonVerify.singletonErrorHandle(this);
 	}
 	
 	public static var instance:EnterFrameTicker = new EnterFrameTicker();

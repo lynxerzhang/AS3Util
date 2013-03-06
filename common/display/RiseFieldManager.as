@@ -15,7 +15,9 @@ internal class RiseFieldManager
 {
 	public function RiseFieldManager()
 	{
-		new SingletonVerify(this, RiseFieldManager);
+		if(instance){
+			SingletonVerify.singletonErrorHandle(this);
+		}
 	}
 	
 	//

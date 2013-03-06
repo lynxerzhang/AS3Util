@@ -9,7 +9,9 @@ import common.tool.SingletonVerify;
 public class Ticker
 {
 	public function Ticker(){
-		new SingletonVerify(this, Ticker);
+		if(instance){
+			SingletonVerify.singletonErrorHandle(this);
+		}
 	}
 	
 	public static var instance:Ticker = new Ticker();

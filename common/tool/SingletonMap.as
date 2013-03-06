@@ -12,7 +12,9 @@ import flash.utils.getQualifiedClassName;
  */ 
 public class SingletonMap{
 	public function SingletonMap(){
-		new SingletonVerify(this, SingletonMap);
+		if(instance){
+			SingletonVerify.singletonErrorHandle(this);
+		}
 	}
 	
 	public static var instance:SingletonMap = new SingletonMap();

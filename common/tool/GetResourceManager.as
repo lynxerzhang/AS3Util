@@ -117,11 +117,5 @@ public class GetResourceManager
 		s.mouseChildren = s.mouseEnabled = false;
 		return s;
 	}
-	
-//	clickOpenShopBuyDecorationHandler
-//	public static function addListener(name:String, listener:Function, eventType:Event):void{
-//		
-//	}
-	
 }
 }
