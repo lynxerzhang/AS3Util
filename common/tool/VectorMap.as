@@ -78,6 +78,16 @@ public class VectorMap
 		record[item] = vector.push(item) - 1;
 	}
 	
+        /**
+	 * add specfied items in map
+         */ 
+	public function addAll(...args):void{
+		var len:int = args.length, i:int;
+		for(i = 0; i < len; i ++){
+			add(args[i]);
+		}
+	}
+
 	/**
 	 * remove specfied item from map
 	 */ 
