@@ -46,6 +46,18 @@ public class VectorMap
 		return Boolean(item in record);
 	}
 	
+        /**
+	 * checked value of complex object is whether match specfied value
+	 */ 
+	public function containSpecfiedValue(property:*, value:*):Boolean{
+		for(var item:* in record){
+			if(item[property] == value){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * get the vector's length
 	 */ 
