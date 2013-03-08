@@ -53,7 +53,7 @@ public class GetResourceManager
 				t.selectable = !slience;
 			}
 			else if(t.type == TextFieldType.INPUT){
-				
+				t.tabEnabled = false;
 			}
 			if(removing){
 				t.text = "";
@@ -70,6 +70,9 @@ public class GetResourceManager
 		if(t){
 			t.mouseEnabled = !slience;
 			t.mouseChildren = !slience;
+                        t.tabEnabled = false;
+			t.tabChildren = false;
+			t.buttonMode = !slience;
 		}
 		if(t && t.totalFrames > 1){
 			t.gotoAndStop(1);
@@ -85,6 +88,9 @@ public class GetResourceManager
 		if(t){
 			t.mouseEnabled = !slience;
 			t.mouseChildren = !slience;
+                        t.tabEnabled = false;
+			t.tabChildren = false;
+                        t.buttonMode = !slience;
 		}
 		return t;
 	}
@@ -96,6 +102,7 @@ public class GetResourceManager
 		var t:SimpleButton = this.content.getChildByName(name) as SimpleButton;
 		if(t){
 			t.mouseEnabled = !slience;
+                        t.tabEnabled = false;
 		}
 		return t;
 	}
@@ -115,6 +122,8 @@ public class GetResourceManager
 			parent.addChild(s);
 		}
 		s.mouseChildren = s.mouseEnabled = false;
+                s.tabEnabled = false;
+		s.tabChildren = false;
 		return s;
 	}
 }
