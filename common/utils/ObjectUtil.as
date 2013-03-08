@@ -175,6 +175,17 @@ public class ObjectUtil
 		return name.substring(0, name.indexOf("::"));
 	}
 	
+        /**
+	 * get specfied object or class 's name
+	 */ 
+	public static function getCompleteClassName(instanceOrClass:*, singleDot:Boolean = true):String{
+		var clsName:String = getQualifiedClassName(instanceOrClass);
+		if(clsName && singleDot){
+			clsName = clsName.split("::").join(".");
+		}
+		return clsName;
+	}
+
 	/**
 	 * TODO
 	 * check specfied object's class is Internal Package class
