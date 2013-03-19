@@ -48,7 +48,7 @@ public class FontRiseMotion
 			DisplayObjectUtil.centerInStage(d.content, true);
 		}
 		else{
-			DisplayObjectUtil.centerInSpecfiedParent(d.content, referDis);
+			DisplayObjectUtil.centerSpecfiedParent(d.content, referDis);
 		}
 		
 		RiseFieldManager.instance.add(d);

@@ -20,26 +20,23 @@ import flash.geom.Point;
 import flash.geom.Rectangle;
 import flash.geom.Transform;
 import flash.text.TextField;
-import flash.text.TextFieldAutoSize;
-
 
 public class DisplayObjectUtil 
 {	
 	/**
-	 * remove all children in give the container
-	 * 
-	 * @param d  				 the displayObjectContainer
-	 * @param isRecursive     recursive run the fun
+	 * 清除指定容器中的所有显示对象
+	 * @param d           指定显示对象     
+	 * @param isRecursive 是否对其中的显示对象容器递归调用
 	 */
 	public static function removeAll(d:DisplayObjectContainer, isRecursive:Boolean = false):void {
 		if(!d){
 			return;
 		}
 		if(d is MovieClip){
-			__disposeMovieClip(MovieClip(d));
+			disposeMovieClip(MovieClip(d));
 		}
 		else if(d is Loader){
-			__disposeLoader(Loader(d));
+			disposeLoader(Loader(d));
 			return;
 		}
 		var s:DisplayObject;
@@ -47,13 +44,13 @@ public class DisplayObjectUtil
 		while (--len > -1) {
 			s = d.removeChildAt(len);
 			if(s is SimpleButton){
-				__disposeSimpleButton(SimpleButton(s));
+				disposeSimpleButton(SimpleButton(s));
 			}
 			else if(s is Bitmap){
-				__disposeBitmap(Bitmap(s));
+				disposeBitmap(Bitmap(s));
 			}
 			else if(s is Shape){
-				__disposeShape(Shape(s));
+				disposeShape(Shape(s));
 			}
 			else if(s is DisplayObjectContainer){
 				if(isRecursive){
@@ -63,46 +60,41 @@ public class DisplayObjectUtil
 		}
 	}
 	
-	private static function __disposeMovieClip(mc:MovieClip):void{
+	private static function disposeMovieClip(mc:MovieClip):void{
 		mc.stop();
-		//maybe have some dynamic method in specfied mc instance
 		for(var item:* in mc){
-			mc[item] = undefined;
-			delete mc[item];
+			delete mc[item];//考虑可能存在动态赋值的属性或方法
 		}
 	}
 	
-	private static function __disposeShape(s:Shape):void{
+	private static function disposeShape(s:Shape):void{
 		s.graphics.clear();
 	}
 	
-	private static function __disposeBitmap(b:Bitmap):void{
+	private static function disposeBitmap(b:Bitmap):void{
 		try{
 			b.bitmapData.dispose();
 			b.bitmapData = null;
 		}
 		catch(e:Error){
-			//slience
 		}
 	}
 	
-	private static function __disposeSimpleButton(btn:SimpleButton):void{
+	private static function disposeSimpleButton(btn:SimpleButton):void{
 		btn.upState = null;
 		btn.downState = null;
 		btn.overState = null;
 		btn.hitTestState = null;
 	}
 	
-	private static function __disposeLoader(loader:Loader):void{
+	private static function disposeLoader(loader:Loader):void{
 		try{
 			loader.close();
 		}
 		catch(e:Error){
-			//slience
 		}
 		loader.unloadAndStop();
 	}
-	
 	
 	/**
 	 * 设置子对象的可见性 
@@ -117,8 +109,9 @@ public class DisplayObjectUtil
 	}
 
 	/**
-	 * just remove, no dispose or kill
-	 */ 
+	 * 移除指定容器中的子对象
+	 * @param container
+	 */
 	public static function removeChildren(container:DisplayObjectContainer):void{
 		var len:int = container.numChildren;
 		while(--len > -1){
@@ -127,10 +120,9 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * remove and dispose the displayobject container's bitmap children
-	 * 
-	 * @param d  the displayObject container 
-	 */ 
+	 * 销毁指定容器中的位图对象
+	 * @param d
+	 */
 	public static function removeForBitmap(d:DisplayObjectContainer):void{
 		if(!d){
 			return;
@@ -150,33 +142,9 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * add displayobject to top displaylist
-	 * 
+	 * 获取指定显示对象的全局坐标
 	 * @param d
-	 */
-	public static function addToTop(d:DisplayObject):void {
-		if (d && d.parent) {
-			d.parent.addChild(d);
-		}
-	}
-	
-	/**
-	 * add displayobject to bottom displaylist
-	 * 
-	 * @param d
-	 */
-	public static function addToBottom(d:DisplayObject):void {
-		if (d && d.parent) {
-			d.parent.addChildAt(d, 0);
-		}
-	}
-	
-	/**
-	 * get displayobject's position
-	 * 
-	 * @param d
-	 * 
-	 * @return point
+	 * @return 
 	 */
 	public static function getStagePosition(d:DisplayObject):Point {
 		if (d && d.parent) {
@@ -186,10 +154,11 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * get the displayobject's topleft position
-	 * the displayobject's scaleX scaleY maybe have problem
+	 * 获取指定显示对象的注册点偏移量
 	 * @param d
-	 * @return point
+	 * @param scaleX
+	 * @param scaleY
+	 * @return 
 	 */
 	public static function getLeftTopPosition(d:DisplayObject, scaleX:Number = NaN, scaleY:Number = NaN):Point {
 		if(!isNaN(scaleX)){
@@ -208,51 +177,29 @@ public class DisplayObjectUtil
 		return new Point(-rx|0, -ry|0);
 	}
 	
+
 	/**
-	 * get bitmap with specfied dis's offset
-	 * 
-	 * @param d     the displayobject
-	 * @return      the sprite wrap the bitmapdata
-	 */ 
-	public static function getBitmapSprite(d:DisplayObject, alignTopLeft:Boolean = false,  scaleX:Number = 1.0, scaleY:Number = 1.0, isSmooth:Boolean = false):Sprite{
-		var offset:Point = getLeftTopPosition(d, scaleX, scaleY);
-		var b:BitmapData = getBitmapData(d, scaleX, scaleY);
-		var bitmap:Bitmap = new Bitmap(b);
-		if(isSmooth){
-			bitmap.smoothing = isSmooth;
-		}
-		var s:Sprite = new Sprite();
-		s.addChild(bitmap);
-		if(!alignTopLeft){
-			bitmap.x = -offset.x;
-			bitmap.y = -offset.y;
-		}
-		return s;
-	}
-	
-	/**
-	 * get a bitmap with dis
-	 *
-	 * @param dis   the displayobject
-	 * @return      the bitmap
-	 */ 
+	 * 获取指定显示对象的位图对象
+	 * @param dis
+	 * @return 
+	 */
 	public static function getBitmap(dis:DisplayObject):Bitmap{	
 		var bitmapData:BitmapData = getBitmapData(dis);
 		return new Bitmap(bitmapData);
 	}
 	
 	/**
-	 * get a specified displayobject's bitmapdata
-	 * 
-	 * @param d the displayobject you want to become a bitmapdata
-	 * 
-	 * @return the bitmapData
-	 */ 
+	 * 获取指定显示对象的位图数据对象
+	 * @param d
+	 * @param scaleX
+	 * @param scaleY
+	 * @return 
+	 */
 	public static function getBitmapData(d:DisplayObject, scaleX:Number = 1.0, scaleY:Number = 1.0):BitmapData{
 		if(d.width <= 0 || d.height <= 0){
 			return null;
 		}
-		if(!__checkDraw(d)){
+		if(!checkDraw(d)){
 			return null;
 		}
 		var offset:Point = getLeftTopPosition(d, scaleX, scaleY);
@@ -263,14 +210,18 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * TODO
-	 * @see getBitmapData (这里将ColorTransform, filters 计算在内)
-	 */ 
+	 * 获取指定显示对象的位图数据对象
+	 * @param dis
+	 * @param sx
+	 * @param sy
+	 * @see getBitmapData (这里将ColorTransform, filters 计算在内) 
+	 * @return 
+	 */
 	public static function getCopy(dis:DisplayObject, sx:Number = 1.0, sy:Number = 1.0):BitmapData{
 		if(dis.width <= 0 || dis.height <= 0){
 			return null;
 		}
-		if(!__checkDraw(dis)){
+		if(!checkDraw(dis)){
 			return null;
 		}
 		var wh:Rectangle = getActualSize(dis);
@@ -293,14 +244,17 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * TODO
-	 * @see getSprite (这里将ColorTransform, filters 计算在内)
-	 */ 
+	 * 获取指定显示对象的位图对象, 并包装以Sprite对象并返回
+	 * @param dis
+	 * @param sx
+	 * @param sy
+	 * @return 
+	 */
 	public static function getCopySprite(dis:DisplayObject, sx:Number = 1.0, sy:Number = 1.0):Sprite{
 		if(dis.width <= 0 || dis.height <= 0){
 			return null;
 		}
-		if(!__checkDraw(dis)){
+		if(!checkDraw(dis)){
 			return null;
 		}
 		var wh:Rectangle = getActualSize(dis);
@@ -327,18 +281,16 @@ public class DisplayObjectUtil
 		return s;
 	}
 
-	
 	/**
-	 * get real bitmapdata (remove transparent area - (in as3 is rectangle))
-	 * 
-	 * @param d   the displayobject
-	 * @return    the bitmapdata
-	 */ 
+	 * 获取指定显示对象的不透明像素区域的位图数据对象
+	 * @param d
+	 * @return 
+	 */
 	public static function getOpaqueDisObj(d:DisplayObject):BitmapData{
 		if(d.width <= 0 || d.height <= 0){
 			return null;
 		}
-		if(!__checkDraw(d)){
+		if(!checkDraw(d)){
 			return null;
 		}
 		var bitmapData:BitmapData = getBitmapData(d);
@@ -350,11 +302,10 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * get real bitmapData with specfied bitmapData
-	 * 
-	 * @param bitmapData  the bitmapData
-	 * @return            the bitmapData
-	 */ 
+	 * @param bitmapData
+	 * @see getOpaqueDisObj
+	 * @return 
+	 */
 	public static function getOpaqueBitmapData(bitmapData:BitmapData):BitmapData{
 		var unTransparentArea:Rectangle = bitmapData.getColorBoundsRect(0xFF000000, 0x00000000, false);
 		var c:BitmapData = new BitmapData(unTransparentArea.width, unTransparentArea.height, true, 0);
@@ -364,49 +315,8 @@ public class DisplayObjectUtil
 	}	
 	
 	/**
-	 * generated a colorful bitmap's background
-	 *
-	 * @param color bg color
-	 * @param alpha bg alpha
-	 * @param preW bg width
-	 * @param preH bg height
-	 * @return
-	 */
-	public static function generateSingleColorBG(color:uint, alpha:Number, preW:Number, preH:Number):Bitmap {
-		var s:Shape = new Shape();
-		s.graphics.beginFill(color, alpha);
-		s.graphics.drawRect(0, 0, 1, 1);
-		s.graphics.endFill();
-		var b:BitmapData = new BitmapData(1, 1, true, 0);
-		b.draw(s);
-		var bitmap:Bitmap = new Bitmap(b);
-		bitmap.width = preW;
-		bitmap.height = preH;
-		return bitmap;
-	}
-	
-	/**
-	 * @see generateSingleColorBG
-	 * @return
-	 * 
-	 * create a no mouse 
-	 */
-	public static function generateNoMouseActiveColorBG(color:uint, alpha:Number, prew:Number, preH:Number):Sprite {
-		var b:Bitmap = generateSingleColorBG(color, alpha, prew, preH);
-		//because this sprite's mouseEnabled is active, so under this sprite's DisplayObject hasn't recieve mouse event
-		var s:Sprite = new Sprite();
-		s.addChild(b);
-		return s;
-	}
-	
-	/**
-	 * check the dis whether on the stage
-	 * could use 'stage' property to check is whether on the stage, 
-	 * and other way is check this displayobject's loaderInfo property is whether 'null'
-	 * but when use Loader to load a displayobject, be careful do not check loaded object's 'loaderInfo'
-	 * 
-	 * the loaded object do not add to stage, but this 'loaderInfo' property is not 'Null'
-	 * 
+	 * 检查指定显示对象是否在舞台上, 可以使用Stage属性是否为空为判断条件, 还有个方法是检测显示对象的loaderInfo属性是否为空
+	 * 但是当一个loader加载了一个显示对象后, 就不要去检测它的LoaderInfo属性, 即使该loader对象不在舞台, loaderInfo属性也不为空
 	 * @param dis
 	 * @return
 	 */
@@ -419,38 +329,12 @@ public class DisplayObjectUtil
 		return false;
 	}
 	
-	
 	/**
-	 * create a specified width's TextField
-	 * @param w
-	 * @return
+	 * 检查指定显示对象是否为指定容器的子级
+	 * @param target
+	 * @param checkWhetherParent
+	 * @return 
 	 */
-	public static function createSpecWidthTextField(enabled:Boolean = false, w:Number = NaN):TextField {
-		var t:TextField = new TextField();
-		t.autoSize = TextFieldAutoSize.LEFT;
-		t.wordWrap = true; 
-		t.selectable = enabled;
-		t.mouseEnabled = enabled;
-		if (!isNaN(w)) {
-			t.width = w;
-		}
-		return t;
-	}
-	
-	/**
-	 * create a raw textField
-	 */ 
-	public static function createTextField(enabled:Boolean = false):TextField{
-		var t:TextField = new TextField();
-		t.autoSize = TextFieldAutoSize.LEFT;
-		t.selectable = enabled;
-		t.mouseEnabled = enabled;
-		return t;
-	}
-	
-	/**
-	 * check target's parent is whether is checkWhetherParent
-	 */ 
 	public static function checkIsParent(target:DisplayObject, checkWhetherParent:DisplayObject):Boolean{
 		if(target && checkWhetherParent){
 			var p:DisplayObject = target.parent;
@@ -465,9 +349,11 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * @param target        the target
-	 * @param parentType    the parent Type class
-	 */ 
+	 * 检查指定显示对象是否拥有指定的类型, 该方法的编写主要是考虑某一个容器的事件监听为冒泡阶段的问题
+	 * @param target
+	 * @param parentType
+	 * @return 
+	 */
 	public static function checkHasType(target:DisplayObject, parentType:Class):Boolean{
 		if(target && parentType){
 			var p:DisplayObject = target.parent;
@@ -481,30 +367,12 @@ public class DisplayObjectUtil
 		return false;
 	}
 	
-	
 	/**
-	 * create a mouseDisabled Sprite container
-	 * 
-	 * @param name the name you want add to sprite
-	 * @param parent if the parent exist, the parent will add the sprite
-	 */ 
-	public static function createSprite(name:String = null, parent:DisplayObjectContainer = null):Sprite{
-		var s:Sprite = new Sprite();
-		s.mouseChildren = s.mouseEnabled = false;
-		s.focusRect = false;
-		if(name != null){
-			s.name = name;
-		}
-		if(parent != null){
-			parent.addChild(s);
-		}
-		return s;
-	}
-	
-	/**
-	 * check whether the two bitmapData is same (the same width, the same height, and the same pixel everything)
-	 * please read the BitmapData's method 'compare' for more details
-	 */ 
+	 * 检查2个位图对象是否相同, 相同长宽, 相同的像素值
+	 * @param bitmapA
+	 * @param bitmapB
+	 * @return 
+	 */
 	public static function checkBitmapDataIsEqual(bitmapA:BitmapData, bitmapB:BitmapData):Boolean{
 		var data:Object = bitmapA.compare(bitmapB);
 		if(data is Number){
@@ -517,28 +385,22 @@ public class DisplayObjectUtil
 	}
 
 	/**
-	 * remove specified color
-	 * 
-	 * @param d           the displayobject to convert a bitmapData
-	 * @param removeColor the color you want to remove
-	 * @param isReal      is remove transparent's area
-	 * 
-	 * TODO
-	 * 
-	 * in some case, you could use (bitmapData.floodFill, even 'getPixel' and 'setPixel' combine with 'lock' and 'unlock' method)
-	 */ 
-	public static function removeSpecfiedColor(d:DisplayObject, removeColor:uint, isReal:Boolean = false):BitmapData{
+	 * 移除指定显示对象中的某种指定像素(首先会将该显示对象转为位图对象)
+	 * @param d
+	 * @param pixel
+	 * @param opaque
+	 * @return 
+	 */
+	public static function removePixel(d:DisplayObject, pixel:uint, opaque:Boolean = false):BitmapData{
 		if(d.width <= 0 || d.height <= 0){
 			return null;
 		}
-		if(d is Loader){
-			if(!((d as Loader).contentLoaderInfo.childAllowsParent)){
-				return null;
-			}
+		if(!checkDraw(d)){
+			return null;
 		}
 		var bmpData:BitmapData = getBitmapData(d);
-		bmpData.threshold(bmpData, bmpData.rect, new Point(0, 0), "==", removeColor, 0x00000000);
-		if(isReal){
+		bmpData.threshold(bmpData, bmpData.rect, new Point(0, 0), "==", pixel, 0x00000000);
+		if(opaque){
 			var unTransparentArea:Rectangle = bmpData.getColorBoundsRect(0xFF000000, 0x00000000, false);
 			var c:BitmapData = new BitmapData(unTransparentArea.width, unTransparentArea.height, true, 0);
 			c.copyPixels(bmpData, unTransparentArea.clone(), new Point(0, 0));
@@ -549,24 +411,10 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * @param d 	the displayobject
-	 * 
-	 * get the specfied displayobject's mold
-	 */ 
-	public static function drawMold(d:DisplayObject):Sprite{
-		var s:Sprite = new Sprite();
-		var top:Point = DisplayObjectUtil.getLeftTopPosition(d);
-		s.graphics.beginFill(0, 0);
-		s.graphics.drawRect(-top.x, -top.y, d.width, d.height);
-		s.graphics.endFill();
-		return s;
-	}
-	
-	/**
-	 * center specfied disObj in stage
-	 * 
-	 * @see centerInParent
-	 */ 
+	 * 将指定显示对象的坐标居中于整个舞台
+	 * @param disObj
+	 * @param checkOnStage  对是否在舞台上的判断
+	 */
 	public static function centerInStage(disObj:DisplayObject, checkOnStage:Boolean = false):void{
 		if(disObj){
 			if(!disObj.stage && checkOnStage){
@@ -591,10 +439,11 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * get disObj centerInStage's point, this point has been covert coordinate
-	 * so just use it to disobject's x, y property
-	 */ 
-	public static function getCenterInStagePoint(disObj:DisplayObject):Point{
+	 * 获取指定显示对象居中的Point对象, 该Point对象已执行坐标转换
+	 * @param disObj
+	 * @return 
+	 */
+	public static function getCenterStagePoint(disObj:DisplayObject):Point{
 		if(!(disObj && disObj.stage)){
 			return null;
 		}
@@ -606,15 +455,12 @@ public class DisplayObjectUtil
 		return c;
 	}
 	
-	
 	/**
-	 * center specfied disObj in it's parent
-	 * 
-	 * if disObj's position exceed it's parent coordinate range, this method maybe has a issue
-	 * because disObj.parent.width is not only his raw width, but also contain 
-	 * it's child's coordinate range
-	 */ 
-	public static function centerInParent(disObj:DisplayObject, checkHasParent:Boolean = false):void{
+	 * 将指定显示对象在其父级中居中显示, 需要注意的是如果子级的长宽大于父级, 那么父级的长宽其实就是子级的了
+	 * @param disObj
+	 * @param checkHasParent
+	 */
+	public static function centerParent(disObj:DisplayObject, checkHasParent:Boolean = false):void{
 		if(disObj){
 			if(!disObj.parent && checkHasParent){
 				disObj.addEventListener(Event.ADDED, function(evt:Event):void{
@@ -647,84 +493,76 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * 
-	 * center in specfied refer
-	 * 
-	 * @param disObj           displayobject
-	 * @param refer            reference displayobject
-	 * 
-	 */ 
-	public static function centerInSpecfiedParent(disObj:DisplayObject, refer:DisplayObject, posX:Number = NaN, posY:Number = NaN):void{
+	 * 将指定的显示对象居中至指定的另一个显示对象
+	 * @param disObj
+	 * @param refer
+	 * @param posX
+	 * @param posY
+	 */
+	public static function centerSpecfiedParent(disObj:DisplayObject, refer:DisplayObject, posX:Number = NaN, posY:Number = NaN):void{
 		if(disObj && refer){			
 			var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(refer);
-			
 			var t:Point = refer.parent.localToGlobal(new Point(isNaN(posX) ? refer.x : posX, isNaN(posY) ? refer.y : posY));
 			t.x -= topLeft.x;
 			t.y -= topLeft.y;
-		
 			topLeft = DisplayObjectUtil.getLeftTopPosition(disObj);
-			
 			t.x += (refer.width - disObj.width) * .5 + topLeft.x;
 			t.y += (refer.height - disObj.height) * .5 + topLeft.y;
-			
 			t = disObj.parent.globalToLocal(t);
-			
 			disObj.x = t.x;
 			disObj.y = t.y;
 		}
 	}
 	
 	/**
-	 * TODO
-	 * get vanishing point in stage's left part
-	 */ 
-	public static function getLeftStageHidePoint(disObj:DisplayObject, checkOnStage:Boolean = false):Point{
+	 * 获取指定显示对象正好位于消失于舞台左侧的坐标点
+	 * @param disObj
+	 * @param checkOnStage
+	 * @return 
+	 */
+	public static function getStageLeftHidePoint(disObj:DisplayObject, checkOnStage:Boolean = false):Point{
 		if(!(disObj && disObj.stage)){
 			return null;
 		}
-		
 		//other case, you could test this case and to test with current use case's performance diff
-		
 		//var r:Rectangle = disObj.transform.pixelBounds;
 		//var t:Point = disObj.parent.globalToLocal(new Point(0, 0));
-		
 		var m:Matrix = disObj.transform.concatenatedMatrix;
 		m.invert();
 		m.concat(disObj.transform.matrix);
 		m.tx -= disObj.width;
-		
 		//this is minus topleft's registerPoint's position's offset
 		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(disObj);
 		m.tx -= leftTop.x;
-	
 		return new Point(m.tx, m.ty);
 	}
 	
 	/**
-	 * TODO
-	 * get vanishing point in stage's right part
-	 */ 
-	public static function getRightStageHidePoint(disObj:DisplayObject, checkOnStage:Boolean = false):Point{
+	 * @param disObj
+	 * @param checkOnStage
+	 * @see getStageLeftHidePoint
+	 * @return 
+	 */
+	public static function getStageRightHidePoint(disObj:DisplayObject, checkOnStage:Boolean = false):Point{
 		if(!(disObj && disObj.stage)){
 			return null;
 		}
-		
 		var m:Matrix = disObj.transform.concatenatedMatrix;
 		m.invert();
 		m.concat(disObj.transform.matrix);
 		m.tx += disObj.stage.stageWidth;
-		
 		//this is add topleft's registerPoint's position's offset
 		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(disObj);
 		m.tx += leftTop.x;
-		
 		return new Point(m.tx, m.ty);
 	}
 	
 	/**
-	 * @param mc 				 the movieclip
-	 * @param rawMethodName  the movieclip's method 
 	 * 对指定影片剪辑及其子集影片剪辑调用指定方法
+	 * @param mc
+	 * @param rawMethodName
+	 * @param args
+	 * 
 	 */
 	public static function runMethodInMovie(mc:MovieClip, rawMethodName:String, ...args):void{
 		if(!mc || !mc.hasOwnProperty(rawMethodName)){
@@ -848,18 +686,17 @@ public class DisplayObjectUtil
 		return found;
 	}
 	
-	
 	/**
-	 * sampling specfied disObj to bitmapData
-	 * 
-	 * @param dis   display object which you want to sample
-	 * @param range sample's range
-	 */ 
+	 * 将指定显示对象绘制成一个指定长宽的位图数据对象
+	 * @param dis
+	 * @param range
+	 * @return 
+	 */
 	public static function sampling(dis:DisplayObject, range:Rectangle = null):BitmapData{
 		if((dis.width == 0) || (dis.height == 0)){
 			return null;
 		}
-		if(!__checkDraw(dis)){
+		if(!checkDraw(dis)){
 			return null;
 		}
 		if(!range || ((range.width >= dis.width) && (range.height >= dis.height))){
@@ -884,7 +721,7 @@ public class DisplayObjectUtil
 		return bd;
 	}
 	
-	private static function __checkDraw(dis:DisplayObject):Boolean{
+	private static function checkDraw(dis:DisplayObject):Boolean{
 		if(dis is Loader){
 			return (dis as Loader).contentLoaderInfo.childAllowsParent;
 		}
@@ -892,10 +729,11 @@ public class DisplayObjectUtil
 	}
 
 	/**
-	 * @param dis     the dis to check    the dis for check is whether hitTest itself  
-	 * @param point   the specfied point  the stage point
-	 * @see checkPointIsTransParent
-	 */ 
+	 * 检查指定显示对象在指定舞台坐标点下是否为透明像素
+	 * @param dis
+	 * @param point
+	 * @return 
+	 */
 	public static function checkUnderPointTransParent(dis:DisplayObject, point:Point):Boolean{
 		if(!dis.parent){
 			return false;
@@ -912,15 +750,17 @@ public class DisplayObjectUtil
 	
 	
 	/**
-	 * 将以下三种类型变量常量提出, 是为了避免每帧创建所带来的内存浪费, 如下方法
-	 * 目前应用在FarmField中的ENTER_FRAME中
+	 * 将以下三种类型变量常量提出, 是为了避免每帧创建所带来的内存浪费
 	 */ 
 	private static const checkTransParent:BitmapData = new BitmapData(1, 1, true, 0);
 	private static const checkMatrix:Matrix = new Matrix();
 	private static var checkPoint:Point = new Point();
+	
 	/**
-	 * @param dis
-	 * @param point
+	 * 检查指定显示对象在指点鼠标点下是否为透明
+	 * @param dis   指定显示对象
+	 * @param point 指定鼠标点Point对象, 为舞台全局坐标         
+	 * @param alphaThreshold 透明度阈值
 	 */ 
 	public static function checkPointIsTransParent(dis:DisplayObject, point:Point, alphaThreshold:uint = 0xFF):Boolean{
 		if(!dis){
@@ -935,11 +775,8 @@ public class DisplayObjectUtil
 		checkTransParent.draw(dis, checkMatrix);
 		return ((checkTransParent.getPixel32(0, 0) >> 24) & alphaThreshold) == 0;
 	}
-	
 
 	/**
-	 * @see adobe's documention (DisplayObjectContainer's getObjectsUnderPoint' method)
-	 * 
 	 * @see getDisObjectUnderPoint
 	 */ 
 	public static function getDisObjectUnderXY(container:DisplayObjectContainer, px:Number, py:Number):DisplayObject{
@@ -989,7 +826,8 @@ public class DisplayObjectUtil
 	 * 如不在舞台需要除以5以获取实际值(原因不明), getBounds目前测试是不受任何影响, 
 	 * 包括了不在舞台的情况, 获得的均是原始值
 	 * 
-	 * @param dis 
+	 * @param dis        指定显示对象
+	 * @return Rectangle 返回实际长宽的矩形对象
 	 */ 
 	public static function getActualSize(dis:DisplayObject):Rectangle{		
 //		var rect:Rectangle = dis.transform.pixelBounds.clone();
@@ -1000,31 +838,27 @@ public class DisplayObjectUtil
 //			rect.height /= 5; //
 //		}
 //		return rect;
-		
 		//TODO, 特例, pixelBounds无法返回文本的长宽, 只能返回对应坐标
 		if(dis is TextField){
 			return dis.getBounds(dis);
 		}
-		
 		//solution two
 		//inspiration from joe@usecake.com and senocular.com
 		var currentTransform:Transform = dis.transform;
 		var currentMatrix:Matrix = currentTransform.matrix;
 		var globalMatrix:Matrix = currentTransform.concatenatedMatrix;
-		
 		globalMatrix.invert();
 		globalMatrix.concat(currentMatrix);
 		currentTransform.matrix = globalMatrix;
-		
 		var rect:Rectangle = currentTransform.pixelBounds;
 		currentTransform.matrix = currentMatrix; //reset the position, scale and skew value
 		return rect;
 	}
 	
 	/**
-	 * 
-	 * @param resource 指定需要将注册点调整至左上角位置的显示对象
-	 * 将指定显示对象的注册点调整为左上角(top-left)以方便定位 (只是嵌套一层Sprite)
+	 * 将注册点调整至左上角位置, 将指定显示对象的注册点调整为左上角(top-left)以方便定位 (只是嵌套一层Sprite)
+	 * @param resource 指定显示对象
+	 * @return Sprite 返回包含指定显示对象的Sprite对象
 	 */ 
 	public static function handleResetTopLeftPos(resource:Sprite):Sprite{
 		var s:Sprite = new Sprite();
@@ -1040,11 +874,12 @@ public class DisplayObjectUtil
 		return s;
 	}
 	
-
 	/**
 	 * inspired from showbox (a air game develop tool) and grantskiner's js tool
-	 * TODO
 	 * 将美术资源的png转换为2块jpg格式(原rgb, alpha, 缩小整体文件大小, 加载2张图片后再使用copyChannel方法合并为透明图片)
+	 * @param rgbBd    rgb通道
+	 * @param alphaBd  透明通道
+	 * @return BitmapData 返回一个合并了透明通道的rgb位图数据对象
 	 */ 
 	public static function combinePng(rgbBd:BitmapData, alphaBd:BitmapData):BitmapData{
 		var rgbCom:BitmapData = rgbBd.clone();
@@ -1057,6 +892,8 @@ public class DisplayObjectUtil
 	
 	/**
 	 * 获取指定位图对象的透明通道
+	 * @param data        指定位图数据
+	 * @return BitmapData 返回一个包含透明通道的位图数据结构
 	 */ 
 	public static function getAlphaChannel(data:BitmapData):BitmapData{
 		var alp:BitmapData = new BitmapData(data.width, data.height, true, 0);
@@ -1069,8 +906,11 @@ public class DisplayObjectUtil
 	
 	/**
 	 * 返回指定位图的指定通道位图对象
-	 * @param raw
-	 * @param channel
+	 * @param raw     原始位图数据
+	 * @param channel 所希望得到的通道数据
+	 * @see BitmapDataChannel
+	 * @see BitmapData's copyChannel method
+	 * @return BitmapData 返回一个新的位图数据结构
 	 */ 
 	public static function copyBitmapChannel(raw:BitmapData, channel:uint):BitmapData{
 		var d:BitmapData = new BitmapData(raw.width, raw.height, true, 0xFF000000);
@@ -1079,23 +919,11 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * TODO
-	 * @param dis
-	 * @param point
-	 */ 
-	public static function getStagePoint(dis:DisplayObject, point:Point):Point{
-		var p:Point = dis.localToGlobal(point.clone());
-		return dis.globalToLocal(p);
-	}
-	
-	/**
-	 * TODO hack method to redraw specfied displayobject immediately
-	 * 
+	 * @param dis 指定显示对象
 	 * 设置了scrollRect, 又或者移除舞台，而后添加至舞台, 会导致可视长宽无法及时获得, 
 	 * 需要延迟一帧才能获得 (移除舞台到添加至舞台, 添加至舞台到移除舞台，具体表现还不一致)
 	 * 似乎也可以使用draw绘制当前可视范围, 但也需要注意当前显示对象如果为loader,可能会
 	 * 导致安全报错
-	 * 
 	 * getBounds 只对设置过的scrollRect 起作用, 对内部visible为false始终保持原始的该区域的值
 	 */ 
 	public static function invalidateRedraw(dis:DisplayObject):void{
@@ -1105,7 +933,7 @@ public class DisplayObjectUtil
 		dis.scrollRect = area;
 		__redraw(dis);
 	}
-	
+
 	private static function __redraw(d:DisplayObject):void{
 		var bd:BitmapData = new BitmapData(1, 1, true, 0);
 		bd.draw(d);
@@ -1113,17 +941,15 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * 获取指定的显示对象和指定长宽返回可拖拽区域
-	 * @param dis
-	 * @param areaWidth
-	 * @param areaHeight
-	 * 
-	 * @see 
+	 * 获取在指定长宽下的显示对象可拖拽的范围
+	 * @param dis          指定显示对象
+	 * @param areaWidth    可拖拽长
+	 * @param areaHeight   可拖拽宽
+	 * @return Rectangle 返回一个矩形
 	 */ 
-	public static function getWHDragLimitRect(dis:DisplayObject, areaWidth:Number, areaHeight:Number):Rectangle{
+	public static function getDragRect(dis:DisplayObject, width:Number, height:Number):Rectangle{
 		var bounds:Rectangle = dis.getBounds(dis);
-		return new Rectangle(-bounds.x, -bounds.y, areaWidth - dis.width, areaHeight - dis.height);
+		return new Rectangle(-bounds.x, -bounds.y, width - dis.width, height - dis.height);
 	}
-	
 }
 }
