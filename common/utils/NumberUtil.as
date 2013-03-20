@@ -4,48 +4,59 @@ import flash.utils.getQualifiedClassName;
 
 public class NumberUtil
 {
-	public function NumberUtil()
-	{
-	}	
-	
 	/**
-	 * get absolute value (only integer)
-	 */ 
+	 * 获取指定整形的绝对值
+	 * @param value
+	 * @return 
+	 */
 	public static function getAbsolute(value:int):int{
 		return (value ^ value >> 31) - (value >> 31);
 	}
 	
 	/**
-	 * get the min num (only integer, fast than Math.min()) 
-	 */ 
+	 * 获取2个整形数值中的最小值
+	 * @param x
+	 * @param y
+	 * @return 
+	 */
 	public static function min(x:int, y:int):int{
 		return y ^ ((x ^ y) & -(int(x < y)));
 	}
 	
 	/**
-	 * get the max num (only integer, fast than Math.max())
-	 */ 
+	 * 获取2个整形数值中的最大值
+	 * @param x
+	 * @param y
+	 * @return 
+	 */
 	public static function max(x:int, y:int):int{
 		return x ^ ((x ^ y) & -(int(x < y)));
 	}
 	
 	/**
-	 * check num is whether even
-	 */ 
+	 * 获取指定整形数值是否为偶数
+	 * @param num
+	 * @return 
+	 */
 	public static function isEven(num:int):Boolean{
 		return (num & 1) == 0;
 	}
 	
 	/**
-	 * check the specfied number is power of two
-	 */ 
+	 * 检查指定数值是否为2的倍数
+	 * @param num
+	 * @return 
+	 */
 	public static function isPowerOfTwo(num:int):Boolean{
 		return num && !(num & (num - 1));
 	}
 	
 	/**
-	 * check whether two number has same sign
-	 */ 
+	 * 检查2个整形数值的符号是否相同
+	 * @param a
+	 * @param b
+	 * @return 
+	 */
 	public static function sameSign(a:Number, b:Number):Boolean{
 		return ((a >> 31) ^ (b >> 31)) == 0;
 	}
@@ -70,45 +81,56 @@ public class NumberUtil
 	}
 	
 	/**
-	 * get a specfied fixed points number with ceil method
-	 */ 
+	 * 将指定数值完成指定位数的ceil转换
+	 * @param num
+	 * @param fixedPoint
+	 * @return 
+	 */
 	public static function ceilFixedPoints(num:Number, fixedPoint:Number = .01):Number{
 		if(getQualifiedClassName(num) == "int"){
 			return num;
 		}
 		var n:int = 1 / fixedPoint;
-		return Number((Math.ceil(num * n) * fixedPoint).toFixed(getFrictionPoint(fixedPoint)));
+		return Number((Math.ceil(num * n) * fixedPoint).toFixed(getFrictionCount(fixedPoint)));
 	}
 	
 	/**
-	 * get a specfied fixed points number with floor method
-	 */ 
+	 * 将指定数值完成指定位数的floor转换
+	 * @param num
+	 * @param fixedPoint
+	 * @return 
+	 * 
+	 */
 	public static function floorFixedPoints(num:Number, fixedPoint:Number = .01):Number{
 		if(getQualifiedClassName(num) == "int"){
 			return num;
 		}
 		var n:int = 1 / fixedPoint;
-		return Number((Math.floor(num * n) * fixedPoint).toFixed(getFrictionPoint(fixedPoint)));
+		return Number((Math.floor(num * n) * fixedPoint).toFixed(getFrictionCount(fixedPoint)));
 	}
 	
 	/**
-	 * get a specfied fixed points number with round method
-	 */ 
+	 * 将指定数值完成指定位数的round转换
+	 * @param num
+	 * @param fixedPoint
+	 * @return 
+	 */
 	public static function roundFixedPoints(num:Number, fixedPoint:Number = .01):Number{
 		if(getQualifiedClassName(num) == "int"){
 			return num;
 		}
 		var n:int = 1 / fixedPoint;
-		return Number((Math.round(num * n) * fixedPoint).toFixed(getFrictionPoint(fixedPoint)));
+		return Number((Math.round(num * n) * fixedPoint).toFixed(getFrictionCount(fixedPoint)));
 	}
 	
-	private static function getFrictionPoint(ns:Number):int{
+	/**
+	 * 
+	 * @param ns
+	 * @return 
+	 */
+	public static function getFrictionCount(ns:Number):int{
 		var s:String = String(ns);
 		return s.slice(s.lastIndexOf(".") + 1).length;
-	}
-	
-	public static function getFrictionCount(ns:Number):int{
-		return getFrictionPoint(ns);
 	}
 }
 }

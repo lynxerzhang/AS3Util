@@ -7,7 +7,8 @@ import flash.geom.Point;
 import flash.text.TextField;
 import flash.text.TextFieldAutoSize;
 
-public class DisplayUtil{
+public class DisplayUtil
+{
 
 	/**
 	 * 创建指定长度的文本对象

@@ -7,10 +7,9 @@ import flash.utils.getQualifiedClassName;
 public class ArrayUtil
 {	
 	/**
-	 * return a unique element's array
-	 * 获取指定数组中拥有唯一元素的copy (shallow copy)
+	 * 获取指定数组中拥有唯一元素的copy (shallow copy) 
 	 * @param ary
-	 * @return
+	 * @return 
 	 */
 	public static function getUnique(ary:Array):Array {
 		var result:Array = [];
@@ -24,7 +23,7 @@ public class ArrayUtil
 	}
 	
 	/**
-	 * 根据指定的prop属性名过滤ary已使返回的数组中包含唯一的对象
+	 * 根据指定的prop属性名过滤ary以使返回的数组中包含唯一的对象
 	 */ 
 	public static function removeSameElement(ary:Array, prop:String):Array{
 		var result:Array = [], len:int = ary.length, d:*, value:*
@@ -53,11 +52,11 @@ public class ArrayUtil
 //	}
 	
 	/**
-	 * check two array has same value
+	 * 检查指定2数组拥有元素是否相同
 	 * @param aryA
 	 * @param aryB
-	 * 检查指定2数组拥有元素是否相同
-	 */ 
+	 * @return 
+	 */
 	public static function checkSame(aryA:Array, aryB:Array):Boolean{
 		if(!(aryA && aryB)){
 			return false;
@@ -133,6 +132,7 @@ public class ArrayUtil
 	}
 	
 	/**
+	 * source数组清除desireRemoveable数组中列出的对象
 	 * @param source             original array
 	 * @param desireRemoveable   
 	 */ 
@@ -148,8 +148,7 @@ public class ArrayUtil
 	}
 	
 	/**
-	 * 
-	 * 
+	 *  以对象的具体属性作为判定存在的条件, 遍历并返回位置索引
 	 *  @param ary
 	 *  @param data
 	 */ 

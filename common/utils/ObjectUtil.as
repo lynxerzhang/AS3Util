@@ -11,11 +11,11 @@ import flash.utils.getQualifiedClassName;
 public class ObjectUtil
 {	
 	/**
-	 * check the object's length
-	 * @param o 
-	 * 判断指定对象是否为空对象
-	 */ 
-	public static function isEmptyRawObject(o:Object):Boolean{
+	 * 判断指定动态对象是否为空
+	 * @param o
+	 * @return 
+	 */
+	public static function isEmpty(o:Object):Boolean{
 		if(o){
 			for(var item:* in o){
 				return true;
@@ -25,11 +25,11 @@ public class ObjectUtil
 	}
 	
 	/**
-	 * check the object's length
+	 * 获取指定对象的内部动态属性数目 
 	 * @param o
-	 * 返回指定对象的键值数
-	 */ 
-	public static function getRawObjectLen(o:Object):int{
+	 * @return 
+	 */
+	public static function getLen(o:Object):int{
 		var t:int = 0;
 		if(o){
 			for(var item:* in o){
@@ -40,11 +40,11 @@ public class ObjectUtil
 	}
 	
 	/**
-	 * check specfied 'parent' Class and 'child' Class is whether has inheritance relation
+	 * 判断指定child类型与parent类型是否拥有继承关系
 	 * @param parent
 	 * @param child
-	 * 判断指定child类型与parent类型是否拥有继承关系
-	 */ 
+	 * @return 
+	 */
 	public static function checkIsInheritance(parent:Class, child:Class):Boolean{
 		if(!(parent && child)){
 			return false;
@@ -52,29 +52,42 @@ public class ObjectUtil
 		if(parent == child){
 			return true;
 		}
-		return (parent.prototype.isPrototypeOf(child.prototype)) as Boolean;
+		return Boolean(parent.prototype.isPrototypeOf(child.prototype));
 	}
 
 	private static const classDefMapCache:Object = {};
+	
+	/**
+	 * 获取指定对象的类定义
+	 * @param d 
+	 * @return 
+	 */
 	public static function getClassDefinition(d:*):Class{
 		var s:String = getQualifiedClassName(d);
+		var cls:Class;
 		if(classDefMapCache[s]){
-			return (classDefMapCache[s]) as Class;
+			cls = (classDefMapCache[s]) as Class;
 		}
-		//一个例外
-		//Function                         匿名函数
-		//builtin.as$0::MethodClosure      方法闭包
-		if(s == "builtin.as$0::MethodClosure"){
-			//or will ReferenceError: Error #1065: 变量 MethodClosure 未定义。
-			return classDefMapCache[s] = Object(d).constructor as Class;
+		else{
+			//一个例外
+			//Function                         匿名函数
+			//builtin.as$0::MethodClosure      方法闭包
+			if(s == "builtin.as$0::MethodClosure"){
+				//or will ReferenceError: Error #1065: 变量 MethodClosure 未定义。
+				cls = classDefMapCache[s] = Object(d).constructor as Class;
+			}
+			else{
+				cls = classDefMapCache[s] = getDefinitionByName(s) as Class;
+			}
 		}
-		return classDefMapCache[s] = getDefinitionByName(s) as Class;
+		return cls
 	}
 	
 	/**
-	 * @param cls  instance or class
-	 * 用于注册类定义
-	 */ 
+	 * 用于注册类定义 
+	 * @param cls
+	 * @return 
+	 */
 	public static function registerClassDefinition(cls:*):Boolean{
 		if(DebugUtil.isNull(cls)){
 			return false;
@@ -95,9 +108,10 @@ public class ObjectUtil
 	}
 	
 	/**
-	 * check a and b is same reference
+	 * 检查a对象和b对象的引用是否相同
 	 * @param a
 	 * @param b
+	 * @return 
 	 */
 	public static function isSameReference(a:Object, b:Object):Boolean{
 		if(DebugUtil.isNull(a) || DebugUtil.isNull(b)){
@@ -116,9 +130,10 @@ public class ObjectUtil
 	}
 	
 	/**
-	 * check specfied object is whether dynamic class
+	 * 检查指定对象是否为动态类型的对象 
 	 * @param data
-	 */ 
+	 * @return 
+	 */
 	public static function isDynamic(data:Object):Boolean{
 		var xml:XML = describeType(data);
 		var isDynamic:Boolean = xml.@isDynamic;
@@ -126,13 +141,13 @@ public class ObjectUtil
 		return isDynamic;
 	}
 	
+	
 	/**
-	 * @param cl               the class to check
-	 * @param interfaces       the interface
-	 * 
-	 * @return                 if specfied parameter cl is implements the parameter interfaces
-	 * 判定指定类是否实现指定接口
-	 */ 
+	 * 判定指定类是否实现指定接口 
+	 * @param cl
+	 * @param interfaces
+	 * @return 
+	 */
 	public static function checkIsImplementsInterface(cl:Class, interfaces:Class):Boolean{
 		var xml:XML = describeType(cl);
 		var isImpl:Boolean = xml.factory.implementsInterface.(@type == getQualifiedClassName(interfaces)).length() > 0;
@@ -141,24 +156,23 @@ public class ObjectUtil
 	}
 	
 	/**
-	 * check the specfied value is whether a primitive value
+	 * 判断指定值对象是否为简单类型对象 
 	 * @param value
-	 * 判断指定值对象是否为简单类型对象
-	 */ 
+	 * @return 
+	 */
 	public static function checkIsPrimitive(value:Object):Boolean{
 		var s:String = typeof value;
 		return s == "boolean" || s == "number" || s == "string";
 	}
 	
 	/**
-	 * get class name
-	 * 
-	 * @param removePackage is whether remove package (remove front colon's string)
-	 * 
-	 * 返回指定对象的类名
-	 */ 
-	public static function getClassName(runIn:Object, removePackage:Boolean = true):String{
-		var name:String = getQualifiedClassName(runIn);
+	 * 返回指定对象的类名 
+	 * @param runIn
+	 * @param removePackage 是否移除包名字符串
+	 * @return 
+	 */
+	public static function getClassName(obj:Object, removePackage:Boolean = true):String{
+		var name:String = getQualifiedClassName(obj);
 		if(removePackage){
 			name = name.substr(name.indexOf("::") + 2);
 		}
@@ -166,18 +180,21 @@ public class ObjectUtil
 	}
 	
 	/**
-	 * get specfied object's package name
-	 * 
+	 * 获取指定对象的包名字符串
 	 * @param runIn
-	 */ 
-	public static function getPackageName(runIn:Object):String{
-		var name:String = getQualifiedClassName(runIn);
+	 * @return 
+	 */
+	public static function getPackageName(obj:Object):String{
+		var name:String = getQualifiedClassName(obj);
 		return name.substring(0, name.indexOf("::"));
 	}
 	
-        /**
-	 * get specfied object or class 's name
-	 */ 
+	/**
+	 * 获取指定对象的类名字符串格式
+	 * @param instanceOrClass
+	 * @param singleDot
+	 * @return 
+	 */
 	public static function getCompleteClassName(instanceOrClass:*, singleDot:Boolean = true):String{
 		var clsName:String = getQualifiedClassName(instanceOrClass);
 		if(clsName && singleDot){
@@ -187,22 +204,20 @@ public class ObjectUtil
 	}
 
 	/**
-	 * TODO
-	 * check specfied object's class is Internal Package class
-	 * 
+	 * 判断指定对象是否为包外类 (internal class)
 	 * @example 
-	 * 	in FlashBuilder 
-	 * 	BufferStatePanel.as$93::BufferStateIconDisplay
-	 *  
-	 *  in FlashIDE
-	 *  ::BufferStateIconDisplay
+	 *  Test是一个包外类
+	 * 	在flashBuilder中的得到如下字符串
+	 * 	Test.as$93::BufferStateIconDisplay
+	 *  在Flash IDE中得到如下字符串
+	 *  ::Test
 	 * @param runIn
 	 */ 
-	public static function isInternalClass(runIn:Object):Boolean{
-		var name:String = getQualifiedClassName(runIn);
+	public static function isInternalClass(obj:Object):Boolean{
+		var name:String = getQualifiedClassName(obj);
 		if(StringUtil.contain(name, "::")){
-			//check FlashIDE and FlashBuilder
-			if(getPackageName(runIn) == "" || StringUtil.contain(name, "as")){
+			//同时检查Flash IDE和flashBuilder中的表现
+			if(getPackageName(obj) == "" || StringUtil.contain(name, "as")){
 				return true;
 			}
 		}
@@ -210,24 +225,22 @@ public class ObjectUtil
 	}
 	
 	/**
-	 * copy the target object's saved data to source
-	 * 
-	 * (shallow copy)
-	 * 
+	 * 浅复制一个指定的对象的动态属性
 	 * @param source
 	 * @param target
-	 */ 
+	 */
 	public static function copy(source:Object, target:Object):void{
 		for(var item:* in target){
-			source[item] = target[item];
+			if(source.hasOwnProperty(item)){
+				source[item] = target[item];
+			}
 		}
 	}
 	
 	/**
-	 * clear the specfied object's saved data
-	 * 
+	 * 清除指定对象中的动态属性
 	 * @param target
- 	 */ 
+	 */
 	public static function clear(target:Object):void{
 		for(var item:* in target){
 			delete target[item];
@@ -235,10 +248,11 @@ public class ObjectUtil
 	}
 	
 	/**
-	 * TODO  not contain static property or private protected property
+	 * 复制一个复杂类型对象, 但是如果被复制属性值为复杂类型, 那么该复制仍旧为浅复制。
 	 * @param source
 	 * @param target
-	 */ 
+	 * @note 不包含静态属性或者私有, 保护属性
+	 */
 	public static function copyComplex(source:Object, target:Object):void{
 		var sourceClstr:String = getQualifiedClassName(source);
 		if(sourceClstr == getQualifiedClassName(target)){
@@ -260,19 +274,22 @@ public class ObjectUtil
 	}
 	
 	/**
-	 * copy value from targetRaw to complex
-	 * @param complex
-	 * @param targetRaw   
+	 * 判断指定对象是否为所列出的类型之一
 	 */ 
-	public static function copyFromObject(complex:Object, targetRaw:Object):void{
-		if(complex && targetRaw){
-			for(var item:String in targetRaw){
-				if(complex.hasOwnProperty(item)){
-					complex[item] = targetRaw[item];
-				}
-			}
+	public static function assertTypeIsMatch(obj:*, typeAry:Array):Boolean{
+		if(!obj || !typeAry){
+			return false;
 		}
-	}
+		return typeAry.some(function(item:Class, ...args):Boolean{
+			return obj is item;
+		});
+	} 
 	
+	/**
+	 * 
+	 */ 
+	public static function getContentType(url:String):String{
+		return url.slice(url.lastIndexOf(".") + 1, url.length).toLocaleLowerCase();
+	}
 }
 }

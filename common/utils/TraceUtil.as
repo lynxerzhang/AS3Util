@@ -1,16 +1,16 @@
 package common.utils
 {	
-import flash.utils.describeType;
+import flash.display.DisplayObject;
+import flash.display.DisplayObjectContainer;
 import flash.utils.getQualifiedClassName;
 
 public class TraceUtil
 {
 	/**
-	 * get repeat string
-	 *
-	 * @param str the string value for repeat
-	 * @param repeat the repeat value
-	 * @return
+	 * 将指定的字符串重复指定的次数
+	 * @param str
+	 * @param repeat
+	 * @return 
 	 */
 	public static function getRepeat(str:String, repeat:int):String {
 		var s:String = "";
@@ -21,63 +21,30 @@ public class TraceUtil
 	}
 	
 	/**
-	 * check param o whether has none property
-	 * @param o
-	 * @return has zero property
-	 */
-	public static function isEmpty(o:Object):Boolean {
-		var item:int = 0;
-		for (var i:* in o) {
-			item ++;
-		}
-		return item == 0;
-	}
-	
-	/**
-	 * get object's type
-	 * @param o
-	 * @return get object's type for string format
-	 */
-	public static function getType(o:Object):String {
-		if(!RecordCache.has(o)){
-			RecordCache.add(o, describeType(o));
-		}
-		var xml:XML = RecordCache.get(o);
-		return String(xml.@name);
-	}
-	
-	/**
-	 * prefix to format output data (we need prefix is tab space) 
+	 * 字符串描述格式的格式字符(tab键)
 	 */
 	private static var prefix:String = "\t";
 	
-	
 	/**
-	 * output function, the initial is trace
+	 * 默认的输出方法, 为内置的trace方法 
 	 */
 	public static var output:Function = trace;
 	
 	/**
-	 * check the object is whether dynamic
-	 * @param o
-	 * @return 
+	 * 记录当下对象字符串描述格式的字符串
 	 */
-	public static function isDynamic(o:Object):Boolean {
-		if(!RecordCache.has(o)){
-			RecordCache.add(o, describeType(o));
-		}
-		var xml:XML = RecordCache.get(o);
-		return String(xml.@isDynamic) == "true";
-	}
-	
 	private static var outputstr:String = "";
-	private static var _timeStamp:Date;
-	private static var _title:String;
 	
 	/**
-	 * dump the generic object for debug
-	 * this method only run the 'trace' method to dump, not return any value
+	 * 输出标题 
+	 */
+	private static var _title:String;
+
+	/**
+	 * trace指定对象的内部属性，只针对对象的动态属性,如Object,
+	 * 如果为密封类，则不能通过for..in来获取, 可以通过调用describeType来获取xml格式的描述
 	 * @param o
+	 * @param title
 	 */
 	public static function dump(o:Object, title:String = null):void {
 		_title = title == null ? "" : title;
@@ -90,8 +57,11 @@ public class TraceUtil
 	}
 	
 	/**
-	 * this method return dump string
-	 */ 
+	 * 返回指定对象的字符串描述格式
+	 * @param o
+	 * @param r
+	 * @return 
+	 */
 	private static function rdump(o:Object, r:int = 1):String {
 		var s:String = "";
 		var pre:String = getRepeat(prefix, r);
@@ -112,6 +82,20 @@ public class TraceUtil
 	
 	private static function type(d:Object):String{
 		return getQualifiedClassName(d);
+	}
+	
+	/**
+	 * 遍历指定显示对象容器, 并将内部显示对象的类型名以字符串格式返回
+	 */ 
+	public static function dumpDisplayChildren(container:DisplayObjectContainer):String{
+		var len:int = container.numChildren;
+		var s:String = "dumpDisplayList begin ---- > \n";
+		for(var i:int = 0; i < len; i++){
+			var t:DisplayObject = container.getChildAt(i);
+			s += "depth : " + i + " ----> " + getQualifiedClassName(t) + "\n";
+		}
+		s += "dumpDisplayList end ---- > \n";
+		return s;
 	}
 }
 }

@@ -1,11 +1,11 @@
 package common.load
 {
 
+import common.utils.DisplayObjectUtil;
+import common.utils.ObjectUtil;
+
 import flash.display.DisplayObjectContainer;
 import flash.utils.Dictionary;
-
-import common.utils.ObjectUtil;
-import common.utils.DisplayObjectUtil;
 
 /**
  * TODO
@@ -74,6 +74,10 @@ public class LoadTool
 }
 
 
+import common.utils.DebugUtil;
+import common.utils.DisplayObjectUtil;
+import common.utils.ObjectUtil;
+
 import flash.display.Bitmap;
 import flash.display.DisplayObject;
 import flash.display.Loader;
@@ -85,9 +89,6 @@ import flash.net.URLRequest;
 import flash.system.ApplicationDomain;
 import flash.system.LoaderContext;
 import flash.system.SecurityDomain;
-
-import common.utils.DebugUtil;
-import common.utils.DisplayObjectUtil;
 
 /**
  *  use 'kill' method to prepare gc the loader
@@ -161,7 +162,7 @@ internal class SimpleLoader extends Loader{
 		this.completeCallback = completeCall;
 		this.strictWidth = strictWidth;
 		
-		loadedType = DebugUtil.getContentType(this.url);
+		loadedType = ObjectUtil.getContentType(this.url);
 		
 		if(loadedType == "swf"){
 			var isLocal:Boolean = DebugUtil.isLocal();

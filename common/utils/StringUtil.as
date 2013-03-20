@@ -5,18 +5,14 @@ import flash.text.TextFormat;
 	
 public class StringUtil 
 {
-	
 	/**
-	 * @example
-	 * TODO
-	 *
-	 * var s:String = "***[0]***[1]***[2]***"
-	 * s = replace(s, ["1", "2", "3"]);
-	 * //trace(s);
-	 *
 	 * @param check
 	 * @param ary
-	 * @return
+	 * @return 
+	 * @see replaceMultiVal
+	 *  @example 
+	 *  s = h[0][1][2]o， world
+	 *  replaceMultiVal(s, ["e", "l", "l"]);
 	 */
 	public static function replaceSingleVal(check:String, ary:Array):String {
 		if (!ary || !check) {
@@ -26,7 +22,7 @@ public class StringUtil
 		var r:RegExp = /\[\d+\]/g; //heacache
 		var s:Array = check.match(r);
 		if (!s || s.length < ary.length) {
-			trace("StringUtil's method replace's second arguments length is less than match length");
+			trace("result array less than matched array length");
 			return null;
 		}
 		var len:int = s.length;
@@ -37,18 +33,13 @@ public class StringUtil
 	}
 	
 	/**
-	 * @example
-	 * TODO
-	 *
-	 * var s:String = "***[1]***[0]***[0]***"
-	 * s = replace(s, ["1", "2"]);
-	 * //trace(s);
-	 *
-	 * this method can replace Multi-same variable(e.g. above example's [0])
-	 * 
+	 * 将指定的字符串中的[0]符号换为指定的数组中指定的值，容许相同的符号定义
 	 * @param check
 	 * @param ary
-	 * @return
+	 * @return 
+	 * @example 
+	 *  s = h[0][1][1]o， world
+	 *  replaceMultiVal(s, ["e", "l"]);
 	 */
 	public static function replaceMultiVal(check:String, ary:Array):String {
 		if (!check || !ary) {
@@ -65,6 +56,7 @@ public class StringUtil
 	}
 	
 	/**
+	 * 获取指定字符串的文件名, 同getFileName方法, 只是该方法只获取字符串中的数值部分
 	 * @example
 	 * var s:String = "task/1009.png";
 	 * var r:RegExp = /\/([0-9]+).(png|jpg)/g;
@@ -83,58 +75,69 @@ public class StringUtil
 	}
 	
 	/**
-	 * @example source/test.swf will return test
-	 */ 
+	 * 获取文件名
+	 * @param url
+	 * @return 
+	 */
 	public static function getFileName(url:String):String{
 		return url.slice(url.lastIndexOf("/") + 1, url.lastIndexOf("."));
 	}
 	
 	/**
-	 * TODO
-	 * trim Left string's empty character
-	 */ 
+	 * @param s
+	 * @return 
+	 * @see trim
+	 */
 	public static function trimLeft(s:String):String{
 		return s.replace(/^\s*/g, "");
 	}
 	
 	/**
-	 * TODO
-	 * trim right string's empty character
-	 */ 
+	 * @param s
+	 * @return 
+	 * @see trim
+	 */
 	public static function trimRight(s:String):String{
 		return s.replace(/\s*$/g, "");
 	}
 
 	/**
-	 * TODO
-	 * trim string's leftmost and rightmost's empty character
-	 */ 
+	 * 清除指定字符串的左右两边的空白字符
+	 * @param s
+	 * @return 
+	 */
 	public static function trim(s:String):String{
 		return s.replace(/^\s*|\s*$/g, "");
 	}
 	
 	/**
-	 * check string is whether empty
-	 */ 
-	public static function isEmptyBuffer(s:String):Boolean{
+	 * 检查字符串是否为空字符串
+	 * @param s
+	 * @return 
+	 */
+	public static function isEmpty(s:String):Boolean{
 		return trim(s) == "";
 	}
 	
 	/**
-	 * check contain specfied string
-	 */ 
-	public static function contain(str:String, mathStr:String):Boolean{
-		var fi:int = str.indexOf(mathStr);
-		if(fi != -1){
-			return str.substr(fi, mathStr.length) == mathStr;
+	 * 检查指定字符串中是否包含指定子字符串
+	 * @param str
+	 * @param mathStr
+	 * @return 
+	 */
+	public static function contain(str:String, subStr:String):Boolean{
+		var index:int = str.indexOf(subStr);
+		if(index != -1){
+			return str.substr(index, subStr.length) == subStr;
 		}
 		return false;
 	}
 	
 	/**
-	 * TODO
-	 * from google search
-	 */ 
+	 * 检查指定字符串是否为中文字符串
+	 * @param str
+	 * @return 
+	 */
 	public static function isNotChineseWord(str:String):Boolean{
 		return chineseWordReg.test(str);
 	}

@@ -316,7 +316,8 @@ public class DisplayObjectUtil
 	
 	/**
 	 * 检查指定显示对象是否在舞台上, 可以使用Stage属性是否为空为判断条件, 还有个方法是检测显示对象的loaderInfo属性是否为空
-	 * 但是当一个loader加载了一个显示对象后, 就不要去检测它的LoaderInfo属性, 即使该loader对象不在舞台, loaderInfo属性也不为空
+	 * 但是当一个loader加载了一个显示对象后, 就不要去检测被加载对象它的LoaderInfo属性, 
+	 * 即使该loader对象不在舞台, 它的loaderInfo属性也不为空
 	 * @param dis
 	 * @return
 	 */
@@ -951,5 +952,53 @@ public class DisplayObjectUtil
 		var bounds:Rectangle = dis.getBounds(dis);
 		return new Rectangle(-bounds.x, -bounds.y, width - dis.width, height - dis.height);
 	}
+	
+	/**
+	 * TODO
+	 * check whether the specfied dis is a static displayobject ('no internal motion')
+	 * use this function is need more careful
+	 * 
+	 * @param dis
+	 * @param notifyFun
+	 * 
+	 * 获取2帧之间位图是否存在差异来判断, 也可以遍历整个mc, 依次对比
+	 * 判断指定显示对象是否为静态(无动画)
+	 */ 
+	/*
+	public static function assertDisplayObjectIsStatic(dis:DisplayObject, notifyFun:Function):void{
+		var d:BitmapData = DisplayObjectUtil.getOpaqueDisObj(dis);
+		var result:Boolean = false;
+		var check:BitmapData;
+		
+		if(d){
+			var c:Shape = ResourcePool.instance.getResource(Shape);
+			var count:int = 1;	
+			preventGC[c] = true;
+			
+			c.addEventListener(Event.ENTER_FRAME, function(evt:Event):void{
+				if(count++ == 2){
+					preventGC[c] = undefined;
+					delete preventGC[c];
+					c.removeEventListener(Event.ENTER_FRAME, arguments.callee);
+					check = DisplayObjectUtil.getOpaqueDisObj(dis);
+					result =  DisplayObjectUtil.checkBitmapDataIsEqual(d, check);
+					ResourcePool.instance.dispose(c);
+					d.dispose();
+					check.dispose();
+					c = null;
+					if(notifyFun != null){
+						notifyFun(result);
+					}
+				}
+			});
+		}
+		else{
+			d.dispose();
+			if(notifyFun != null){
+				notifyFun(result);
+			}
+		}
+	}
+	//*/
 }
 }

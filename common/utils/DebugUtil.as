@@ -1,6 +1,8 @@
 package common.utils
 {
 
+import common.tool.ResourcePool;
+
 import flash.display.BitmapData;
 import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
@@ -15,15 +17,8 @@ import flash.utils.Dictionary;
 import flash.utils.getQualifiedClassName;
 import flash.utils.getTimer;
 
-import common.tool.ResourcePool;
-
-
 public class DebugUtil
 {
-	public function DebugUtil()
-	{
-	}
-	
 	/**
 	 * 改方法触发FlashPlayer触发GC, 可用于调试, Debug版本可使用
 	 * System.gc()方法, 考虑GC阶段分为Mark-Sweep, 所以需要调用
@@ -33,8 +28,8 @@ public class DebugUtil
 	 */ 
 	public static function gc():void{
 		try{
-			new LocalConnection().connect("__forceGC");
-			new LocalConnection().connect("__forceGC");
+			new LocalConnection().connect("__forceGCDoNotUseInReleaseVersionSWF");
+			new LocalConnection().connect("__forceGCDoNotUseInReleaseVersionSWF");
 		}
 		catch(e:Error){
 			trace("garbage collection is running");
@@ -88,7 +83,6 @@ public class DebugUtil
 	/**
 	 * check variable is whether null
 	 * 判定当前指定值是否为无意义的null值
-	 * 
 	 * @param value 
 	 */ 
 	public static function isNull(value:*):Boolean{
@@ -116,26 +110,8 @@ public class DebugUtil
 	}
 	
 	/**
-	 * TODO
-	 * just used in debugPlayer's Test version
-	 * 获取执行代码链的字符串描述
-	 */ 
-	public static function getExecuteChain():String{
-		var s:String;
-		try{
-			throw new Error("__GetExecuteChain");
-		}
-		catch(e:Error){
-			s = e.getStackTrace();
-		}
-		return s;
-	}
-	
-	/**
-	 * assert BitmapData is whether dispose
-	 * 
-	 * @param data
 	 * 判断指定的bitmapData对象是否可以访问 
+	 * @param data
 	 * @see ArgumentError: Error #2015: 无效的 BitmapData。
 	 */ 
 	public static function assertBitmapDataIsDispose(data:BitmapData):Boolean{
@@ -153,8 +129,6 @@ public class DebugUtil
 	}
 	
 	/**
-	 * if displayobject is unvisible, maybe it outside stage, or his parent is overall it's edge
-	 * @param dis
 	 * 判定指定显示对象是否为可显示状态
 	 */ 
 	public static function assertDisplayObjectIsMayVisible(dis:DisplayObject):Boolean{
@@ -165,17 +139,13 @@ public class DebugUtil
 	}
 	
 	/**
-	 * assert the bitmapData is valid
-	 * @param data
-	 * @see assertBitmapDataIsDispose
+	 * 判断指定的位图对象是否已经失效
 	 */ 
 	public static function assertBitmapDataIsValid(data:BitmapData):Boolean{
 		return !assertBitmapDataIsDispose(data);
 	}
 	
 	/**
-	 * assert expression is true
-	 * @param expression
 	 * 判断指定表达式为true
 	 */ 
 	public static function assertTrue(expression:*):Boolean{
@@ -183,8 +153,6 @@ public class DebugUtil
 	}
 	
 	/**
-	 * assert expression is false
-	 * @param expression
 	 * 判断指定表达式为false
 	 */ 
 	public static function assertFalse(expreesion:*):Boolean{
@@ -192,9 +160,8 @@ public class DebugUtil
 	}
 	
 	/**
-	 * @param fun       the function to delay run with specified frames
-	 * @param frames    the specfied frames
-	 * @param funArgs   the fun's arguments
+	 * 将指定方法延迟指定的帧数执行
+	 * @see cancelRunFramesDelay
 	 **/ 
 	public static function runFramesDelay(fun:Function, frames:uint, ...funArgs):Function{
 		if(frames < 1){
@@ -239,20 +206,6 @@ public class DebugUtil
 	}
 	
 	private static const runFramesDelayDict:Dictionary = new Dictionary(false);
-	
-	/**
-	 * 清除由checkTimesDelay方法所设定的延迟指定时间执行的方法
-	 * @param fun
-	 */ 
-	public static function deleteCheckTimesDelay(fun:Function):void{
-		if(fun in checkTimesDelayDict){
-			var f:Function = checkTimesDelayDict[fun] as Function;
-			if(f != null){
-				f();
-			}
-		}
-	}
-	
 	private static const checkTimesDelayDict:Dictionary = new Dictionary(false);
 	
 	/**
@@ -260,6 +213,7 @@ public class DebugUtil
 	 * @param fun
 	 * @param time
 	 * @param funArgs
+	 * @see deleteCheckTimesDelay 清除timeDelay方法
 	 */ 
 	public static function checkTimesDelay(fun:Function, time:Number, ...funArgs):void{
 		var s:Shape = ResourcePool.instance.getResource(Shape);
@@ -292,16 +246,25 @@ public class DebugUtil
 	}
 	
 	/**
-	 * TODO
-	 * @param s   		  the displayObject to handle the render event
-	 * @param fun 		  the listener
-	 * @param ...funArgs  the function's argument
-	 * 
-	 * 特指定在渲染事件抛出时的执行某一特定方法
+	 * 清除由checkTimesDelay方法所设定的延迟指定时间执行的方法
+	 * @param fun
+	 * @see checkTimesDelay
+	 */ 
+	public static function deleteCheckTimesDelay(fun:Function):void{
+		if(fun in checkTimesDelayDict){
+			var f:Function = checkTimesDelayDict[fun] as Function;
+			if(f != null){
+				f();
+			}
+		}
+	}
+	
+	/**
+	 * 定在渲染事件抛出时的执行某一特定方法
 	 */ 
 	public static function renderInvalid(s:DisplayObject, fun:Function, ...funArgs):void{
 		if(!s || !s.stage){
-			trace("do not execute specfied listener, because your displayObject is null or not on the stage");
+			trace("your displayObject is null or not on the stage");
 			return;
 		}
 		preventGC[s] = true;
@@ -319,53 +282,6 @@ public class DebugUtil
 	private static var preventGC:Dictionary = new Dictionary(false);
 	
 	/**
-	 * TODO
-	 * check whether the specfied dis is a static displayobject ('no internal motion')
-	 * use this function is need more careful
-	 * 
-	 * @param dis
-	 * @param notifyFun
-	 * 
-	 * 获取2帧之间位图是否存在差异来判断, 也可以遍历整个mc, 依次对比
-	 * 判断指定显示对象是否为静态(无动画)
-	 */ 
-	public static function assertDisplayObjectIsStatic(dis:DisplayObject, notifyFun:Function):void{
-		var d:BitmapData = DisplayObjectUtil.getOpaqueDisObj(dis);
-		var result:Boolean = false;
-		var check:BitmapData;
-		
-		if(d){
-			var c:Shape = ResourcePool.instance.getResource(Shape);
-			var count:int = 1;	
-			preventGC[c] = true;
-			
-			c.addEventListener(Event.ENTER_FRAME, function(evt:Event):void{
-				if(count++ == 2){
-					preventGC[c] = undefined;
-					delete preventGC[c];
-					c.removeEventListener(Event.ENTER_FRAME, arguments.callee);
-					check = DisplayObjectUtil.getOpaqueDisObj(dis);
-					result =  DisplayObjectUtil.checkBitmapDataIsEqual(d, check);
-					ResourcePool.instance.dispose(c);
-					d.dispose();
-					check.dispose();
-					c = null;
-					if(notifyFun != null){
-						notifyFun(result);
-					}
-				}
-			});
-		}
-		else{
-			d.dispose();
-			if(notifyFun != null){
-				notifyFun(result);
-			}
-		}
-	}
-	
-	/**
-	 * check player running on the local machine
 	 * 判断当前运行swf环境 为本地还是线上
 	 */ 
 	public static function isLocal():Boolean{
@@ -373,8 +289,8 @@ public class DebugUtil
 	}
 	
 	/**
-	 * check whether specfied resource is could draw
-	 * @note the interface IBitmapDrawable is a mark interface
+	 * 检查指定的实现IBitmapDrawable接口对象是否可以绘制
+	 * DisplayObject和BitmapData均实现此接口
 	 */ 
 	public static function isCouldDraw(IBD:IBitmapDrawable):Boolean{
 		if(IBD is DisplayObject){
@@ -387,22 +303,7 @@ public class DebugUtil
 	}
 	
 	/**
-	 * dump specfied container for debug purpose
-	 */ 
-	public static function dumpDisplayChildren(container:DisplayObjectContainer):String{
-		var len:int = container.numChildren;
-		var s:String = "dumpDisplayList begin ---- > \n";
-		for(var i:int = 0; i < len; i++){
-			var t:DisplayObject = container.getChildAt(i);
-			s += "depth : " + i + " ----> " + getQualifiedClassName(t) + "\n";
-		}
-		s += "dumpDisplayList end ---- > \n";
-		return s;
-	}
-	
-	/**
-	 * 
-	 * get the same type as specfied parameter type
+	 * 获取指定显示对象容器中匹配指定类型的集合
 	 * @param container 
 	 * @param type
 	 */ 
@@ -419,27 +320,6 @@ public class DebugUtil
 			}
 		}
 		return ary;
-	}
-	
-	/**
-	 * @param obj    object or class
-	 * @typeArray    list all type
-	 * 判断指定对象是否为所列出的类型之一
-	 */ 
-	public static function assertTypeIsMatch(obj:*, typeAry:Array):Boolean{
-		if(!obj || !typeAry){
-			return false;
-		}
-		return typeAry.some(function(item:Class, ...args):Boolean{
-			return obj is item;
-		});
-	} 
-
-	/**
-	 * get the file extension name
-	 */ 
-	public static function getContentType(url:String):String{
-		return url.slice(url.lastIndexOf(".") + 1, url.length).toLocaleLowerCase();
 	}
 	
 	/**
