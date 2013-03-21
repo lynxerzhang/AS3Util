@@ -4,11 +4,11 @@ import flash.errors.IllegalOperationError;
 import flash.utils.Dictionary;
 import flash.utils.getQualifiedClassName;
 
+/**
+ * 提供单例类的验证 
+ */
 public class SingletonVerify
 {
-	/**
-	 * singleton verify container (singleton will not be collect, so it hasn't a method like "dispose" to dispose for garbage)
-	 */ 
 	private static const reference:Dictionary = new Dictionary(false);
 	
 	public function SingletonVerify(instance:*, c_class:Class){

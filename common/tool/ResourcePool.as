@@ -1,44 +1,38 @@
 package common.tool
 {
-import flash.errors.IllegalOperationError;
+import common.utils.ObjectUtil;
+
 import flash.utils.Dictionary;
 import flash.utils.getDefinitionByName;
 import flash.utils.getQualifiedClassName;
-
-import common.utils.DebugUtil;
-import common.utils.ObjectUtil;
-import common.tool.SingletonVerify;
 
 public class ResourcePool
 {
 	public function ResourcePool()
 	{
-		if(instance){
-			SingletonVerify.singletonErrorHandle(this);
-		}
+		if(instance) SingletonVerify.singletonErrorHandle(this);
 	}
 	
-	/**
-	 * 
-	 */ 
 	public static const instance:ResourcePool = new ResourcePool();
 	
-	/**
-	 * 
-	 */ 
 	private static const poolDict:Dictionary = new Dictionary(false);
 	
 	/**
-	 * get pool with specfied type (the type is class or object)
-	 */ 
+	 * 获取指定对象类型的对象池
+	 * @param d
+	 * @return 
+	 */
 	public function getPool(d:*):VectorMap{
 		var c:Class = getType(d);
 		return c in poolDict ? poolDict[c] as VectorMap : poolDict[c] = new VectorMap(c);
 	}
 	
 	/**
-	 * get specfied type's object
-	 */ 
+	 * 获取指定类型的对象, 其中如果需要对某些对象执行reset方法, 则需要实现IResourcePoolSetter接口
+	 * @param d
+	 * @param args 
+	 * @return 
+	 */
 	public function getResource(d:*, ...args):*{
 		var k:VectorMap = getPool(d);
 		if(k.getLen() > 0){
@@ -54,15 +48,20 @@ public class ResourcePool
 	}
 	
 	/**
-	 * get specfied instance's pool is sufficient
-	 */ 
+	 * 检查指定类型的对象池是否拥有对应的对象
+	 * @param d
+	 * @return 
+	 */
 	public function isSuffi(d:*):Boolean{
 		return getPool(d).getLen() > 0;
 	} 
 	
 	/**
-	 * dispose specfied instance's pool 
-	 */ 
+	 * 销毁指定类型的对象池 
+	 * @param d
+	 * @param func 可以传入方法, 其中方法的参数就是需要销毁的那个类型的对象
+	 * 
+	 */
 	public function disposeAll(d:*, func:Function = null):void{
 		var c:Class = getType(d);
 		var k:VectorMap = getPool(c);
@@ -77,15 +76,19 @@ public class ResourcePool
 	}
 	
 	/**
-	 * @param d get parameter's Class definition 
-	 */ 
+	 * 获取指定对象的class类型
+	 * @param d
+	 * @return 
+	 */
 	private function getType(d:*):Class{
 		return d is Class ? d as Class : getClass(d);
 	}
 	
 	/**
-	 * @param d assume parameter is instance
-	 */ 
+	 * @param d
+	 * @return 
+	 * @see getType
+	 */
 	private function getClass(d:*):Class{
 		if(ObjectUtil.isInternalClass(d)){
 			return Object(d).constructor;
@@ -93,13 +96,13 @@ public class ResourcePool
 		return getDefinitionByName(getQualifiedClassName(d)) as Class;
 	}
 	
+	
 	/**
-	 * this construct method maybe look bad smell, 
-	 * but now I could't found a better way to 'dynamic' construct a class
-	 * 
-	 * construct method couldn't use function's method 'apply' or 'call'
-	 * 
-	 */ 
+	 * 构造一个指定类型的对象, 由于构造方法无法使用Function的apply或call，所以只能根据参数个数逐个编写, 假设参数数目有10个
+	 * @param c
+	 * @param args
+	 * @return 
+	 */
 	private function construct(c:Class, args:Array):*{
 		var d:*;
 		switch(args.length){
@@ -121,10 +124,11 @@ public class ResourcePool
 		return d;
 	}
 	
-	
 	/**
-	 * dispose a object to specfied pool （the lastIndexOf method maybe bring a performance issue）
-	 */ 
+	 * 销毁一个对象, 按照类型将其放入指定的对象池
+	 * @param d
+	 * @param fun 可以传入一个方法, 执行具体的析构方法
+	 */
 	public function dispose(d:*, fun:Function = null):void{
 		if(!d){
 			return;

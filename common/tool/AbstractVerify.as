@@ -1,10 +1,10 @@
 package common.tool
 {
-import flash.utils.getQualifiedClassName;	
+import flash.errors.IllegalOperationError;
+import flash.utils.getQualifiedClassName;
 	
 /**
- * for abstract verify
- * 
+ * 提供抽象类的验证
  * @example
  * 
  * class Test{
@@ -22,7 +22,7 @@ public class AbstractVerify
 	private function verify(o:*, c:Class):void{
 		var d:Object = o as Object;
 		if(d && Class(d.constructor) == c){
-			throw new Error(getQualifiedClassName(o) + " ---> " + 'abstractError');
+			throw new IllegalOperationError(getQualifiedClassName(o) + " ---> " + 'abstractError');
 		}
 	}
 }

@@ -1,29 +1,24 @@
 package common.tool
 {
-import flash.display.DisplayObject;
 import flash.display.Loader;
 import flash.errors.IllegalOperationError;
 import flash.system.ApplicationDomain;
 import flash.utils.getQualifiedClassName;
 
-import common.tool.VectorMap;
-
 public class ResourceManager
 {
-	
 	/**
-	 * current applicationdomain container reference
-	 */ 
+	 * 记录当前应用程序域
+	 */
 	private static var currentDomain:ApplicationDomain;
 	
 	/**
-	 * check is whether show Error Message
+	 * 是否报警告错误信息
 	 */ 
 	private static var showErrorMessage:Boolean = false;
 	
 	/**
-	 * 
-	 * set applictiondomain resource container
+	 * 初始化当前应用程序主域
 	 */ 
 	public static function initDomain(domain:ApplicationDomain, isShowErrorMessage:Boolean = false):void{
 		currentDomain = domain;
@@ -31,8 +26,7 @@ public class ResourceManager
 	}
 	
 	/**
-	 * get this currentDomain's container whether has className's resource
-	 * 
+	 * 检查当前域中是否存在指定的类定义
 	 */ 
 	public static function hasThisStuff(className:String):Boolean{
 		if(!isDomainExist()){
@@ -45,8 +39,11 @@ public class ResourceManager
 	}
 	
 	/**
-	 * get this currentDomain's container whether specified name in vector array
-	 */ 
+	 * 检查给定的Vector对象中是否存储指定的类定义字符串
+	 * @param name
+	 * @param vector
+	 * @return 
+	 */
 	public static function hasThisStuffInVector(name:String, vector:Vector.<String>):Boolean{
 		if(!isDomainExist()){
 			return false;
@@ -62,7 +59,7 @@ public class ResourceManager
 	}
 	
 	/**
-	 * get this current domain's container whether specified name in ary 
+	 * @see hasThisStuffInVector
 	 */ 
 	public static function hasThisStuffInArray(name:String, ary:Array):Boolean{
 		if(!isDomainExist()){
@@ -80,7 +77,7 @@ public class ResourceManager
 	
 	
 	/**
-	 * get Resource by provided resource name
+	 * 获取指定类名的资源实例
 	 */ 
 	public static function getResource(className:String):*{
 		if(!isDomainExist()){
@@ -98,7 +95,7 @@ public class ResourceManager
 	}
 	
 	/**
-	 * get class definition by resource of class name
+	 * 获取类定义
 	 */ 
 	public static function getDefinition(className:String):Class{
 		if(!isDomainExist()){
@@ -111,7 +108,7 @@ public class ResourceManager
 	}
 	
 	/**
-	 * same with getDefinition
+	 * @see getDefinition
 	 */ 
 	public static function getClass(className:String):Class{
 		return getDefinition(className);
@@ -126,7 +123,7 @@ public class ResourceManager
 	}
 	
 	/**
-	 * get the given object's definition name
+	 * 获取给定的对象的类名
 	 */ 
 	public static function getResourceName(o:Object, isOnlyClassName:Boolean = false):String{
 		var s:String = getQualifiedClassName(o);
@@ -137,15 +134,14 @@ public class ResourceManager
 	}
 	
 	/**
-	 * get the give object's class Name
+	 * @see getResourceName
 	 */ 
 	public static function getClassName(o:Object):String{
 		return getResourceName(o, true);
 	}
 	
-	//below are get child applicationDomain's resource
-	//****************************************************************
 	/**
+	 * 在给定的loader对象中获取指定类型资源
 	 * @param className class's name
 	 * @param loader    loader
 	 */ 
@@ -162,6 +158,7 @@ public class ResourceManager
 	/**
 	 * @param className class's name
 	 * @param loader    loader
+	 * @see getResourceByDomain
 	 */ 
 	public static function getDefinitionByDomain(className:String, loader:Loader):Class{
 		var currentDomain:ApplicationDomain = loader.contentLoaderInfo.applicationDomain;
@@ -172,21 +169,25 @@ public class ResourceManager
 		return null;
 	}
 	
-	
-	//below are child of applicationDomain
-	//*****************************************************************
-	private static const loaderMap:Map = new Map();
 	/**
-	 * add a specfied loader
-	 */ 
+	 * 存储loader对象 
+	 */
+	private static const loaderMap:Map = new Map();
+	
+	/**
+	 * 根据给定的url, 来存储对应的loader对象
+	 * @param url
+	 * @param loader
+	 */
 	public static function setLoader(url:String, loader:Loader):void{
 		if(loaderMap.contains(url)){
 			trace("setLoader encounter a predefined problem", url);
 		}
 		loaderMap.add(url, loader);
 	}
+	
 	/**
-	 * get a specfied loader
+	 * 根据加载的url,获取对应loader对象
 	 */ 
 	public static function getLoader(url:String):Loader{
 		if(loaderMap.contains(url)){
@@ -195,8 +196,9 @@ public class ResourceManager
 		trace("getLoader could not be found url", url);
 		return null;
 	}
+	
 	/**
-	 * dispose specfied loader
+	 * 销毁存储在map中的loader对象
 	 * @param url          the url 
 	 * @param selfRemove   the selfRemove 
 	 */ 
@@ -215,8 +217,10 @@ public class ResourceManager
 			}
 		}
 	}
+	
 	/**
-	 * get resource by specfied url
+	 * 根据url来获取资源
+	 * @see setLoader
 	 */ 
 	public static function getResourceByURL(url:String, className:String):*{
 		var currentDomain:ApplicationDomain = getDomain(url);
@@ -227,10 +231,13 @@ public class ResourceManager
 		trace("getResourceByURL could not be found this resource", url, className);
 		return null;
 	}
+	
 	/**
-	 * get definition by specfied url
-	 * 
-	 */ 
+	 * @param url
+	 * @param className
+	 * @return 
+	 * @see getResourceByURL
+	 */
 	public static function getDefinitionByURL(url:String, className:String):Class{
 		var currentDomain:ApplicationDomain = getDomain(url);
 		if(currentDomain && currentDomain.hasDefinition(className)){
@@ -239,9 +246,13 @@ public class ResourceManager
 		trace("getDefinitionByURL could not be found this resource", url, className);
 		return null;
 	}
+	
 	/**
-	 * get specfied application domain
-	 */ 
+	 * 获取加载指定url的loader的应用程序域
+	 * @param url
+	 * @return 
+	 * @see setLoader
+	 */
 	public static function getDomain(url:String):ApplicationDomain{
 		var loader:Loader = getLoader(url);
 		if(loader){
@@ -250,6 +261,5 @@ public class ResourceManager
 		trace("getDomain could not be found url", url);
 		return null;
 	}
-	//*****************************************************************
 }
 }

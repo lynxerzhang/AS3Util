@@ -12,8 +12,10 @@ public class Signal
 	}
 	
 	/**
-	 * add specific observe function
-	 */ 
+	 * 添加一个监听方法
+	 * @param fun
+	 * @param executeOnce 是否执行一次就删除
+	 */
 	public function addObserver(fun:Function, executeOnce:Boolean = false):void{
 		if(containObserve(fun)){
 			return;
@@ -25,8 +27,9 @@ public class Signal
 	}
 	
 	/**
-	 * remove specific observe function
-	 */ 
+	 * 清除指定方法
+	 * @param fun
+	 */
 	public function removeObserver(fun:Function):void{
 		if(containObserve(fun)){
 			container.remove(fun);
@@ -35,37 +38,42 @@ public class Signal
 	}
 	
 	/**
-	 * check whether contain a observe function
-	 */ 
+	 * 判断指定的方法是否存在于该Signal中
+	 * @param fun
+	 * @return 
+	 */
 	public function containObserve(fun:Function):Boolean{
 		return container.contain(fun);
 	}
 	
 	/**
-	 * get len in this signal
-	 */ 
+	 * 获取该signal的监听者数量
+	 * @return 
+	 */
 	public function getLen():int{
 		return container.getLen();
 	}
 	
 	/**
-	 * check this signal container is empty
-	 */ 
+	 * 是否不存在监听者方法
+	 * @return 
+	 */
 	public function isEmpty():Boolean{
 		return getLen() == 0;
 	}
 	
 	/**
-	 * remove all observer
-	 */ 
+	 * 清除所有的监听者方法
+	 */
 	public function removeAll():void{
 		container.removeAll();
 		config.removeAll();
 	}
 	
 	/**
-	 * dispatch data to all observer
-	 */ 
+	 * 派送指定参数至当前的Signal的监听方法中
+	 * @param args
+	 */
 	public function dispatch(...args):void{
 		if(container.isEmpty()){
 			return;

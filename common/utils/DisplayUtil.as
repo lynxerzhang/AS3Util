@@ -38,6 +38,8 @@ public class DisplayUtil
 		var s:Sprite = new Sprite();
 		s.mouseChildren = s.mouseEnabled = false;
 		s.focusRect = false;
+		s.tabEnabled = false;
+		s.tabChildren = false;
 		if(name != null){
 			s.name = name;
 		}

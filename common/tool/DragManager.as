@@ -1,15 +1,15 @@
 package common.tool
 {
+import common.tool.ListenerManager;
+import common.tool.Signal;
+import common.utils.DisplayObjectUtil;
+import common.utils.DisplayUtil;
+
 import flash.display.DisplayObject;
 import flash.display.InteractiveObject;
 import flash.display.Sprite;
 import flash.display.Stage;
 import flash.events.MouseEvent;
-
-import common.tool.ListenerManager;
-import common.tool.Signal;
-
-import common.utils.DisplayObjectUtil;
 
 
 public class DragManager
@@ -17,7 +17,7 @@ public class DragManager
 	/**移动至目标显示对象上时触发该Signal**/
 	public static var hitTargetSignal:Signal = new Signal();
 	
-	private static const dragContainer:Sprite = DisplayObjectUtil.createSprite();
+	private static const dragContainer:Sprite = DisplayUtil.createSprite();
 	
 	private static const listenerManager:ListenerManager = new ListenerManager();
 	
@@ -41,7 +41,7 @@ public class DragManager
 							  checkCondition:Function = null, 
 							  showProp:Object = null):void{
 		stopDrag();
-		var s:DisplayObject = DisplayObjectUtil.getBitmapSprite(show == null ? drag : show) as DisplayObject;
+		var s:DisplayObject = DisplayObjectUtil.getCopySprite(show == null ? drag : show) as DisplayObject;
 		if(showProp != null){
 			for(var item:* in showProp){
 				s[item] = showProp[item];

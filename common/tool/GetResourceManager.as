@@ -5,16 +5,12 @@ import flash.display.DisplayObjectContainer;
 import flash.display.MovieClip;
 import flash.display.SimpleButton;
 import flash.display.Sprite;
-import flash.events.Event;
 import flash.text.TextField;
 import flash.text.TextFieldType;
 import flash.utils.Dictionary;
-import flash.utils.getQualifiedClassName;
 
 /**
- * 
- * just encapsulate displayObjectContainer's getChildByName method and offer some custom behavior
- * e.g.(mouseEnabled set)
+ * 该类仅封装了DisplayObjectContainer类的getChildByName方法
  */ 
 public class GetResourceManager
 {
@@ -28,14 +24,14 @@ public class GetResourceManager
 	private static var dict:Dictionary = new Dictionary(false);
 	
 	/**
-	 * get a GetResourceManager instance
+	 * 根据传入的现实对象容器获取对应的GetResourceManager对象
 	 */ 
 	public static function getManager(container:DisplayObjectContainer):GetResourceManager{
 		return dict[container] == null ? dict[container] = new GetResourceManager(container) : dict[container];
 	}
 	
 	/**
-	 * delete specfied container's related getResourceManager
+	 * 删除记录的DisplayObjectContainer对象
 	 */ 
 	public static function clear(container:DisplayObjectContainer):Boolean{
 		dict[container] = undefined;
@@ -43,8 +39,12 @@ public class GetResourceManager
 	}
 	
 	/**
-	 * get a internal textfield
-	 */ 
+	 * 获取文本对象
+	 * @param name
+	 * @param slience
+	 * @param removing
+	 * @return 
+	 */
 	public function getTextField(name:String, slience:Boolean = true, removing:Boolean = true):TextField{
 		var t:TextField = this.content.getChildByName(name) as TextField;
 		if(t){
@@ -63,14 +63,17 @@ public class GetResourceManager
 	}
 	
 	/**
-	 * get a internal movieclip
-	 */ 
+	 * 获取一个影片剪辑
+	 * @param name
+	 * @param slience
+	 * @return 
+	 */
 	public function getMovieClip(name:String, slience:Boolean = true):MovieClip{
 		var t:MovieClip = this.content.getChildByName(name) as MovieClip;
 		if(t){
 			t.mouseEnabled = !slience;
 			t.mouseChildren = !slience;
-                        t.tabEnabled = false;
+            t.tabEnabled = false;
 			t.tabChildren = false;
 			t.buttonMode = !slience;
 		}
@@ -81,50 +84,36 @@ public class GetResourceManager
 	}
 	
 	/**
-	 * get a internal sprite
-	 */ 
+	 * 获取一个Sprite对象
+	 * @param name
+	 * @param slience
+	 * @return 
+	 */
 	public function getSprite(name:String, slience:Boolean = true):Sprite{
 		var t:Sprite = this.content.getChildByName(name) as Sprite;
 		if(t){
 			t.mouseEnabled = !slience;
 			t.mouseChildren = !slience;
-                        t.tabEnabled = false;
+            t.tabEnabled = false;
 			t.tabChildren = false;
-                        t.buttonMode = !slience;
+            t.buttonMode = !slience;
 		}
 		return t;
 	}
 	
 	/**
-	 * get a simplebutton
-	 */ 
+	 * 获取一个SimpleButton对象
+	 * @param name
+	 * @param slience
+	 * @return 
+	 */
 	public function getSimpleButton(name:String, slience:Boolean = false):SimpleButton{
 		var t:SimpleButton = this.content.getChildByName(name) as SimpleButton;
 		if(t){
 			t.mouseEnabled = !slience;
-                        t.tabEnabled = false;
+            t.tabEnabled = false;
 		}
 		return t;
-	}
-	
-	/**
-	 * create a non-interactive's sprite
-	 * 
-	 * @param parent   the sprite's parent
-	 * @param name     the sprite's name, add a name for debug purpose
-	 */ 
-	public static function createSprite(parent:DisplayObjectContainer = null, name:String = null):Sprite{
-		var s:Sprite = new Sprite();
-		if(name != null && name.length > 0){
-			s.name = name;
-		}
-		if(parent){
-			parent.addChild(s);
-		}
-		s.mouseChildren = s.mouseEnabled = false;
-                s.tabEnabled = false;
-		s.tabChildren = false;
-		return s;
 	}
 }
 }

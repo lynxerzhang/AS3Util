@@ -1,8 +1,6 @@
 package common.tool
 {
-/**
- * 
- */ 
+
 public class SignalMap extends Map
 {
 	public function SignalMap()
@@ -11,24 +9,25 @@ public class SignalMap extends Map
 	}
 		
 	/**
-	 * the added operation's signal
-	 */ 
+	 * 对添加入map对象中的键值提供通知
+	 */
 	public var added:Signal = new Signal();
 	
 	/**
-	 * the removed operation's signal
-	 */ 
+	 * 对删除map对象中的键值提供通知
+	 */
 	public var removed:Signal = new Signal();
 	
 	/**
-	 * the removeAll operation's signal
-	 */ 
+	 * 对清除map对象中的所有键值提供通知
+	 */
 	public var removeAlled:Signal = new Signal();
 	
 	/**
-	 * remove
+	 * 移除指定键
 	 * @param key
-	 */ 
+	 * @return 
+	 */
 	override public function remove(key:*):*{
 		var data:Object = super.remove(key);
 		if(data){
@@ -38,10 +37,11 @@ public class SignalMap extends Map
 	}
 	
 	/**
-	 * add 
+	 * 添加指定键值
 	 * @param key
 	 * @param value
-	 */ 	
+	 * @return 
+	 */
 	override public function add(key:*, value:*):Boolean{
 		var isSuccess:Boolean = super.add(key, value);
 		if(isSuccess){
@@ -51,8 +51,8 @@ public class SignalMap extends Map
 	}
 	
 	/**
-	 * dispose this map
-	 */ 
+	 * 销毁该map对象
+	 */
 	override public function dispose():void{
 		super.dispose();
 		this.added.removeAll();
@@ -62,8 +62,8 @@ public class SignalMap extends Map
 	}
 	
 	/**
-	 * remove all record
-	 */ 
+	 * 清除所有键值对
+	 */
 	override public function removeAll():void{
 		super.removeAll();
 		removeAlled.dispatch(this, removeAlled, "removeAll"); 

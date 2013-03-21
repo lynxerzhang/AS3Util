@@ -1,19 +1,12 @@
 package common.tool
 {
-import flash.sampler.getSize;
 import flash.utils.Dictionary;
 
 
 public class Map
 {
-	/**
-	 * use dictionary, do not use raw object (because the 'key' maybe is a as3 internal object)
-	 */ 
 	private var map:Dictionary;
 	
-	/**
-	 * record the map length
-	 */ 
 	private var len:int = 0;
 	
 	/**
@@ -24,7 +17,7 @@ public class Map
 	}
 	
 	/**
-	 * remove key from dictionary
+	 * 移除指定的键
 	 */ 
 	public function remove(key:*):*{
 		var data:Object;
@@ -38,7 +31,7 @@ public class Map
 	}
 	
 	/**
-	 * remove all key from dictionary
+	 * 移除所有的键
 	 */ 
 	public function removeAll():void{
 		for(var key:* in map){
@@ -49,7 +42,7 @@ public class Map
 	}
 	
 	/**
-	 * 
+	 * 销毁该map对象
 	 */ 
 	public function dispose():void{
 		this.removeAll();
@@ -57,7 +50,7 @@ public class Map
 	}
 	
 	/**
-	 * add "key=value" to dictionary
+	 * 以键值形式存储至map对象中
 	 */ 
 	public function add(key:*, value:*):Boolean{
 		if(contains(key)){
@@ -69,21 +62,21 @@ public class Map
 	}
 	
 	/**
-	 * get value with key
+	 * 根据键获取匹配值
 	 */ 
 	public function get(key:*):*{
 		return map[key];
 	}
 	
 	/**
-	 * check key is whether exist
+	 * 检查指定的键是否存在某值与其对应
 	 */ 
 	public function contains(key:*):Boolean{
 		return (map[key] != null) && (map[key] != undefined);
 	}
 	
 	/**
-	 * clearAllData
+	 * 清空存储
 	 */ 
 	public function clear():void{
 //		for(var item:* in map){
@@ -95,14 +88,14 @@ public class Map
 	}
 	
 	/**
-	 * get internal dictionary
+	 * 获取内部的Dictionary对象
 	 */ 
 	public function getInternalData():Dictionary{
 		return map;
 	}
 	
 	/**
-	 * to raw object
+	 * 将存储的键值形式以Object对象返回
 	 */ 
 	public function toObject():Object{
 		var o:Object = {};
@@ -113,7 +106,7 @@ public class Map
 	}
 	
 	/**
-	 * to raw array
+	 * 将存储的键值形式以数组对象返回
 	 */ 
 	public function toArray():Array{
 		var ary:Array = [];
@@ -124,22 +117,23 @@ public class Map
 	}
 	
 	/**
-	 * get size
+	 * 获取map长度
 	 */ 
 	public function getLen():int{
 		return len;
 	}
 	
 	/**
-	 * check empty
+	 * 检查该map是否为空
 	 */ 
 	public function isEmpty():Boolean{
 		return getLen() == 0;
 	}
 	
 	/**
-	 * for each key is specfied function's arguments
-	 */ 
+	 * 循环遍历map中的所有键, 退出循环条件由指定方法判定
+	 * @param fun
+	 */
 	public function someKey(fun:Function):void{
 		for(var item:* in map){
 			if(item){
@@ -151,8 +145,9 @@ public class Map
 	}
 	
 	/**
-	 * for each value is specfied function's arguments
-	 */ 
+	 * 循环遍历map中的所有值, 退出循环条件由指定方法判定
+	 * @param fun
+	 */
 	public function someValue(fun:Function):void{
 		for each(var item:* in map){
 			if(item){
@@ -165,8 +160,9 @@ public class Map
 	}
 	
 	/**
-	 * run the specfied function and fill in the map's key
-	 */ 
+	 * 遍历所有键, 并根据传入的方法对键依次操作
+	 * @param fun
+	 */
 	public function forEachKey(fun:Function):void{
 		for(var item:* in map){
 			if(item){
@@ -176,8 +172,9 @@ public class Map
 	}
 	
 	/**
-	 * run the specfied function and fill in the map's value
-	 */ 
+	 * 遍历所有值, 并根据传入的方法对值依次操作
+	 * @param fun
+	 */
 	public function forEachValue(fun:Function):void{
 		for each(var item:* in map){
 			if(item){
@@ -187,8 +184,7 @@ public class Map
 	}
 	
 	/**
-	 * filter every element's key and run the execute fun in match item
-	 * 
+	 * 执行对键的过滤，并对成功匹配或失败匹配的键做对应操作 
 	 * @param fun   execute fun
 	 * @param check filter fun
 	 * @see         forEachValueWithFilter
@@ -209,8 +205,7 @@ public class Map
 	}
 	
 	/**
-	 * filter every element's value and run the execute fun in match items
-	 * 
+	 * 执行对值的过滤，并对成功匹配或失败匹配的值做对应操作 
 	 * @param fun      execute fun
 	 * @param check    filter  fun
 	 * @param unMatch  unMatch fun
@@ -231,9 +226,8 @@ public class Map
 	}
 	
 	/**
-	 * 返回对应指定value的所有键名
-	 * 
-	 * @param value 返回指定value的所有key值
+	 * 获取对该map对象中匹配指定的值的所有键
+	 * @param value
 	 */ 
 	public function getValueToKey(value:*):Array{
 		var k:Array = [];
@@ -246,9 +240,8 @@ public class Map
 	}
 	
 	/**
-	 * 删除指定value的所有键
-	 * 
-	 * @param value 指定的存储在该map中的value
+	 * 移除该map对象中匹配指定值的所有键
+	 * @param value
 	 */ 
 	public function removeValue(value:*):void{
 		var key:Array = getValueToKey(value);
