@@ -1,2 +1,2 @@
-AS3Util some userful as3 tool
+AS3Util项目中包含常用的as3工具类
 =======
