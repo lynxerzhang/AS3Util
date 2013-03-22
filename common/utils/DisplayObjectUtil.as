@@ -954,6 +954,33 @@ public class DisplayObjectUtil
 	}
 	
 	/**
+	 * 根据给定的显示对象获取实际显示的长宽
+	 * @param dis
+	 * @return 
+	 * @example
+	 * 绘制一个shape盖在_mc上, 这个shape的覆盖区域就是_mc的不透明矩形区域
+	 *  var r:Rectangle = getDisplaySize(_mc);
+	 *	var s:Shape = new Shape();
+	 *	addChild(s);
+	 *	s.graphics.beginFill(0, .4);
+	 *	s.graphics.drawRect(r.x, r.y, r.width, r.height);
+	 *	s.graphics.endFill();
+	 *	s.x = _mc.x;
+	 *	s.y = _mc.y;
+	 */
+	public static function getDisplaySize(dis:DisplayObject):Rectangle{
+		var b:Rectangle = dis.getBounds(dis);
+		var t:Matrix = dis.transform.matrix;
+		var d:BitmapData = new BitmapData(b.width * t.a, b.height * t.d, true, 0);
+		d.draw(dis, new Matrix(t.a, 0, 0, t.d, -b.x * t.a, -b.y * t.d));
+		var r:Rectangle = d.getColorBoundsRect(0xFF000000, 0, false);
+		d.dispose();
+		r.x += b.x * t.a;
+		r.y += b.y * t.d;
+		return r;
+	}
+	
+	/**
 	 * TODO
 	 * check whether the specfied dis is a static displayobject ('no internal motion')
 	 * use this function is need more careful

@@ -4,13 +4,8 @@ import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.utils.Dictionary;
 	
-/**
- * TODO
- * this class is used to manager eventdispatcher's listener
- * 
- */
-public class ListenerManager {
-	
+public class ListenerManager 
+{
 	private var listenerDict:Dictionary;
 	
 	/**
@@ -21,8 +16,7 @@ public class ListenerManager {
 	}
 	
 	/**
-	 * map a listener with specific event
-	 * 
+	 * 配置指定的EventDispatcher事件处理
 	 * @param	dispatch
 	 * @param	event
 	 * @param	listener
@@ -34,6 +28,7 @@ public class ListenerManager {
 		
 		var container:Vector.<EventCore> = listenerDict[dispatch];
 		var len:int = container.length;
+		
 		for (var i:int = 0; i < len; i ++ ) {
 			var item:EventCore = container[i] as EventCore;
 			if (item.eventName == event && 
@@ -50,12 +45,11 @@ public class ListenerManager {
 		data.useCapture = useCapture;
 		
 		dispatch.addEventListener(event, listener, useCapture);
-		container[container.length] = data;
+		container.push(data);
 	}
 	
 	/**
-	 * remove a listener with a specific dispatch
-	 * 
+	 * 清除一个指定的事件监听
 	 * @param	dispatch
 	 * @param	event
 	 * @param	listener
@@ -76,7 +70,7 @@ public class ListenerManager {
 	}
 	
 	/**
-	 * remove all eventdispatcher's listener
+	 * 清除所有的监听
 	 */
 	public function removeAll():void {
 		for (var item:* in listenerDict) {
@@ -86,7 +80,7 @@ public class ListenerManager {
 	
 	/**
 	 * 
-	 * dipose all eventdispatcher
+	 * 彻底销毁该事件管理器
 	 */
 	public function dispose():void {
 		removeAll();
@@ -94,8 +88,7 @@ public class ListenerManager {
 	}
 	
 	/**
-	 * remove all listener specific eventdispatcher
-	 * 
+	 * 清除指定监听者的所有事件监听
 	 * @param	dispatch
 	 */
 	public function removeAllListeners(dispatch:EventDispatcher):void {
@@ -115,25 +108,26 @@ public class ListenerManager {
 }
 
 import flash.events.EventDispatcher;
+
 class EventCore 
 {
 	/**
-	 * record dispatcher
+	 * 事件监听者
 	 */
 	public var dispatcher:EventDispatcher;
 	
 	/**
-	 * record event's name
+	 * 事件名
 	 */
 	public var eventName:String;
 	
 	/**
-	 * record event's listener
+	 * 监听者方法
 	 */
 	public var eventListener:Function;
 	
 	/**
-	 * record event's capture
+	 * 是否处于捕捉阶段
 	 */
 	public var useCapture:Boolean;
 }
