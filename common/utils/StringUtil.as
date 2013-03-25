@@ -1,8 +1,5 @@
 package common.utils
 {
-import flash.text.TextField;
-import flash.text.TextFormat;
-	
 public class StringUtil 
 {
 	/**

@@ -1,6 +1,5 @@
 package common.tool
 {
-import flash.display.MovieClip;
 import flash.utils.Dictionary;
 import flash.utils.getDefinitionByName;
 import flash.utils.getQualifiedClassName;

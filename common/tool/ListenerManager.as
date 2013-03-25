@@ -1,6 +1,5 @@
 package common.tool
 {
-import flash.events.Event;
 import flash.events.EventDispatcher;
 import flash.utils.Dictionary;
 	

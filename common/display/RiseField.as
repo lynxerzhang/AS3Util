@@ -1,11 +1,7 @@
 package common.display
 {
-import flash.display.Bitmap;
-import flash.display.BitmapData;
 import flash.display.Sprite;
-import flash.filters.ConvolutionFilter;
 import flash.filters.GlowFilter;
-import flash.geom.Point;
 import flash.text.TextField;
 import flash.text.TextFieldAutoSize;
 import flash.text.TextFormat;
@@ -62,7 +58,7 @@ internal class RiseField implements IMotionSync
 			this.isDelay = false;
 		}
 		this.showTxt = this.generateText(str);
-		this.showTxtSprite = DisplayObjectUtil.getBitmapSprite(this.showTxt, true);
+		this.showTxtSprite = DisplayObjectUtil.getCopySprite(this.showTxt);
 	}
 	
 	/**

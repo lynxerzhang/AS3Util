@@ -43,14 +43,12 @@ public class FontRiseMotion
 	public function show(str:String, referDis:DisplayObject = null, style:RiseFieldStyle = null):void{
 		var d:RiseField = new RiseField(str, style);
 		container.addChild(d.content);
-		
 		if(!referDis){
 			DisplayObjectUtil.centerInStage(d.content, true);
 		}
 		else{
 			DisplayObjectUtil.centerSpecfiedParent(d.content, referDis);
 		}
-		
 		RiseFieldManager.instance.add(d);
 	}
 }
