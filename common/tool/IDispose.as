@@ -1,4 +1,4 @@
-package common.load
+package common.tool
 {
 /**
  * dispose 
