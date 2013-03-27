@@ -4,47 +4,45 @@ import flash.events.TimerEvent;
 import flash.utils.Timer;
 import common.tool.Signal;
 
-/**
- * 
- * the countDown implement with a native as3 timer
- */ 
 public class CountDown
 {
 	/**
-	 * the core ticker realized
-	 */ 
+	 * 使用Timer对象进行倒计时计算
+	 */
 	private var timer:Timer;
 	
+	/**
+	 * 倒计时秒数
+	 */
 	private var _seconds:Number;
 	
 	/**
-	 * complete Signal (maintain related observe)
-	 */ 
+	 * 倒计时完成后的signal通知
+	 */
 	public var completeSignal:Signal;
 	
 	/**
-	 * tick Signal (maintain related observe)
-	 */ 
+	 * 倒计时每秒的间隔的signal通知
+	 */
 	public var tickSignal:Signal;
 	
-	
 	/**
-	 * state Signal (maintain related observe)
-	 */ 
+	 * 倒计时指定通知秒数的signal通知
+	 */
 	public var stateSignal:Signal;
 	
 	/**
-	 * state's ary (contains some report points in ticker run)
-	 */ 
+	 * 倒计时指定通知秒数
+	 */
 	private var stateVector:Vector.<int>;
 	
 	/**
-	 * record the total seconds to countdown 
+	 * 记录倒计时的总秒数
 	 */ 
 	private var totalSeconds:Number;
 	
 	/**
-	 * this countdown time value (base in seconds)
+	 * 获取当前的倒计时秒数
 	 */
 	public function get seconds():Number
 	{
@@ -52,10 +50,10 @@ public class CountDown
 	}
 
 	/**
-	 * construct method
 	 * 
-	 * @param s this is countdown base number, it's type is (seconds)
-	 */ 
+	 * @param	s      秒数
+	 * @param	state  记录被通知的秒数数组
+	 */
 	public function CountDown(s:Number, state:Vector.<int> = null):void{
 		if(!isNaN(s)){
 			timer = new Timer(1000, 0);
@@ -69,7 +67,7 @@ public class CountDown
 	}
 	
 	/**
-	 * start the tick
+	 * 开始倒计时
 	 */ 
 	public function start():void{
 		this.timer.start();
@@ -89,14 +87,14 @@ public class CountDown
 	}
 	
 	/**
-	 * check this timer is whether start
+	 * 检查倒计时是否开启
 	 */ 
 	public function isStart():Boolean{
 		return this.timer.running;
 	}
 	
 	/**
-	 * refresh timer
+	 * 刷新倒计时秒数和监听指定秒数数组
 	 */ 
 	public function refreshTimer(s:Number, state:Vector.<int> = null):void{
 		this.timer.stop();
@@ -111,16 +109,14 @@ public class CountDown
 	}
 	
 	/**
-	 * pause timer
+	 * 暂停倒计时
 	 */ 
 	public function pauseTimer():void{
 		this.timer.stop();
 		this.timer.reset();
 	}
 	
-	/**
-	 * add this timer event
-	 */ 
+	
 	private function addTimerEvent(t:Timer):void{
 		if(t){
 			t.addEventListener(TimerEvent.TIMER, timerTickHandler);
@@ -128,9 +124,7 @@ public class CountDown
 		}
 	}
 	
-	/**
-	 * every second tick and notify observe
-	 */ 
+
 	private function timerTickHandler(evt:TimerEvent):void{
 		this._seconds --;
 		this.tickSignal.dispatch();
@@ -158,7 +152,7 @@ public class CountDown
 	}
 	
 	/**
-	 * dispose all active object wait for gc
+	 * 清除
 	 */ 
 	public function dispose():void{
 		if(this.timer){

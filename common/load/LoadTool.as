@@ -3,27 +3,21 @@ package common.load
 
 import common.utils.DisplayObjectUtil;
 import common.utils.ObjectUtil;
-
 import flash.display.DisplayObjectContainer;
 import flash.utils.Dictionary;
 
-/**
- * TODO
- * current version has no cache feature, so every load operation will remove the last resource
- * 
- */ 
 public class LoadTool
 {
-	/*cache the loader to save the performance*/
+	/*每一个显示容器缓存一个loader*/
 	private static const loadPool:Dictionary = new Dictionary(false);
 	
 	/**
-	 * @param url           the load url
 	 * 
-	 * @param completeCall  the complete load callback
-	 *  
-	 * @param width         strictly specified loaded resource width
-	 */ 
+	 * @param	host
+	 * @param	url
+	 * @param	completeCall
+	 * @param	width
+	 */
 	public static function load(host:DisplayObjectContainer, url:String, completeCall:Function, width:Number = NaN):void{
 		var loader:SimpleLoader;
 		if(loadPool[host]){
@@ -41,7 +35,7 @@ public class LoadTool
 	}
 	
 	/**
-	 * temp close the running loader
+	 * 中断加载
 	 */ 
 	public static function close(host:DisplayObjectContainer):void{
 		var loader:SimpleLoader = loadPool[host] as SimpleLoader;
@@ -51,7 +45,7 @@ public class LoadTool
 	}
 	
 	/**
-	 * 
+	 * 中断并销毁加载
 	 */
 	public static function dispose(host:DisplayObjectContainer):void{
 		try{
@@ -90,24 +84,48 @@ import flash.system.ApplicationDomain;
 import flash.system.LoaderContext;
 import flash.system.SecurityDomain;
 
-/**
- *  use 'kill' method to prepare gc the loader
- */ 
-internal class SimpleLoader extends Loader{
-	
+internal class SimpleLoader extends Loader
+{	
+	/**
+	 * 加载成功回调
+	 */
 	private var completeCallback:Function;
+	
+	/**
+	 * 加载路径地址
+	 */
 	private var url:String;
+	
+	/**
+	 * 该资源是否有安全许可, 如果没有, 则在draw时会触发安全报错
+	 */
 	private var couldNotAccessResourcePixel:Boolean = false;
+	
+	/**
+	 * 严格制定宽
+	 */
 	private var strictWidth:Number = NaN;
+	
+	/**
+	 * 加载策略
+	 */
 	private var context:LoaderContext;
-	public var isComplete:Boolean = false;
+	
+	/**
+	 * 判断是否加载成功
+	 */
+	private var isComplete:Boolean = false;
+	
+	/**
+	 * 加载类型(png or swf or something else)
+	 */
 	private var loadedType:String;
 	
 	/**
-	 * @param url           the load url
-	 * @param completeCall  will call in completeEvent handle
-	 * @param strictWidth   the loader's width
-	 */ 
+	 * @param	url
+	 * @param	completeCall
+	 * @param	strictWidth
+	 */
 	public function SimpleLoader(url:String, completeCall:Function, strictWidth:Number = NaN):void{
 		if(!url){
 			return;
@@ -115,10 +133,16 @@ internal class SimpleLoader extends Loader{
 		refresh(url, completeCall, strictWidth);
 	}
 	
+	/**
+	 * 开始加载
+	 */
 	public function start():void{
 		this.load(new URLRequest(this.url), context);
 	}
-		
+	
+	/**
+	 * 清除加载
+	 */
 	private function dispose():void{
 		try{
 			this.close();
@@ -137,7 +161,6 @@ internal class SimpleLoader extends Loader{
 				}
 			}
 		}
-		//DebugUtil.gc();
 		this.contentLoaderInfo.removeEventListener(Event.COMPLETE, loadCompleteHandler);
 		this.contentLoaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, loadIOErrorHandler);
 		this.contentLoaderInfo.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, securityErrorHandler);
@@ -229,12 +252,12 @@ internal class SimpleLoader extends Loader{
 	/* io error */
 	private function loadIOErrorHandler(evt:IOErrorEvent):void{
 		dispose();
-		trace("load " + this.url + " encounter a io error");
+		trace("loadIOErrorHandler " + this.url + " encounter a io error");
 	}
 	
 	/* security error */
 	private function securityErrorHandler(evt:SecurityErrorEvent):void{
 		dispose();
-		trace("load " + this.url + " encounter a security error");
+		trace("securityErrorHandler " + this.url + " encounter a security error");
 	}
 }
