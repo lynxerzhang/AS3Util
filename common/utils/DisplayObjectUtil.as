@@ -761,9 +761,8 @@ public class DisplayObjectUtil
 	 * 检查指定显示对象在指点鼠标点下是否为透明
 	 * @param dis   指定显示对象
 	 * @param point 指定鼠标点Point对象, 为舞台全局坐标         
-	 * @param alphaThreshold 透明度阈值
 	 */ 
-	public static function checkPointIsTransParent(dis:DisplayObject, point:Point, alphaThreshold:uint = 0xFF):Boolean{
+	public static function checkPointIsTransParent(dis:DisplayObject, point:Point):Boolean{
 		if(!dis){
 			return true;
 		}
@@ -774,7 +773,7 @@ public class DisplayObjectUtil
 		checkMatrix.tx = -checkPoint.x|0;
 		checkMatrix.ty = -checkPoint.y|0;
 		checkTransParent.draw(dis, checkMatrix);
-		return ((checkTransParent.getPixel32(0, 0) >> 24) & alphaThreshold) == 0;
+		return ((checkTransParent.getPixel32(0, 0) >>> 24) & 0xFF) < 0x80;
 	}
 
 	/**
