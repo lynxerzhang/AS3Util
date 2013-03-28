@@ -1,16 +1,19 @@
 package common.display
 {
-import common.load.IDispose;
+import common.tool.IDispose;
 
-/**
- * 
- */ 
 public interface IMotionSync extends IDispose
 {
-	//update method will run in every frame tick
+	/**
+	 * 每帧的更新通知
+	 * @param	time
+	 */
 	function update(time:Number = NaN):void;
 	
-	//check motion is should complete
+	/**
+	 * 检查动画播放是否完毕
+	 * @return
+	 */
 	function isComplete():Boolean;
 }
 }

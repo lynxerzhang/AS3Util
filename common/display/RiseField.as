@@ -11,39 +11,54 @@ import flash.utils.setTimeout;
 
 import common.utils.DisplayObjectUtil;
 
-/**
- *
- */ 
-internal class RiseField implements IMotionSync
+public class RiseField implements IMotionSync
 {
-	//font color
+	/**
+	 * 字体颜色
+	 */
 	private var fontColor:uint = RiseFieldArgu.WHITE;
 	
-	//font size
+	/**
+	 * 字体大小
+	 */
 	private var fontSize:uint = RiseFieldArgu.FONT_SIZE;
 	
-	//font glow filter
+	/**
+	 * 外发光滤镜
+	 */
 	private var glow:GlowFilter = new GlowFilter(RiseFieldArgu.GLOW_COLOR, 1.0, 2, 2, 1024);
 	
-	//motion txt
+	/**
+	 * 显示文本
+	 */
 	private var showTxt:TextField;
 	
-	//motion sprite
+	/**
+	 * 包含文本的容器
+	 */
 	private var showTxtSprite:Sprite;
 	
+	/**
+	 * 样式
+	 */
 	private var txtStyle:RiseFieldStyle;
 	
-	//是否延迟动画
+	/**
+	 * 是否延迟播放动画
+	 */
 	private var isDelay:Boolean;
 	
-	//如果延迟,则延迟的毫秒数
+	/**
+	 * 如果延迟,则延迟的毫秒数
+	 */
 	private var delayTime:Number;
 	
-	//记录setTimeout返回数值标识
-	private var timeOutId:Number;
 	/**
-	 * 
-	 */ 
+	 * 记录setTimeout返回数值标识
+	 */
+	private var timeOutId:Number;
+	
+
 	public function RiseField(str:String, style:RiseFieldStyle = null):void{
 		this.txtStyle = style;
 		if(this.txtStyle != null){
@@ -62,15 +77,12 @@ internal class RiseField implements IMotionSync
 	}
 	
 	/**
-	 * 
+	 * 获取显示容器
 	 */ 
 	public function get content():Sprite{
 		return this.showTxtSprite;
 	}
 	
-	/**
-	 * generate a text field
-	 */ 
 	private function generateText(str:String):TextField{
 		var t:TextField = new TextField();
 		t.mouseEnabled = false;
@@ -94,7 +106,7 @@ internal class RiseField implements IMotionSync
 	}
 	
 	/**
-	 * @inheritDoc 
+	 * 销毁
 	 */ 
 	public function dispose():void{
 		DisplayObjectUtil.removeAll(this.showTxtSprite, true);
@@ -106,7 +118,7 @@ internal class RiseField implements IMotionSync
 	}
 	
 	/**
-	 * @inheritDoc
+	 * 更新动画
 	 */ 
 	public function update(time:Number = NaN):void{
 		if(this.isDelay && !isNaN(this.delayTime)){
@@ -121,20 +133,17 @@ internal class RiseField implements IMotionSync
 			}, this.delayTime);
 			return;
 		}
-		
-		if(isNaN(time)){
-			this.showTxtSprite.y -= 0.04 * (this.txtStyle != null ? this.txtStyle.stepperRate : RiseFieldArgu.STEPPER);
-			this.showTxtSprite.alpha -= 0.04 * (this.txtStyle != null ? this.txtStyle.alphaRate : RiseFieldArgu.ALPHA);
+		if (isNaN(time)) {
+			time = 0.04;
 		}
-		else{
-			this.showTxtSprite.y -= time * (this.txtStyle != null ? this.txtStyle.stepperRate : RiseFieldArgu.STEPPER);
-			this.showTxtSprite.alpha -= time * (this.txtStyle != null ? this.txtStyle.alphaRate : RiseFieldArgu.ALPHA);
-		}
+		this.showTxtSprite.y -= time * (this.txtStyle != null ? this.txtStyle.stepperRate : RiseFieldArgu.STEPPER);
+		this.showTxtSprite.alpha -= time * (this.txtStyle != null ? this.txtStyle.alphaRate : RiseFieldArgu.ALPHA);
 	}
 	
 	/**
-	 * @inheritDoc
-	 */ 
+	 * 判定动画播放是否结束
+	 * @return
+	 */
 	public function isComplete():Boolean{
 		return this.showTxtSprite.alpha <= 0;
 	}

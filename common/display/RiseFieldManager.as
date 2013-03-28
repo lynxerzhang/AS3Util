@@ -5,38 +5,39 @@ import flash.events.Event;
 import flash.utils.getTimer;
 
 import common.tool.VectorMap;
-
 import common.tool.SingletonVerify;
 
-/**
- * TODO
- */ 
-internal class RiseFieldManager
+public class RiseFieldManager
 {
 	public function RiseFieldManager()
 	{
-		if(instance){
-			SingletonVerify.singletonErrorHandle(this);
-		}
+		if(instance) SingletonVerify.singletonErrorHandle(this);
 	}
 	
-	//
 	public static var instance:RiseFieldManager = new RiseFieldManager();
 	
-	//
+	/**
+	 * 保存IMotionSync的VectorMap
+	 */
 	private var motionMap:VectorMap = new VectorMap(IMotionSync);
 	
-	//singleton's signal in every frame
+	/**
+	 * tick
+	 */
 	private var ticker:Shape = new Shape();
 	
-	//
+	/**
+	 * 记录播放至上一帧时的毫秒数
+	 */
 	private var prevTime:Number = 0;
 	
-	//record current frame's milliseconds
+	/**
+	 * 每两帧之间的毫秒数
+	 */
 	private var milliseconds:Number = 0;
 	
 	/**
-	 * add a IMotionSync data
+	 * 添加一个IMotionSync对象
 	 */ 
 	public function add(data:IMotionSync):void{
 		motionMap.add(data);
@@ -49,7 +50,7 @@ internal class RiseFieldManager
 	}
 	
 	/**
-	 * execute in every frame (if has some stuff)
+	 * 帧循环
 	 */ 
 	private function runMotion(evt:Event):void{
 		var c:Number = getTimer();
@@ -69,7 +70,7 @@ internal class RiseFieldManager
 	}
 	
 	/**
-	 * remove a specfied IMotionSync data
+	 * 删除一个IMotionSync对象
 	 */ 
 	public function remove(data:IMotionSync):void{
 		this.motionMap.remove(data);

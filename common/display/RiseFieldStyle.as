@@ -6,7 +6,6 @@ package common.display
  */ 
 public class RiseFieldStyle
 {
-	
 	/*字体色彩 hex*/
 	public var fontColor:uint = RiseFieldArgu.WHITE;
 	
@@ -16,20 +15,14 @@ public class RiseFieldStyle
 	/*字体尺寸*/
 	public var fontSize:uint = RiseFieldArgu.FONT_SIZE;
 	
-	//----------------------------------
 	/*步进值*/
 	public var stepperRate:Number = RiseFieldArgu.STEPPER;
 	
 	/*透明度步进值*/
 	public var alphaRate:Number = RiseFieldArgu.ALPHA;
-	//----------------------------------
 	
-	//动画延迟时间(毫秒数)
+	/*设置动画开始前的延迟时间*/
 	public var frozenTime:Number = RiseFieldArgu.FROZEN_TIME;
-	
-	public function RiseFieldStyle()
-	{	
-	}
 	
 	/*setFontColor 设置字体色彩*/
 	public function setFontColor(color:uint):RiseFieldStyle{

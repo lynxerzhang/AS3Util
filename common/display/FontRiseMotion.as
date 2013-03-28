@@ -1,44 +1,39 @@
 package common.display
 {
-
 import flash.display.DisplayObject;
 import flash.display.Sprite;
 
 import common.utils.DisplayObjectUtil;
 import common.tool.SingletonVerify;
 
-/**
- * 
- */ 
 public class FontRiseMotion
 {
 	public function FontRiseMotion()
 	{
-		if(instance){
-			SingletonVerify.singletonErrorHandle(this);
-		}
+		if(instance) SingletonVerify.singletonErrorHandle(this);
 	}
 	
 	private static var instance:FontRiseMotion = new FontRiseMotion();
 	
 	/**
-	 * 
-	 */ 
-	public static var container:Sprite; // you should set the container (in stage)
+	 * 动画播放的容器
+	 */
+	public static var container:Sprite;
 	
 	/**
-	 * 
-	 */ 
+	 * 播放一个字体飘升动画 
+	 * @param	str         显示的文字
+	 * @param	referDis    参照显示对象
+	 * @param	style       设置色彩大小的style对象
+	 */
 	public static function show(str:String, referDis:DisplayObject = null, style:RiseFieldStyle = null):void{
 		instance.show(str, referDis, style);
 	}
 
 	/**
-	 * current version use the init style
-	 * @see Motion
-	 * 
 	 * @param str       需要显示的字符串
 	 * @param referDis  参照物  (可以是任何的现实对象, 如果不指定(默认), 则以舞台为基准剧中对齐)
+	 * @param style     设置飘升字体的样式
 	 */ 
 	public function show(str:String, referDis:DisplayObject = null, style:RiseFieldStyle = null):void{
 		var d:RiseField = new RiseField(str, style);
@@ -53,7 +48,3 @@ public class FontRiseMotion
 	}
 }
 }
-
-
-
-

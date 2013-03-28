@@ -1,14 +1,8 @@
 package common.display
 {
-/**
- * 
- */ 
-public class RiseFieldArgu
-{
-	public function RiseFieldArgu()
-	{
-	}
 	
+public class RiseFieldArgu
+{	
 	//white  文本字体色彩（白色）
 	public static const WHITE:uint = 0xFFFFFF;
 	
@@ -21,12 +15,10 @@ public class RiseFieldArgu
 	//font size           (文本字体尺寸)
 	public static const FONT_SIZE:uint = 16;
 	
-	//the motion's stepper value (you could use getTimer to test and modify this value to get a good experience)
-	//
+	//步进值
 	public static const STEPPER:Number = 30;
 	
-	//same with STEPPER
-	//
+	//透明度步进值
 	public static const ALPHA:Number = .6;
 	
 	//起始冻结时间
