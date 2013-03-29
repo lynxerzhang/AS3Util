@@ -81,6 +81,27 @@ public class DebugUtil
 	}
 	
 	/**
+	 * 检查当前运行swf的player是否为浏览器中运行
+	 * @return
+	 * 同时判断player中一个swf是否是被加载进来的可以判断这个显示对象(比如文档类实例)的loaderInfo.loader是否为空来判断
+	 */
+	public static function isOnline():Boolean {
+		return Capabilities.playerType == "PlugIn" || Capabilities.playerType == "ActiveX";
+	}
+	
+	/**
+	 * 检查当前运行在player中的swf文件是否为debug版本
+	 * @return
+	 */
+	public static function isDebuggerSWF():Boolean {
+		var s:String  = new Error().getStackTrace();
+		if (s == null) {
+			return false;
+		}
+		return s.search(/.as:[0-9]+]$/m) != -1;
+	}
+	
+	/**
 	 * check variable is whether null
 	 * 判定当前指定值是否为无意义的null值
 	 * @param value 

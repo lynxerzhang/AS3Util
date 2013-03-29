@@ -6,6 +6,7 @@ import flash.display.BitmapData;
 import flash.display.BitmapDataChannel;
 import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
+import flash.display.Graphics;
 import flash.display.Loader;
 import flash.display.MovieClip;
 import flash.display.Shape;
@@ -977,6 +978,39 @@ public class DisplayObjectUtil
 		r.x += b.x * t.a;
 		r.y += b.y * t.d;
 		return r;
+	}
+	
+	/**
+	 * @param	container   一个指定容器（Sprite 或者 Movieclip)
+	 * @param	scale9Grids 设定的9slice 矩形对象
+	 * @example 
+	 *	var r:Rectangle = new Rectangle(23, 21, 44, 47);//9slice 尺寸
+     *	convertBitmaptoScale9(_mc, r);//清除原始Bitmap信息，转而在该mc的graphics中绘制
+	 * 需要注意的是该方法没有返回container中的位图的bitmapData对象, 如果这个bitmapData对象调用dispose
+	 * 被销毁, 那么依靠beginBitmapFill进行绘图的显示对象中的图形会被清除
+	 */
+	public static function convertBitmaptoScale9(container:DisplayObjectContainer, scale9Grids:Rectangle):void{
+		var b:Bitmap = container.removeChildAt(0) as Bitmap; //获取到的是Bitmap而不是Shape,就是因为在库中取了链接名
+		var topDown:Array = [scale9Grids.top, scale9Grids.bottom, b.height];
+		var leftRight:Array = [scale9Grids.left, scale9Grids.right, b.width];
+		var g:Graphics = Sprite(container).graphics;
+		var bd:BitmapData = b.bitmapData.clone();
+		var topDownStepper:int = 0;
+		var leftRightStepper:int = 0;
+		for(var i:int = 0; i < 3; i ++){
+			for(var j:int = 0; j < 3; j ++){
+				g.beginBitmapFill(bd, null, true, true);
+				g.drawRect(leftRightStepper, topDownStepper,
+					leftRight[i] - leftRightStepper, topDown[j] - topDownStepper);
+				g.endFill();
+				topDownStepper = topDown[j];
+			}
+			leftRightStepper = leftRight[i];
+			topDownStepper = 0;
+		}
+		container.scale9Grid = scale9Grids;
+		b.bitmapData.dispose();
+		b.bitmapData = null;
 	}
 	
 	/**
