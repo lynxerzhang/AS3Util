@@ -339,12 +339,10 @@ public class DisplayObjectUtil
 	 */
 	public static function checkIsParent(target:DisplayObject, checkWhetherParent:DisplayObject):Boolean{
 		if(target && checkWhetherParent){
-			var p:DisplayObject = target.parent;
-			while(p){
-				if(p == checkWhetherParent){
+			if(checkWhetherParent is DisplayObjectContainer){
+				if(DisplayObjectContainer(checkWhetherParent).contains(target)){
 					return true;
 				}
-				p = p.parent;
 			}
 		}
 		return false;
