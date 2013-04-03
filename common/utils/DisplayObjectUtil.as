@@ -841,6 +841,10 @@ public class DisplayObjectUtil
 		if(dis is TextField){
 			return dis.getBounds(dis);
 		}
+		//如果dis的父级为Loader对象
+		if(dis.parent is Loader){
+			return new Rectangle(0, 0, dis.width, dis.height);
+		}
 		//solution two
 		//inspiration from joe@usecake.com and senocular.com
 		var currentTransform:Transform = dis.transform;
@@ -983,7 +987,7 @@ public class DisplayObjectUtil
 	 * @param	scale9Grids 设定的9slice 矩形对象
 	 * @example 
 	 *	var r:Rectangle = new Rectangle(23, 21, 44, 47);//9slice 尺寸
-     *	convertBitmaptoScale9(_mc, r);//清除原始Bitmap信息，转而在该mc的graphics中绘制
+         *	convertBitmaptoScale9(_mc, r);//清除原始Bitmap信息，转而在该mc的graphics中绘制
 	 * 需要注意的是该方法没有返回container中的位图的bitmapData对象, 如果这个bitmapData对象调用dispose
 	 * 被销毁, 那么依靠beginBitmapFill进行绘图的显示对象中的图形会被清除
 	 */
