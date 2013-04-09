@@ -17,10 +17,10 @@ public class ObjectUtil
 	public static function isEmpty(o:Object):Boolean{
 		if(o){
 			for(var item:* in o){
-				return true;
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 	
 	/**
