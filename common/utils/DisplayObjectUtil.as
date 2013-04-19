@@ -170,11 +170,11 @@ public class DisplayObjectUtil
 		}
 		var rect:Rectangle = d.getBounds(d);
 		var m:Matrix = d.transform.matrix;
-		var scaleX:Number = m.a;
-		var scaleY:Number = m.d;
+		var sX:Number = m.a;
+		var sY:Number = m.d;
 		var rx:Number, ry:Number;
-		rx = scaleX >0 ? m.a * rect.left : m.a * rect.right;
-		ry = scaleY >0 ? m.d * rect.top : m.d * rect.bottom;
+		rx = sX >0 ? m.a * rect.left : m.a * rect.right;
+		ry = sY >0 ? m.d * rect.top : m.d * rect.bottom;
 		return new Point(-rx|0, -ry|0);
 	}
 	
