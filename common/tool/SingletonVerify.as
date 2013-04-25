@@ -38,6 +38,13 @@ public class SingletonVerify
 	public static function singletonErrorHandle(c:Object):void{
 		throw new IllegalOperationError("<" + getQualifiedClassName(c) + ">" + " is singleton class, " + SingletonVerify.singletonMessage);
 	}
+
+	public static function checkSingleton(d:Object):void {
+		var c:Class = (d.constructor) as Class;
+		if ((c && c["instance"]) || (c["instance"] === undefined)) {
+			singletonErrorHandle(d);
+		}
+	}
 }
 }
 
