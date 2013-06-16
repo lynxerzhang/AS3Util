@@ -326,7 +326,12 @@ public class DisplayObjectUtil
 		if(dis && dis.stage && dis.visible){
 			var main:Rectangle = new Rectangle(0, 0, dis.stage.stageWidth, dis.stage.stageHeight);
 			var p:Point = dis.parent.localToGlobal(new Point(dis.x, dis.y));
-			return main.containsPoint(p);
+			var isOnStage:Boolean = main.containsPoint(p);
+			if (!isOnStage) {
+				var bounds:Rectangle = dis.getBounds(dis.parent);
+				isOnStage = main.intersects(bounds);
+			}
+			return isOnStage;
 		}
 		return false;
 	}
