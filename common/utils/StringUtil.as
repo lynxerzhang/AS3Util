@@ -53,6 +53,37 @@ public class StringUtil
 	}
 	
 	/**
+	 * 修饰字符串
+	 * @param str 目标字符串 
+	 * @param args 一个数组传入, 一个对象, 或者一个顺序参数列表
+	 * @example
+	 *       replaceString("helloWor[0][1]", "l", "d");
+	 * 	 replaceString("helloWor[0][1]", ["l", "d"]);
+	 *	 replaceString("helloWor[first][last]", {"first":"l", "last":"d"});
+	 *       replaceString("he[0][0]oWorld", "l");
+	 */
+	public static function replaceString(str:String, ...args):String{
+		var r:RegExp, provider:Object;
+		if(args.length == 1 && typeof(args[0]) == "object"){
+			r = /\((?i:[a-z]+)\) | \{(?i:[a-z]+)\} | \[(?i:[a-z]+)\]/gx;
+			provider = args[0] as Object;
+		}
+		else{
+			r = /\(\d+\) | \{\d+\} | \[\d+\]/gx;
+			if(args[0] is Array){
+				provider = args[0] as Array;
+			}
+			else{
+				provider = args;
+			}
+		}
+		str = str.replace(r, function(match:String, ...t):String{
+			return provider[match.slice(1, match.length - 1)];
+		});
+		return str;
+	}
+	
+	/**
 	 * 获取指定字符串的文件名, 同getFileName方法, 只是该方法只获取字符串中的数值部分
 	 * @example
 	 * var s:String = "task/1009.png";
