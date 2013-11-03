@@ -4,6 +4,7 @@ import flash.net.getClassByAlias;
 import flash.net.registerClassAlias;
 import flash.utils.ByteArray;
 import flash.utils.describeType;
+import flash.utils.Dictionary;
 import flash.utils.getDefinitionByName;
 import flash.utils.getQualifiedClassName;
 		
@@ -283,6 +284,27 @@ public class ObjectUtil
 			return obj is item;
 		});
 	} 
+	
+	private static const cleanMasterPoint:Dictionary = new Dictionary();
+	/**
+	 * @see jackson as3's blog "how to fixed XML's memory leak"
+	 * @param	str
+	 * 不过经过测试发现, 即便是XML对象只要不是引用属性(E4X中的@号)的值, 都可以被回收, 不产生对原始XML对象的依赖
+	 * (使用flash.sample.getMasterString()方法测试), 如果被引用了属性, 那么即使调用System.disposeXML也无法被回收。
+	 */
+	public static function cleanMasterString(str:String):void {
+		cleanMasterPoint[str] = true;
+		delete cleanMasterPoint[str];
+	}
+	
+	/**
+	 * 检查指定对象是否可以使用for...in 或者 for...each迭代
+	 * @param	obj
+	 * @return
+	 */
+	public static function isCouldForEach(obj:*):Boolean {
+		return typeof(obj) == "object" && (obj is Array || getQualifiedClassName(obj).indexOf(getQualifiedClassName(Vector)) > -1);
+	}
 	
 	/**
 	 * 
