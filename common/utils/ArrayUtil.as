@@ -165,5 +165,22 @@ public class ArrayUtil
 		}
 		return index;
 	}
+	
+	/**
+	 * 获取指定数组中的对象中指定属性的值对数组集合
+	 * @param	array
+	 * @param	name
+	 * @return
+	 * @inspired by js framework "underscore.js"
+	 */
+	public static function pluck(array:Array, name:String):Array {
+		var len:int = array.length;
+		var c:Array = [];
+		for (var i:int = 0; i < len; i ++) {
+			c.push(array[i][name]);
+		}
+		return c;
+	}
+	
 }
 }
