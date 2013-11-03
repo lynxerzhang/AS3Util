@@ -97,7 +97,8 @@ public class StringUtil
 	 * @param str
 	 * @return 
 	 */
-	public static function isChineseWord(str:String):Boolean{
+	public static function isChineseWord(str:String):Boolean {
+		chineseWord.lastIndex = 0;
 		return chineseWord.test(str);
 	}
 	
