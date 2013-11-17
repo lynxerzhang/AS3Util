@@ -307,6 +307,32 @@ public class ObjectUtil
 	}
 	
 	/**
+	 * 获取指定对象的方法字符串集合
+	 * @param	obj       
+	 * @param	includeInherit  是否包含继承父级的方法
+	 * @return  返回字符串类型的Vector对象
+	 */
+	public static function functionCollection(obj:*, includeInherit:Boolean = false):Vector.<String> {
+		var result:Vector.<String> =  new Vector.<String>();	
+		var type:XML = describeType(obj);
+		var len:int, methodName:String, list:XMLList;
+		if (includeInherit) {
+			list = type.*.(name() == "method");
+		}
+		else {
+			list = type.*.(name() == "method" && attribute("declaredBy") == String(getQualifiedClassName(obj)));
+		}
+		if(list && list.length() > 0){
+			len = list.length();
+			while(--len > -1){
+				methodName = String(list[len].@name);
+				result.push(methodName);
+			}
+		}
+		return result;
+	}
+	
+	/**
 	 * 
 	 */ 
 	public static function getContentType(url:String):String{
