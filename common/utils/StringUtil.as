@@ -93,6 +93,26 @@ public class StringUtil
 	}
 	
 	/**
+	 * 检查字符串是以指定字符串起始
+	 * @param	str
+	 * @param	checkStr
+	 * @return
+	 */
+	public static function startWith(str:String, checkStr:String):Boolean {
+		return str.slice(0, checkStr.length) == checkStr;
+	}
+	
+	/**
+	 * 检查字符串是否以指定字符串结尾
+	 * @param	str
+	 * @param	checkStr
+	 * @return
+	 */
+	public static function endWith(str:String, checkStr:String):Boolean {
+		return str.slice(str.length - checkStr.length, str.length) == checkStr;
+	}
+	
+	/**
 	 * 检查指定字符串是否为中文字符串
 	 * @param str
 	 * @return 
