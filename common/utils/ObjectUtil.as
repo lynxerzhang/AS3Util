@@ -333,6 +333,27 @@ public class ObjectUtil
 	}
 	
 	/**
+	 * 获取指定对象的方法名称, 以字符串格式返回
+	 * @param	obj
+	 * @param	func
+	 * @return
+	 */
+	public static function functionName(obj:Object, func:Function):String {
+		var collection:Vector.<String> = functionCollection(obj, true);
+		var foundName:String = "";
+		if (collection && collection.length > 0) {
+			collection.some(function(name:String, ...args):Boolean {
+				if (obj[name] == func) {
+					foundName = name;
+					return true;
+				}
+				return false;
+			});
+		}
+		return foundName;
+	}
+	
+	/**
 	 * 
 	 */ 
 	public static function getContentType(url:String):String{
