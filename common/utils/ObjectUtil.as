@@ -354,6 +354,15 @@ public class ObjectUtil
 	}
 	
 	/**
+	 * 检查指定对象是否为原生的object类型对象
+	 * @param	obj
+	 * @return
+	 */
+	public static function isRawObject(obj:*):Boolean {
+		return getDefinitionByName(getQualifiedClassName(obj)) as Class == Object;
+	}
+	
+	/**
 	 * 
 	 */ 
 	public static function getContentType(url:String):String{
