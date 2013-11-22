@@ -113,6 +113,20 @@ public class StringUtil
 	}
 	
 	/**
+	 * 翻转指定字符串
+	 * @param	str
+	 * @return
+	 */
+	public static function reverse(str:String):String {
+		//return str.split("").reverse().join(""); //执行速度稍慢
+		var i:int = str.length, d:String = "";
+		while(i--){
+			d += str.charAt(i);
+		}
+		return d;
+	}
+	
+	/**
 	 * 检查指定字符串是否为中文字符串
 	 * @param str
 	 * @return 
