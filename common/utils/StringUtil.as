@@ -127,6 +127,34 @@ public class StringUtil
 	}
 	
 	/**
+	 * 移除指定字符串
+	 * @param	str
+	 * @param	deleteStr
+	 * @param	regFlags gixsm
+	 * @return
+	 */
+	public static function remove(str:String, deleteStr:String, regFlags:String = "g"):String {
+		//@see http://blog.stevenlevithan.com/archives/javascript-match-nested
+		var metaChar:RegExp = /[-[\]{}()*+?.\\^$|,]/g;
+		if (metaChar.test(deleteStr)) {
+			deleteStr = deleteStr.replace(metaChar, "\\$&");
+		}
+		return str.replace(new RegExp(deleteStr, regFlags), "");
+	}
+	
+	/**
+	 * 移除指定索引间的字符串
+	 * @param	str
+	 * @param	startIndex
+	 * @param	endIndex
+	 * @return
+	 */
+	public static function removeSlice(str:String, startIndex:int, endIndex:int):String {
+		var removeStr:String = str.slice(startIndex, endIndex);
+		return remove(str, removeStr, null);
+	}
+	
+	/**
 	 * 检查指定字符串是否为中文字符串
 	 * @param str
 	 * @return 
