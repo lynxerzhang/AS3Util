@@ -376,6 +376,24 @@ public class ObjectUtil
 	}
 	
 	/**
+	 * 删除对象在指定属性集合中列出的属性名
+	 * @param	obj
+	 * @param	...args
+	 * @return
+	 */
+	public static function omit(obj:Object, ...args):Object{
+		var t:Array = args.length == 1 && args[0] is Array ? args[0] as Array : args;
+		var c:Object = clone(obj);
+		var len:int = t.length;
+		for (var i:int = 0; i < len; i ++) {
+			if (c.hasOwnProperty(t[i])) {
+				delete c[t[i]];
+			}
+		}
+		return c;
+	}
+	
+	/**
 	 * 
 	 */ 
 	public static function getContentType(url:String):String{
