@@ -238,6 +238,19 @@ public class ObjectUtil
 	}
 	
 	/**
+	 * 浅复制指定的原生Object对象
+	 * @param	source
+	 * @return
+	 */
+	public static function clone(source:Object):Object {
+		var d:Object = { };
+		for (var item:* in source) {
+			d[item] = source[item];
+		}
+		return d;
+	}
+	
+	/**
 	 * 清除指定对象中的动态属性
 	 * @param target
 	 */
