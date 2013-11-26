@@ -155,6 +155,47 @@ public class StringUtil
 	}
 	
 	/**
+	 * 返回以起始字符为标识的嵌套结构, 将匹配的字符串以数组形式返回
+	 * @param	str		目标字符串
+	 * @param	start	起始标识字符串
+	 * @param	end		结束标识字符串
+	 * @param	useRegStyle  是否使用RegExp格式约束起始和结束标识字符串
+	 * @see 	http://blog.stevenlevithan.com/archives/javascript-match-nested
+	 * 
+	 * @return
+	 */
+	public function matchRecursive(str:String, start:String, end:String, useRegStyle:Boolean = false):Array {
+		if (!useRegStyle) {
+			var metaCharacter:RegExp = /[^\w]/g;//TODO:
+			start = start.replace(metaCharacter, "\\$&");
+			end = end.replace(metaCharacter, "\\$&");
+		}
+		var result:Array = [];
+		if (start != end) {
+			var m:RegExp = new RegExp(start + "|" + end, "g");
+			var s:RegExp = new RegExp(start);
+			var o:int, c:int, d:Object;
+			do {
+				o = 0;
+				while (d = m.exec(str)) {
+					if (s.test(d[0])) {
+						if (!o++) {
+							c = m.lastIndex;
+						}
+					}
+					else if (o) {
+						if (!--o) {
+							result.push(str.slice(c, d.index));
+						}
+					}
+				}
+			}
+			while (o && (m.lastIndex = c));
+		}
+		return result;
+	}
+	
+	/**
 	 * 检查指定字符串是否为中文字符串
 	 * @param str
 	 * @return 
