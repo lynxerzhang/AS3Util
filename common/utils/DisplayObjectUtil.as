@@ -1063,6 +1063,16 @@ public class DisplayObjectUtil
 	}
 	
 	/**
+	 * 检查指定显示对象是否为原生显示对象
+	 * @param	dis
+	 * @return
+	 */
+	public static function isRawDisplayObject(dis:DisplayObject):Boolean {
+		var disCls:Class = getDefinitionByName(getQualifiedClassName(dis)) as Class;
+		return disCls == Sprite || disCls == Shape || disCls == MovieClip || disCls == SimpleButton;
+	}
+	
+	/**
 	 * TODO
 	 * check whether the specfied dis is a static displayobject ('no internal motion')
 	 * use this function is need more careful
