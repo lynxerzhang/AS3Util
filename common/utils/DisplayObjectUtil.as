@@ -1021,6 +1021,48 @@ public class DisplayObjectUtil
 	}
 	
 	/**
+	 * 复制指定显示对象
+	 * @param	dis
+	 * @return
+	 */
+	public static function copyDisplayObject(dis:DisplayObject):DisplayObject {
+		var disCls:Class = getDefinitionByName(getQualifiedClassName(dis)) as Class;
+		var copy:DisplayObject = new disCls() as DisplayObject;
+		if (copy is Shape || (copy is Sprite && Sprite(dis).numChildren == 0) 
+				|| (copy is MovieClip && MovieClip(dis).numChildren == 0 && MovieClip(dis).totalFrames == 1)) {
+			Graphics(copy["graphics"]).copyFrom(Graphics(dis["graphics"]));
+		}
+		else {
+			if (copy is MovieClip) {
+				//TODO:only one frame
+				var frame:MovieClip = dis as MovieClip;
+				frame.gotoAndStop(1);
+				MovieClip(copy).graphics.drawGraphicsData(frame.graphics.readGraphicsData(true));
+			}
+			else {
+				if (copy is SimpleButton) {
+					//TODO:每一帧都需要有显示对象填充
+					var btn:SimpleButton = copy as SimpleButton;
+					var templateBtn:SimpleButton = dis as SimpleButton;
+					btn.upState = copyDisplayObject(templateBtn.upState);
+					btn.overState = copyDisplayObject(templateBtn.overState);
+					btn.downState = copyDisplayObject(templateBtn.downState);
+					btn.hitTestState = copyDisplayObject(templateBtn.hitTestState);
+				}
+				else {
+					Sprite(copy).graphics.drawGraphicsData(Sprite(dis).graphics.readGraphicsData(true));
+				}
+			}
+		}
+		copy.transform = dis.transform;
+		copy.blendMode = dis.blendMode;
+		copy.opaqueBackground = dis.opaqueBackground;
+		copy.cacheAsBitmap = dis.cacheAsBitmap;
+		copy.filters = dis.filters;
+		return copy;
+	}
+	
+	/**
 	 * TODO
 	 * check whether the specfied dis is a static displayobject ('no internal motion')
 	 * use this function is need more careful
