@@ -21,6 +21,9 @@ import flash.text.TextFieldAutoSize;
  *  t.size = 30;
  *  t.bold = true;
  *  
+ *  var b:BitmapText = new BitmapText();
+ *  addChild(b); //需要先添加至舞台
+ * 
  *  b.setTextProperty("defaultTextFormat", t); //设置TextFormat
  *  b.setTextProperty("setTextFormat", t);
  *  b.setTextProperty("text", "just a test for Bitmaptext" + "\n" + "version 1.00"); //设置显示文本
@@ -65,6 +68,32 @@ public class BitmapText extends Sprite
 			}
 			invalidate();
 		}
+	}
+	
+	/**
+	 * 返回原始文本的属性或方法
+	 * @param	name
+	 * @return  
+	 * 
+	 * @example 
+	 *  var format:TextFormat = new TextFormat();
+	 *	format.color = 0xFF6600;
+	 *	b.getTextProperty("setTextFormat")(format);
+	 * 
+	 *  trace(b.getTextProperty("text")); 
+	 */
+	public function getTextProperty(name:String):*{
+		if (Object(text).hasOwnProperty(name)) {
+			var ns:* = text[name];
+			if (ns is Function) {
+				return function(...args):void {
+					ns.apply(null, args);
+					invalidate();
+				}
+			}
+			return ns;
+		}
+		return null;
 	}
 	
 	private function removeFromStageHandler(e:Event):void {
