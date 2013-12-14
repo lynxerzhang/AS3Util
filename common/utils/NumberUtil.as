@@ -19,8 +19,8 @@ public class NumberUtil
 	 * @param y
 	 * @return 
 	 */
-	public static function min(x:int, y:int):int{
-		return y ^ ((x ^ y) & -(int(x < y)));
+	public static function minInt(x:int, y:int):int{
+		return y ^ ((x ^ y) & ((x - y) >> 31));
 	}
 	
 	/**
@@ -29,8 +29,28 @@ public class NumberUtil
 	 * @param y
 	 * @return 
 	 */
-	public static function max(x:int, y:int):int{
-		return x ^ ((x ^ y) & -(int(x < y)));
+	public static function maxInt(x:int, y:int):int{
+		return x ^ ((x ^ y) & ((x - y) >> 31));
+	}
+	
+	/**
+	 * 返回最小值 略快于Math.min
+	 * @param	x
+	 * @param	y
+	 * @return
+	 */
+	public static function minNum(x:Number, y:Number):Number {
+		return (x - y) * int((x - y) < 0) + y;
+	}
+	
+	/**
+	 * 返回最大值 略快于Math.max
+	 * @param	x
+	 * @param	y
+	 * @return
+	 */
+	public static function maxNum(x:Number, y:Number):Number {
+		return (x - y) * int((x - y) > 0) + y;
 	}
 	
 	/**
@@ -57,8 +77,8 @@ public class NumberUtil
 	 * @param b
 	 * @return 
 	 */
-	public static function sameSign(a:Number, b:Number):Boolean{
-		return ((a >> 31) ^ (b >> 31)) == 0;
+	public static function sameSignInt(a:int, b:int):Boolean{
+		return Boolean((a ^ b) >> 31 == 0);
 	}
 	
 	public static const ator:Number = Math.PI / 180;
@@ -128,7 +148,7 @@ public class NumberUtil
 	 * @param ns
 	 * @return 
 	 */
-	public static function getFrictionCount(ns:Number):int{
+	private static function getFrictionCount(ns:Number):int{
 		var s:String = String(ns);
 		return s.slice(s.lastIndexOf(".") + 1).length;
 	}
