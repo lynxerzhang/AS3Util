@@ -102,5 +102,57 @@ public class DisplayUtil
 		return r;
 	}
 	
+	/**
+	 * 绘制弧形
+	 * @param	g
+	 * @param	initX     初始x坐标
+	 * @param	initY     初始y坐标
+	 * @param	radius    绘制半径
+	 * @param	size      线条尺寸
+	 * @param	color     色彩 
+	 * @param	angleFrom 起始角度 
+	 * @param	angleTo   结束角度
+	 */
+	public static function drawArc(g:Graphics, initX:Number, initY:Number, radius:Number, size:Number, 
+							color:uint, angleFrom:Number, angleTo:Number):void{
+		g.clear();
+		g.lineStyle(size, color);
+		
+		//angleFrom = rangeAngle(angleFrom);
+		//angleTo = rangeAngle(angleTo);
+		
+		var atodR:Number = Math.PI / 180;
+		angleFrom = angleFrom * atodR;
+		angleTo = angleTo * atodR;
+		
+		var diff:Number = Math.abs(angleTo - angleFrom);
+		var drawCount:Number = ((diff / (Math.PI * .25)) >> 0) + 1;
+		g.moveTo(Math.cos(angleFrom) * radius + initX, Math.sin(angleFrom) * radius + initY);
+		
+		var a:Number = diff / (drawCount * 2);
+		var controlRadius:Number = radius / Math.cos(a);
+		var sa:Number = angleFrom, ea:Number = sa;
+		
+		for (var i:int = 0; i < drawCount; i ++) {
+			sa = ea + a;
+			ea = sa + a;
+			g.curveTo(initX + Math.cos(sa) * controlRadius, 
+					  initY + Math.sin(sa) * controlRadius, 
+					  initX + Math.cos(ea) * radius, 
+					  initY + Math.sin(ea) * radius);
+		}
+	}
+
+	private static function rangeAngle(angle:Number):Number {
+		var a:Number = angle;
+		a %= 360;
+		if(a > 180){
+			a -= 360;
+		}
+		else if(a < -180){
+			a += 360;
+		}
+		return a;
+	}
 }
 }
