@@ -79,6 +79,16 @@ public class StringUtil
 	}
 	
 	/**
+	 * 
+	 *  移除字符串头部包含空行的字符, 但并不替换空白字符
+	 * @param	s
+	 * @return
+	 */
+	public static function trimWrapline(s:String):String {
+		return s.replace(/^\s*[\r\n]/, "");
+	}
+	
+	/**
 	 * 检查指定字符串中是否包含指定子字符串
 	 * @param str
 	 * @param mathStr
