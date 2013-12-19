@@ -80,12 +80,21 @@ public class StringUtil
 	
 	/**
 	 * 
-	 *  移除字符串头部包含空行的字符, 但并不替换空白字符
+	 *  移除字符串头部包含空行的字符, 但不替换空白字符
 	 * @param	s
 	 * @return
 	 */
-	public static function trimWrapline(s:String):String {
+	public static function trimStartWrapline(s:String):String {
 		return s.replace(/^\s*[\r\n]/, "");
+	}
+	
+	/**
+	 *  移除字符串尾部包含空行的字符, 但不替换空白字符
+	 * @param	str
+	 * @return
+	 */
+	public static function trimEndWrapline(str:String):String{
+		return str.replace(/[\n\r]\s*$/, "");
 	}
 	
 	/**
