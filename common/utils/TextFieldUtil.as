@@ -51,7 +51,7 @@ public class TextFieldUtil
 	 */
 	private static function getParagraphCount(txtOrStr:*):int{
 		var str:String = txtOrStr is TextField ? TextField(txtOrStr).text : txtOrStr;
-		return str.split(/[\n\r]{2}/g).length;
+		return str.split(/[\n\r]{2,}/g).length;
 	}
 
 	/**
@@ -98,7 +98,7 @@ public class TextFieldUtil
 			else{
 				offset = txt.getLineOffset(txt.bottomScrollV);
 			}
-			vectList.push(str.slice(t, offset - 1));
+			vectList.push(str.slice(t, offset));
 			if(i < c - 1){
 				txt.scrollV = Math.min(txt.scrollV + n, txt.maxScrollV);
 			}
