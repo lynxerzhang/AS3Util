@@ -123,7 +123,7 @@ public class DisplayUtil
 		
 		var atodR:Number = Math.PI / 180;
 		angleFrom = angleFrom * atodR;
-		angleTo = angleTo * atodR;
+		angleTo = angleTo * atodR + angleFrom;
 		
 		var diff:Number = Math.abs(angleTo - angleFrom);
 		var drawCount:Number = ((diff / (Math.PI * .25)) >> 0) + 1;
