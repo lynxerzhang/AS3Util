@@ -137,7 +137,8 @@ public class HightLightWord extends Sprite
 			g.clear();
 		}
 		g.beginFill(color, alpha);
-		g.drawRect(rect.x, rect.y, rect.width, rect.height);
+		//g.drawRect(rect.x, rect.y, rect.width, rect.height);
+		g.drawRoundRect(rect.x, rect.y, rect.width, rect.height, 8, 8);
 		g.endFill();
 	}
 	
@@ -235,9 +236,21 @@ public class HightLightWord extends Sprite
 							endCharRect = wordTxt.getCharBoundaries(endIndex); 
 						}
 						else {
+							//\t和\n 各占一个字符, 如果是自动换行的该行则没有\n字符
 							lineLength = wordTxt.getLineLength(t);
 							sumLineLength += lineLength;
 							endCharRect = wordTxt.getCharBoundaries((sumLineLength - 1)); 
+							if(!endCharRect && startCharRect){
+								var lastLegalChar:int = sumLineLength - 2;
+								//末尾的字符也许是\r\n, 导致getCharBoundaries返回null
+								//同时getCharBoundaries方法只对在scrollV和bottomScrollV包含的字符返回矩形, 不然就返回null
+								var checkLineIndex:int = wordTxt.getLineIndexOfChar(sumLineLength - 1) + 1;
+								while(!endCharRect && checkLineIndex >= currentScrollRow){
+									endCharRect = wordTxt.getCharBoundaries(lastLegalChar);
+									checkLineIndex = wordTxt.getLineIndexOfChar(lastLegalChar);
+									lastLegalChar--;
+								}
+							}
 						}
 						
 						if(startCharRect && endCharRect){
@@ -253,6 +266,12 @@ public class HightLightWord extends Sprite
 				}
 			}
 		}
+	}
+	
+	private function isInScrollArea(txt:TextField, charIndex:int):Boolean{
+		var checkLineIndex:int = txt.getLineIndexOfChar(charIndex) + 1;
+		var currentScrollRow:int = txt.scrollV; //start at 1			
+		return checkLineIndex >= currentScrollRow;
 	}
 }
 }
