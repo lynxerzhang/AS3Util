@@ -97,6 +97,32 @@ public class StringUtil
 		return str.replace(/[\n\r]\s*$/, "");
 	}
 	
+	private static var padHelperAry:Array = [];
+	
+	/**
+	 * 在指定字符串起始位置添加填充字符
+	 * @param	raw       原始字符串
+	 * @param	padStr    填充字符
+	 * @param	padCount  填充字符的数量
+	 * @return
+	 */
+	public static function padLeft(raw:String, padStr:String, padCount:uint):String {
+		padHelperAry.length = padCount + 1;
+		return raw.replace(/^/, padHelperAry.join(padStr));
+	}
+	
+	/**
+	 * 在指定字符串结束位置添加填充字符
+	 * @param	raw       原始字符串
+	 * @param	padStr    填充字符
+	 * @param	padCount  填充字符的数量
+	 * @return
+	 */
+	public static function padRight(raw:String, padStr:String, padCount:uint):String {
+		padHelperAry.length = padCount + 1;
+		return raw.replace(/$/, padHelperAry.join(padStr)); 	
+	}
+	
 	/**
 	 * 检查指定字符串中是否包含指定子字符串
 	 * @param str
