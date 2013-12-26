@@ -2,14 +2,15 @@ package common.tool
 {
 import common.tool.ListenerManager;
 import common.tool.Signal;
+import common.utils.BitmapUtil;
 import common.utils.DisplayObjectUtil;
 import common.utils.DisplayUtil;
-
 import flash.display.DisplayObject;
 import flash.display.InteractiveObject;
 import flash.display.Sprite;
 import flash.display.Stage;
 import flash.events.MouseEvent;
+
 
 
 public class DragManager
@@ -41,7 +42,7 @@ public class DragManager
 							  checkCondition:Function = null, 
 							  showProp:Object = null):void{
 		stopDrag();
-		var s:DisplayObject = DisplayObjectUtil.getCopySprite(show == null ? drag : show) as DisplayObject;
+		var s:DisplayObject = BitmapUtil.getCopySprite(show == null ? drag : show) as DisplayObject;
 		if(showProp != null){
 			for(var item:* in showProp){
 				s[item] = showProp[item];

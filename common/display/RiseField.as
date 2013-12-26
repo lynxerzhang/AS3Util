@@ -1,5 +1,6 @@
 package common.display
 {
+import common.utils.BitmapUtil;
 import flash.display.Sprite;
 import flash.filters.GlowFilter;
 import flash.text.TextField;
@@ -73,7 +74,7 @@ public class RiseField implements IMotionSync
 			this.isDelay = false;
 		}
 		this.showTxt = this.generateText(str);
-		this.showTxtSprite = DisplayObjectUtil.getCopySprite(this.showTxt);
+		this.showTxtSprite = BitmapUtil.getCopySprite(this.showTxt);
 	}
 	
 	/**

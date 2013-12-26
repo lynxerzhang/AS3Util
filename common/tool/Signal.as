@@ -1,5 +1,7 @@
 package common.tool
 {
+import common.data.Map;
+import common.data.VectorMap;
 
 public class Signal
 {

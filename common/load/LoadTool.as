@@ -68,6 +68,7 @@ public class LoadTool
 }
 
 
+import common.utils.BitmapUtil;
 import common.utils.DebugUtil;
 import common.utils.DisplayObjectUtil;
 import common.utils.ObjectUtil;
@@ -185,7 +186,7 @@ internal class SimpleLoader extends Loader
 		this.completeCallback = completeCall;
 		this.strictWidth = strictWidth;
 		
-		loadedType = ObjectUtil.getContentType(this.url);
+		loadedType = getContentType(this.url);
 		
 		if(loadedType == "swf"){
 			var isLocal:Boolean = DebugUtil.isLocal();
@@ -206,6 +207,10 @@ internal class SimpleLoader extends Loader
 		this.isShouldKill = false;
 	}
 	
+	private static function getContentType(url:String):String{
+		return url.slice(url.lastIndexOf(".") + 1, url.length).toLocaleLowerCase();
+	}
+	
 	private static const contentType:Vector.<String> = new <String>["image/png", "image/jpeg", "image/gif"];
 	
 	private function loadCompleteHandler(evt:Event):void{
@@ -224,7 +229,7 @@ internal class SimpleLoader extends Loader
 			else{
 				if(contentType.indexOf(info.contentType) != -1 || (info.content != null && loadedType && loadedType != "swf")){
 					var dobj:DisplayObject = info.content as DisplayObject;
-					var bitmap:Bitmap = DisplayObjectUtil.getBitmap(dobj);
+					var bitmap:Bitmap = BitmapUtil.getBitmap(dobj);
 					if(!isNaN(this.strictWidth)){
 						bitmap.width = this.strictWidth;
 						bitmap.scaleY = bitmap.scaleX;

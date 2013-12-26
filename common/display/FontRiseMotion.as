@@ -10,7 +10,7 @@ public class FontRiseMotion
 {
 	public function FontRiseMotion()
 	{
-		if(instance) SingletonVerify.singletonErrorHandle(this);
+		SingletonVerify.checkSingleton(this);
 	}
 	
 	private static var instance:FontRiseMotion = new FontRiseMotion();

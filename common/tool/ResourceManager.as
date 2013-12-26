@@ -1,5 +1,6 @@
 package common.tool
 {
+import common.data.Map;
 import flash.display.Loader;
 import flash.errors.IllegalOperationError;
 import flash.system.ApplicationDomain;

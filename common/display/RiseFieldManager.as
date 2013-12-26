@@ -1,17 +1,17 @@
 package common.display
 {
+import common.data.VectorMap;
 import flash.display.Shape;
 import flash.events.Event;
 import flash.utils.getTimer;
 
-import common.tool.VectorMap;
 import common.tool.SingletonVerify;
 
 public class RiseFieldManager
 {
 	public function RiseFieldManager()
 	{
-		if(instance) SingletonVerify.singletonErrorHandle(this);
+		SingletonVerify.checkSingleton(this);
 	}
 	
 	public static var instance:RiseFieldManager = new RiseFieldManager();

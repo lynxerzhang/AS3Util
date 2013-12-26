@@ -1,5 +1,6 @@
 package common.tool
 {
+import common.data.VectorMap;
 import common.utils.ObjectUtil;
 
 import flash.utils.Dictionary;
@@ -10,7 +11,7 @@ public class ResourcePool
 {
 	public function ResourcePool()
 	{
-		if(instance) SingletonVerify.singletonErrorHandle(this);
+		SingletonVerify.checkSingleton(this);
 	}
 	
 	public static const instance:ResourcePool = new ResourcePool();

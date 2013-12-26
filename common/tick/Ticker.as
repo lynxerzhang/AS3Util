@@ -1,12 +1,12 @@
 package common.tick
 {
-import common.tool.Map;
+import common.data.Map;
 import common.tool.SingletonVerify;
 
 public class Ticker
 {
 	public function Ticker(){
-		if(instance) SingletonVerify.singletonErrorHandle(this);
+		SingletonVerify.checkSingleton(this);
 	}
 	
 	public static var instance:Ticker = new Ticker();
