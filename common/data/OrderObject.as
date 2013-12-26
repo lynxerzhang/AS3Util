@@ -1,4 +1,4 @@
-package common.tool
+package common.data
 {
 import flash.utils.Proxy;
 import flash.utils.flash_proxy;

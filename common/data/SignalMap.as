@@ -1,5 +1,7 @@
-package common.tool
+package common.data
 {
+import common.data.Map;
+import common.tool.Signal;
 
 public class SignalMap extends Map
 {

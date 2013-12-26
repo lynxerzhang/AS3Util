@@ -1,4 +1,4 @@
-package common.tool
+package common.data
 {
 import flash.utils.Dictionary;
 import flash.utils.getDefinitionByName;
