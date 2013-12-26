@@ -1,16 +1,18 @@
 package common.utils
 {
+
 public class StringUtil 
 {	
 	/**
 	 * 修饰字符串
 	 * @param str 目标字符串 
 	 * @param args 一个数组传入, 一个对象, 或者一个顺序参数列表
+	 * 
 	 * @example
-	 *       replaceString("helloWor[0][1]", "l", "d");
-	 * 	 replaceString("helloWor[0][1]", ["l", "d"]);
-	 *	 replaceString("helloWor[first][last]", {"first":"l", "last":"d"});
-	 *       replaceString("he[0][0]oWorld", "l");
+	 *		replaceString("helloWor[0][1]", "l", "d");
+	 * 	 	replaceString("helloWor[0][1]", ["l", "d"]);
+	 *	 	replaceString("helloWor[first][last]", {"first":"l", "last":"d"});
+	 *		replaceString("he[0][0]oWorld", "l");
 	 */
 	public static function replaceString(str:String, ...args):String{
 		var r:RegExp, provider:Object;
@@ -34,15 +36,7 @@ public class StringUtil
 	}
 	
 	/**
-	 * 获取文件名
-	 * @param url
-	 * @return 
-	 */
-	public static function getFileName(url:String):String{
-		return url.slice(url.lastIndexOf("/") + 1, url.lastIndexOf("."));
-	}
-	
-	/**
+	 * 剔除指定字符串起始位置的所有空白字符
 	 * @param s
 	 * @return 
 	 * @see trim
@@ -52,6 +46,7 @@ public class StringUtil
 	}
 	
 	/**
+	 * 剔除指定字符串结尾部分的所有空白字符
 	 * @param s
 	 * @return 
 	 * @see trim
