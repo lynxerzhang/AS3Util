@@ -34,8 +34,9 @@ public class SingletonVerify
 		}	
 	}
 	
-	public static const singletonMessage:String = "do no use 'new' to get instance, use this class's static property 'instance'";
-	public static function singletonErrorHandle(c:Object):void{
+	private static const singletonMessage:String = "do no use 'new' to get instance, use this class's static property 'instance'";
+	
+	private static function singletonErrorHandle(c:Object):void{
 		throw new IllegalOperationError("<" + getQualifiedClassName(c) + ">" + " is singleton class, " + SingletonVerify.singletonMessage);
 	}
 
