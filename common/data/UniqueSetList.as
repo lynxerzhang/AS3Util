@@ -1,6 +1,7 @@
-package common.utils
+package common.data
 {
 import common.tool.Signal;
+import common.utils.ArrayUtil;
 
 /**
  * 保持存储对象的唯一性

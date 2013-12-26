@@ -1,4 +1,4 @@
-package common.utils
+package common.data
 {
 import flash.utils.Dictionary;
 
