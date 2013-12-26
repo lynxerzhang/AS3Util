@@ -393,11 +393,5 @@ public class ObjectUtil
 		return c;
 	}
 	
-	/**
-	 * 
-	 */ 
-	public static function getContentType(url:String):String{
-		return url.slice(url.lastIndexOf(".") + 1, url.length).toLocaleLowerCase();
-	}
 }
 }
