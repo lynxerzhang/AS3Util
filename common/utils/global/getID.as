@@ -1,4 +1,4 @@
-package common.utils 
+package common.utils.global 
 {
 	/**
 	 * 可用于判定是否2个VO对象的地址值是否相同, 由于大量的VO对象不做缓存, 

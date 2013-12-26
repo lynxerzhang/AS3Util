@@ -1,4 +1,4 @@
-package common.utils
+package common.utils.global
 {
 import flash.events.Event;
 import flash.events.EventPhase;
