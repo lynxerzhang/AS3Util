@@ -195,6 +195,17 @@ public class StringUtil
 	}
 	
 	/**
+	 * 判断指定的字符串是否为数值类型字符串
+	 * @param	str
+	 * @return
+	 */
+	public static function isNum(str:String):Boolean {
+		//parseFloat可以忽略字符串起始和结尾的字符
+		//return str && parseFloat(str) != NaN; 
+		return str && /^[-+]?\d*+(?:\.?\d+)?(?:(?i:e)[-+]?\d+)?$/.test(str);
+	}
+	
+	/**
 	 * 返回以起始字符为标识的嵌套结构, 将匹配的字符串以数组形式返回
 	 * @param	str		目标字符串
 	 * @param	start	起始标识字符串
