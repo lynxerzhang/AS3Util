@@ -213,6 +213,44 @@ public class StringUtil
 	public static function hasNum(str:String):Boolean {
 		return str && /[-+]?\d*(?:\.?\d+)(?:(?i:e)[-+]?\d+)?/.test(str);
 	}
+
+	/**
+	 * 用于对包含数值类型的字符串的数组的排序方法
+	 * @param	a
+	 * @param	b
+	 * 
+	 * @example 
+	 *	var r:Array = ["result1", "result111", "result9"];
+	 *	r.sort(StringUtil.alphaNumericSort); //result1, result9, result111
+	 *   
+	 * @see 
+	 * 	http://www.breaktrycatch.com/alphanumeric-sorting-in-as3/
+	 *  该实现没有对数值是否包含小数点或者有前缀0做判断         
+	 *  
+	 * 	由此参考了 http://www.davekoelle.com/alphanum.html 中js版本
+	 *  同时参考了 http://my.opera.com/GreyWyvern/blog/show.dml/1671288 后继评论中
+	 *	使用正则来生成数组的方法
+	 * @return
+	 */
+	public static function alphaNumericSort(a:String, b:String):int {
+		var reg:RegExp = /([-+]?\d*(?:\.?\d+)(?:(?i:e)[-+]?\d+)?)/;
+		var ka:Array = a.split(reg);
+		var kb:Array = b.split(reg);
+		var s1:String, s2:String;
+		var n1:Number, n2:Number;
+		for (var i:int = 0; ((s1 = ka[i]) && (s2 = kb[i])); i ++) {
+			if (s1 !== s2) {
+				//使用parseFloat是考虑parseFloat可以解析诸如(5e2)的科学计数法
+				n1 = parseFloat(s1);
+				n2 = parseFloat(s2);
+				if (isNaN(n1) || isNaN(n2)) {
+					return s1 < s2 ? -1 : 1;
+				}
+				return n1 - n2;	
+			}
+		}
+		return ka.length - kb.length;
+	}
 	
 	/**
 	 * 返回以起始字符为标识的嵌套结构, 将匹配的字符串以数组形式返回
