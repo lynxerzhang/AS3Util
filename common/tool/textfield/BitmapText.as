@@ -1,4 +1,4 @@
-package common.tool
+package common.tool.textfield
 {
 import flash.display.Bitmap;
 import flash.display.BitmapData;
