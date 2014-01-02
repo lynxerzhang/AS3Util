@@ -5,7 +5,9 @@ import flash.display.BitmapData;
 import flash.display.BitmapDataChannel;
 import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
+import flash.display.GradientType;
 import flash.display.Loader;
+import flash.display.Shape;
 import flash.display.SimpleButton;
 import flash.display.Sprite;
 import flash.display.Stage;
@@ -368,6 +370,99 @@ public class BitmapUtil
 			return customCheck(dis);
 		});
 	}
+	
+	/**
+	 * 获取指定显示对象的"倒影"位图显示对象
+	 * 
+	 * TODO
+	 * @param	dis
+	 * @param	alphaRatio
+	 * @param	heightRatio
+	 * 
+	 * @see		参考自com.innerdrivestudios.visualeffect.Reflection
+	 * 			目前该实现还无法应对显示对象的scaleX,scaleY为负值的情况
+	 * 
+	 * @return
+	 */
+	public static function getReflectionShadow(dis:DisplayObject, alphaRatio:Number = .4, heightRatio:Number = .4):Bitmap {
+		var bounds:Rectangle = dis.getBounds(dis);
+		var bmpd:BitmapData = new BitmapData(bounds.width, bounds.height, true, 0);
+		bmpd.draw(dis, new Matrix(1, 0, 0, 1, -bounds.x, -bounds.y));
+
+		//如下找出非透明区域
+		var untransRect:Rectangle = bmpd.getColorBoundsRect(0xFF000000, 0xFF000000, true);
+		untransRect.offset(bounds.x, bounds.y);
+		bmpd.dispose();
+
+		var realX:Number = untransRect.x|0;
+		var realY:Number = untransRect.y|0;
+		var realWidth:Number = Math.ceil(untransRect.width);
+		var realHeight:Number = Math.ceil(untransRect.height);
+
+		var alphaMask:Shape = new Shape();
+		alphaMask.cacheAsBitmap = true;
+
+		var alphaMatrix:Matrix = new Matrix();
+		var reflectHeight:Number = Math.ceil(realHeight * heightRatio);
+		var reflectWidth:Number = realWidth;
+		//绘制透明mask
+		alphaMatrix.createGradientBox(reflectWidth, reflectHeight, Math.PI * .5);
+		alphaMask.graphics.beginGradientFill(GradientType.LINEAR, [0x000000, 0xFFFFFF], [alphaRatio, 0], [0, 0xFF], alphaMatrix);
+		alphaMask.graphics.drawRect(0, 0, reflectWidth, reflectHeight);
+		alphaMask.graphics.endFill();
+
+		var reflectMatrix:Matrix = new Matrix();
+		reflectMatrix.translate(-realX, -realY);
+		reflectMatrix.scale(1, -1);
+		reflectMatrix.translate(0, realHeight);
+		
+		//绘制倒影
+		var reflectBmpd:BitmapData = new BitmapData(realWidth, realHeight, true, 0);
+		reflectBmpd.draw(dis, reflectMatrix, null, null, new Rectangle(0, 0, realWidth, realHeight));
+
+		var reflectBm:Bitmap = new Bitmap(reflectBmpd);
+		reflectBm.cacheAsBitmap = true;
+		reflectBm.mask = alphaMask;
+
+		var reflectSp:Sprite = new Sprite();
+		reflectSp.addChild(reflectBm);
+		reflectSp.addChild(alphaMask);
+
+		var shadowBmpd:BitmapData = new BitmapData(reflectSp.width, reflectSp.height, true, 0);
+		shadowBmpd.draw(reflectSp);
+		var shadowBm:Bitmap = new Bitmap(shadowBmpd);
+		shadowBm.smoothing = true;
+
+		reflectBmpd.dispose();
+		reflectBm.mask = null;
+		reflectSp.removeChild(reflectBm);
+		reflectSp.removeChild(alphaMask);
+		reflectBm.cacheAsBitmap = false;
+		alphaMask.cacheAsBitmap = false;
+		
+		//定位, 上述代码的绘制部分未考虑原始显示对象的缩放情况, 
+		//而是通过转换坐标来获取实际舞台坐标,注意需要原始对象已经
+		//添加至舞台
+		var offsetXY:Point = new Point(realX, realY);
+		var whXY:Point = new Point(realX + realWidth, realY + realHeight);
+
+		offsetXY = dis.localToGlobal(offsetXY);
+		offsetXY = dis.parent.globalToLocal(offsetXY);
+		
+		whXY = dis.localToGlobal(whXY);
+		whXY = dis.parent.globalToLocal(whXY);
+		
+		whXY.x = whXY.x - offsetXY.x;
+		whXY.y = whXY.y - offsetXY.y;
+		
+		shadowBm.x = offsetXY.x;
+		shadowBm.y = offsetXY.y + whXY.y;
+		shadowBm.width = whXY.x;
+		shadowBm.height = whXY.y;
+
+		return shadowBm;
+	}
+		
 	
 	/**
 	 * 
