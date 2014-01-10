@@ -23,6 +23,50 @@ public class Delegate
 	}
 	
 	/**
+	 * 类似于bindable, 但是可以自由组合所需参数
+	 * @param	s		可以为作用域, 也可为方法本身
+	 * @param	m		可为参数, 方法, 或者方法名
+	 * @param	...args	参数集合
+	 * @example
+	 * 			Delegate.invoke(test, ["tracetestInvoke"])();
+	 * 			Delegate.invoke(test, "tracetestInvoke")();
+	 * 			Delegate.invoke(this, "test", "tracetestInvoke")();
+	 * @return
+	 */
+	public static function invoke(s:*, m:* = null, ...args):Function {
+		var fun:Function;
+		if (typeof s == "function") {
+			fun = s;
+			s = null;
+			if (!(m is Array)) {
+				args = m != null ? [m].concat(args) : [];
+			}
+			else {
+				args = m;
+			}
+		}
+		else {
+			if (s != null) {
+				if (m is String) {
+					//该方法作用域需要为public
+					fun = s[m];
+				}
+			}
+			if (!fun) {
+				fun = m;
+			}
+			if (args && args.length > 0) {
+				if (args[0] is Array) {
+					args = args[0];
+				}
+			}
+		}
+		return function(...rest):void {
+			fun.apply(s, rest.concat(args));
+		}
+	}
+	
+	/**
 	 * 返回保持多重参数的function对象
 	 * @example
 	 * 与数组的map方法配合使用
