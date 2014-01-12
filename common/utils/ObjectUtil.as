@@ -393,5 +393,17 @@ public class ObjectUtil
 		return c;
 	}
 	
+	/**
+	 * 检查指定对象是否为Vector类型数组
+	 * @see http://jacksondunstan.com/articles/2472
+	 * @return
+	 */
+	public static function isVector(vectList:*):Boolean {
+		return vectList && (vectList is Vector.<*> 
+								|| vectList is Vector.<int> 
+								|| vectList is Vector.<uint> 
+								|| vectList is Vector.<Number>);
+	}
+	
 }
 }
