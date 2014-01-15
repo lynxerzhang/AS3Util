@@ -396,6 +396,18 @@ public class ObjectUtil
 	/**
 	 * 检查指定对象是否为Vector类型数组
 	 * @see http://jacksondunstan.com/articles/2472
+	 * 
+	 * 可以使用对象的constructor属性获取Class描述来进行验证
+	 * int		[class Vector.<int>]
+	 * uint		[class Vector.<uint>]
+	 * Number	[class Vector.<Number>]
+	 * 其余对象皆为[class Vector.<*>]
+	 * 
+	 * 可以使用getDefinitionByName获取实际类名定义, 但是*类型
+	 * 会导致报错(ReferenceError: Error #1065: 变量 * 未定义)
+	 * 
+	 * 具体应用的例子可以查看Feathers项目的feathers.data.ListCollection中关于data对象的类型判断
+	 * 
 	 * @return
 	 */
 	public static function isVector(vectList:*):Boolean {
