@@ -1,5 +1,6 @@
 package common.utils 
 {
+import flash.display.DisplayObject;
 import flash.errors.IllegalOperationError;
 import flash.utils.getDefinitionByName;
 import flash.utils.getQualifiedClassName;
@@ -69,6 +70,50 @@ public class VectorUtil
 		for (i = s; i < e; i ++) {
 			r[i] = t[i - s];
 		}
+	}
+	
+	/**
+	 * 利用快速排序对vector对象进行自定义排序
+	 * @param	v
+	 * @param	compare
+	 * @param	modifyOriginal
+	 * @return
+	 */
+	public static function sortDisplayObjects(v:Vector.<DisplayObject>, compare:Function, modifyOriginal:Boolean = true):Vector.<DisplayObject> {
+		var result:Vector.<DisplayObject> = modifyOriginal ? v : v.slice();
+		quickSort(result, compare, 0, result.length - 1);
+		return result;
+	}
+	
+	/**
+	 * http://www.cprogramming.com/tutorial/computersciencetheory/quicksort.html
+	 */
+	private static function quickSort(v:Vector.<DisplayObject>, c:Function, s:int, e:int):void {
+		var rpivot:int = (e + s) * .5;
+		if (s >= e || rpivot >= e) {
+			return;
+		}
+		var mPivot:int = createPivot(v, c, s, e, rpivot);
+		quickSort(v, c, s, mPivot - 1);
+		quickSort(v, c, mPivot + 1, e);
+	}
+	
+	private static function createPivot(v:Vector.<DisplayObject>, c:Function, s:int, e:int, rpivot:int):int {
+		swap(v, rpivot, e);
+		var value:DisplayObject = v[e];
+		for (var i:int = s; i < e; i ++) {
+			if (c(v[i], value) <= 0) {
+				swap(v, s++, i);
+			}
+		}
+		swap(v, s, e);
+		return s;
+	}
+	
+	private static function swap(v:Vector.<DisplayObject>, next:int, prev:int):void {
+		var temp:DisplayObject = v[next];
+		v[next] = v[prev];
+		v[prev] = temp;
 	}
 	
 	/**
