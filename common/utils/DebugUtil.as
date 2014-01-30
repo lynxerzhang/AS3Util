@@ -364,5 +364,33 @@ public class DebugUtil
 	}
 	
 	private static const formatSizeAry:Array = [];
+	
+	private static const NORMAL_IMMINENT:Number = .98;
+	private static const LESS_IMMINENT:Number = .1;
+	
+	/**
+	 * 给予gc以回收时机的提示
+	 * @param	highImminent
+	 */
+	public static function gcOccasion(highImminent:Boolean):void {
+		System.pauseForGCIfCollectionImminent(highImminent == true ? NORMAL_IMMINENT : LESS_IMMINENT);
+	}
+	
+	/**
+	 * 给予使gc以立即执行的提示
+	 * @param	isDebug
+	 * @see gc, isDebuggerSWF, isDebug
+	 */
+	public static function promptImmediateGC(isDebug:Boolean = false):void {
+		gcOccasion(LESS_IMMINENT);
+		if (isDebug) {
+			System.gc();
+			System.gc();
+		}
+		else {
+			gc();
+			gc();
+		}
+	}
 }
 }
