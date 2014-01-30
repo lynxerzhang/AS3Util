@@ -86,7 +86,7 @@ public class VectorUtil
 	}
 	
 	/**
-	 * http://www.cprogramming.com/tutorial/computersciencetheory/quicksort.html
+	 * @see http://www.cprogramming.com/tutorial/computersciencetheory/quicksort.html
 	 */
 	private static function quickSort(v:Vector.<DisplayObject>, c:Function, s:int, e:int):void {
 		var rpivot:int = (e + s) * .5;
@@ -114,6 +114,37 @@ public class VectorUtil
 		var temp:DisplayObject = v[next];
 		v[next] = v[prev];
 		v[prev] = temp;
+	}
+	
+	/**
+	 * 利用插入排序对vector对象进行自定义排序
+	 * @param	v
+	 * @param	compare
+	 * @param	modifyOriginal
+	 * @return
+	 */
+	public static function insertionSortDisplayObjects(v:Vector.<DisplayObject>, compare:Function, modifyOriginal:Boolean = true):Vector.<DisplayObject> {
+		var result:Vector.<DisplayObject> = modifyOriginal ? v : v.slice();
+		insertionSort(result, compare);
+		return result;
+	}
+	
+	private static function insertionSort(v:Vector.<DisplayObject>, c:Function):void {
+		if (v.length <= 1) {
+			return;
+		}
+		var len:int = v.length;
+		var value:DisplayObject;
+		var i:int, j:int;
+		for (i = 1; i < len; i ++) {
+			value = v[i];
+			j = i - 1;
+			while (j >= 0 && c(value, v[j]) <= 0) {
+				swap(v, j, j + 1);
+				j--;
+			}
+			v[j + 1] = value;
+		}
 	}
 	
 	/**
