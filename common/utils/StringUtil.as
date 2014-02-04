@@ -294,6 +294,28 @@ public class StringUtil
 	}
 	
 	/**
+	 * 编码html
+	 * @param	str
+	 * @see http://www.razorberry.com/blog/archives/2007/11/02/converting-html-entities-in-as3/
+	 * @see http://stackoverflow.com/questions/1856726/how-do-you-encode-xml-safely-with-actionscript-3
+	 * @return
+	 */
+	public static function escapeHtml(str:String):String {
+		var t:XML = <xml/>;
+		t.appendChild(str);
+		return t.*[0].toXMLString();
+	}
+	
+	/**
+	 * 解码html
+	 * @param	str
+	 * @return
+	 */
+	public static function unescapeHtml(str:String):String{
+		return XMLList(str).toString();
+	}
+	
+	/**
 	 * 检查指定字符串是否为中文字符串
 	 * @param str
 	 * @return 
