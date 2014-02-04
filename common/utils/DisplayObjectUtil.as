@@ -112,10 +112,15 @@ public class DisplayObjectUtil
 	 * 移除指定容器中的子对象
 	 * @param container
 	 */
-	public static function removeChildren(container:DisplayObjectContainer):void{
-		var len:int = container.numChildren;
-		while(--len > -1){
-			container.removeChildAt(len);
+	public static function removeChildren(container:DisplayObjectContainer):void {
+		if (container["removeChildren"] != null) {
+			container["removeChildren"]();
+		}
+		else {
+			var len:int = container.numChildren;
+			while(--len > -1){
+				container.removeChildAt(len);
+			}
 		}
 	}
 	
