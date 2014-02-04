@@ -29,6 +29,7 @@ public class AssertUtil
 		var isDebugSWF:Boolean = str.search(/.as:[0-9]+]$/m) != -1;
 		if (isDebugSWF) {
 			//TODO
+			trace("current swf file is in a debug mode, so some data maybe null");
 		}
 		var d:Object = reg.exec(str);
 		if (!d) {
