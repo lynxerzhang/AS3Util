@@ -392,12 +392,19 @@ public class DisplayObjectUtil
 		if(!mc || !mc.hasOwnProperty(rawMethodName)){
 			return;
 		}
-		var len:int = mc.numChildren;
-		while(--len > -1){
-			var d:MovieClip = mc.getChildAt(len) as MovieClip;
-			if(d){
-				d[rawMethodName].apply(d, args[0] is Array ? args[0] : args);
-				runMethodInMovie(d, rawMethodName, args);
+		if (rawMethodName == "gotoAndStop") {
+			if (mc["stopAllMovieClips"] != null) {
+				mc["stopAllMovieClips"]();
+			}
+		}
+		else {
+			var len:int = mc.numChildren;
+			while(--len > -1){
+				var d:MovieClip = mc.getChildAt(len) as MovieClip;
+				if(d){
+					d[rawMethodName].apply(d, args[0] is Array ? args[0] : args);
+					runMethodInMovie(d, rawMethodName, args);
+				}
 			}
 		}
 	}
