@@ -81,6 +81,14 @@ public class NumberUtil
 		return Boolean((a ^ b) >> 31 == 0);
 	}
 	
+	/**
+	 * 检查指定数值对象是否为NaN类型
+	 * @return
+	 */
+	public static function isNaN(val:Number):Boolean {
+		return val != val;
+	}
+	
 	public static const ator:Number = Math.PI / 180;
 	
 	public static const rtoa:Number = 180 / Math.PI;
