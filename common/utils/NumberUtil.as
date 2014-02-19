@@ -108,6 +108,32 @@ public class NumberUtil
 		return radian * rtoa;
 	}
 	
+	public static const LOG10:Number = Math.log(10);
+	public static const LOG2:Number = Math.log(2);
+	
+	/**
+	 * 返回以指定参数base为底的对数
+	 * 
+	 * @see http://www.mathsisfun.com/algebra/logarithms.html
+	 * @see http://gskinner.com/blog/archives/2009/11/calculating_log.html
+	 * @see http://jacksondunstan.com/articles/1952
+	 * 
+	 * @param	value
+	 * @param	base
+	 * @return
+	 */
+	public static function logx(value:Number, base:Number):Number {
+		return Math.log(value) / Math.log(base);
+	}
+	
+	public static function log10(value:Number):Number {
+		return Math.log(value) / LOG10;
+	}
+	
+	public static function log2(value:Number):Number {
+		return Math.log(value) / LOG2;
+	}
+	
 	/**
 	 * 将指定数值完成指定位数的ceil转换
 	 * @param num
