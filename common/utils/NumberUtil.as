@@ -119,7 +119,7 @@ public class NumberUtil
 			return num;
 		}
 		var n:int = 1 / fixedPoint;
-		return Number((Math.ceil(num * n) * fixedPoint).toFixed(getFrictionCount(fixedPoint)));
+		return Number((Math.ceil(num * n) * fixedPoint).toFixed(getFrictionCount(n)));
 	}
 	
 	/**
@@ -134,7 +134,7 @@ public class NumberUtil
 			return num;
 		}
 		var n:int = 1 / fixedPoint;
-		return Number((Math.floor(num * n) * fixedPoint).toFixed(getFrictionCount(fixedPoint)));
+		return Number((Math.floor(num * n) * fixedPoint).toFixed(getFrictionCount(n)));
 	}
 	
 	/**
@@ -148,17 +148,11 @@ public class NumberUtil
 			return num;
 		}
 		var n:int = 1 / fixedPoint;
-		return Number((Math.round(num * n) * fixedPoint).toFixed(getFrictionCount(fixedPoint)));
+		return Number((Math.round(num * n) * fixedPoint).toFixed(getFrictionCount(n)));
 	}
 	
-	/**
-	 * 
-	 * @param ns
-	 * @return 
-	 */
 	private static function getFrictionCount(ns:Number):int{
-		var s:String = String(ns);
-		return s.slice(s.lastIndexOf(".") + 1).length;
+		return String(ns).length - 1;
 	}
 }
 }
