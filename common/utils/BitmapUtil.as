@@ -51,15 +51,15 @@ public class BitmapUtil
 		return new Bitmap(bitmapData);
 	}
 	
+	private static const HELP_POINT:Point = new Point(0, 0);
+	
 	/**
 	 * 获取指定显示对象的位图数据对象
 	 * @param dis
-	 * @param sx
-	 * @param sy
 	 * @see getBitmapData (这里将ColorTransform, filters 计算在内) 
 	 * @return 
 	 */
-	public static function getCopy(dis:DisplayObject, sx:Number = 1.0, sy:Number = 1.0):BitmapData{
+	public static function getCopy(dis:DisplayObject):BitmapData{
 		if(dis.width <= 0 || dis.height <= 0){
 			return null;
 		}
@@ -69,7 +69,7 @@ public class BitmapUtil
 		var wh:Rectangle = DisplayObjectUtil.getActualSize(dis);
 		var c:ColorTransform = dis.transform.colorTransform;
 		var len:int = dis.filters.length;
-		var p:Point = DisplayObjectUtil.getLeftTopPosition(dis, sx, sy);
+		var p:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
 		var b:Rectangle = new Rectangle(0, 0, wh.width, wh.height);
 		if(len > 0){
 			for(var i:int = 0; i < len; i ++){
@@ -79,6 +79,8 @@ public class BitmapUtil
 				temp.dispose();
 			}
 		}
+		var sx:Number = dis.scaleX;
+		var sy:Number = dis.scaleY;
 		var mt:Matrix = new Matrix(sx, 0, 0, sy, -b.x + p.x, -b.y + p.y);
 		var dt:BitmapData = new BitmapData(b.width, b.height, true, 0);
 		dt.draw(dis, mt, c);
@@ -88,11 +90,9 @@ public class BitmapUtil
 	/**
 	 * 获取指定显示对象的位图对象, 并包装以Sprite对象并返回
 	 * @param dis
-	 * @param sx
-	 * @param sy
 	 * @return 
 	 */
-	public static function getCopySprite(dis:DisplayObject, sx:Number = 1.0, sy:Number = 1.0):Sprite{
+	public static function getCopySprite(dis:DisplayObject):Sprite{
 		if(dis.width <= 0 || dis.height <= 0){
 			return null;
 		}
@@ -102,7 +102,7 @@ public class BitmapUtil
 		var wh:Rectangle = DisplayObjectUtil.getActualSize(dis);
 		var c:ColorTransform = dis.transform.colorTransform;
 		var len:int = dis.filters.length;
-		var p:Point = DisplayObjectUtil.getLeftTopPosition(dis, sx, sy);
+		var p:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
 		var b:Rectangle = new Rectangle(0, 0, wh.width, wh.height);
 		if(len > 0){
 			for(var i:int = 0; i < len; i ++){
@@ -112,6 +112,8 @@ public class BitmapUtil
 				temp.dispose();
 			}
 		}
+		var sx:Number = dis.scaleX;
+		var sy:Number = dis.scaleY;
 		var mt:Matrix = new Matrix(sx, 0, 0, sy, -b.x + p.x, -b.y + p.y);
 		var dt:BitmapData = new BitmapData(b.width, b.height, true, 0);
 		dt.draw(dis, mt, c);
@@ -126,18 +128,18 @@ public class BitmapUtil
 	/**
 	 * 获取指定显示对象的位图数据对象
 	 * @param d
-	 * @param scaleX
-	 * @param scaleY
 	 * @return 
 	 */
-	public static function getBitmapData(d:DisplayObject, scaleX:Number = 1.0, scaleY:Number = 1.0):BitmapData{
+	public static function getBitmapData(d:DisplayObject):BitmapData{
 		if(d.width <= 0 || d.height <= 0){
 			return null;
 		}
 		if(!checkDraw(d)){
 			return null;
 		}
-		var offset:Point = DisplayObjectUtil.getLeftTopPosition(d, scaleX, scaleY);
+		var scaleX:Number = d.scaleX;
+		var scaleY:Number = d.scaleY;
+		var offset:Point = DisplayObjectUtil.getLeftTopPosition(d, HELP_POINT);
 		var bitmapData:BitmapData = new BitmapData(d.width, d.height, true, 0);
 		var mtx:Matrix = new Matrix(scaleX, 0, 0, scaleY, offset.x, offset.y);
 		bitmapData.draw(d, mtx);
@@ -233,7 +235,7 @@ public class BitmapUtil
 			s = range.height / rect.height;
 		}
 		var bd:BitmapData = new BitmapData(dis.width, dis.height, true, 0);
-		var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(dis);
+		var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
 		bd.draw(dis, new Matrix(s, 0, 0, s, topLeft.x, topLeft.y));
 		return bd;
 	}
@@ -293,7 +295,7 @@ public class BitmapUtil
 			return false;
 		}
 		var bitmapData:BitmapData = getBitmapData(dis);//get the copy(the reg point is on the leftTop)
-		var offset:Point = DisplayObjectUtil.getLeftTopPosition(dis);
+		var offset:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
 		offset.x = -offset.x + dis.x; //get the display object's top left position(0, 0)
 		offset.y = -offset.y + dis.y; 
 		var p:Point = dis.parent.localToGlobal(offset); //get the global position value
