@@ -136,28 +136,27 @@ public class DisplayObjectUtil
 		return null;
 	}
 	
+	private static const HELP_POINT:Point = new Point(0, 0);
+	
 	/**
 	 * 获取指定显示对象的注册点偏移量
 	 * @param d
-	 * @param scaleX
-	 * @param scaleY
 	 * @return 
 	 */
-	public static function getLeftTopPosition(d:DisplayObject, scaleX:Number = NaN, scaleY:Number = NaN):Point {
-		if(!isNaN(scaleX)){
-			d.scaleX = scaleX;
-		}
-		if(!isNaN(scaleY)){
-			d.scaleY = scaleY;
+	public static function getLeftTopPosition(d:DisplayObject, result:Point = null):Point {
+		var p:Point = result;
+		if (!p) {
+			p = new Point();
 		}
 		var rect:Rectangle = d.getBounds(d);
 		var m:Matrix = d.transform.matrix;
 		var sX:Number = m.a;
 		var sY:Number = m.d;
 		var rx:Number, ry:Number;
-		rx = sX >0 ? m.a * rect.left : m.a * rect.right;
-		ry = sY >0 ? m.d * rect.top : m.d * rect.bottom;
-		return new Point(-rx|0, -ry|0);
+		rx = sX > 0 ? m.a * rect.left : m.a * rect.right;
+		ry = sY > 0 ? m.d * rect.top : m.d * rect.bottom;
+		p.setTo( -rx | 0, -ry | 0);
+		return p;
 	}
 	
 	/**
@@ -251,7 +250,7 @@ public class DisplayObjectUtil
 				center();
 			}
 			function center():void{
-				var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(disObj);
+				var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(disObj, HELP_POINT);
 				var c:Point = new Point();
 				c.x = (disObj.stage.stageWidth - disObj.width) * .5 + topLeft.x;
 				c.y = (disObj.stage.stageHeight - disObj.height) * .5 + topLeft.y;
@@ -271,7 +270,7 @@ public class DisplayObjectUtil
 		if(!(disObj && disObj.stage)){
 			return null;
 		}
-		var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(disObj);
+		var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(disObj, HELP_POINT);
 		var c:Point = new Point();
 		c.x = (disObj.stage.stageWidth - disObj.width) * .5 + topLeft.x;
 		c.y = (disObj.stage.stageHeight - disObj.height) * .5 + topLeft.y;
@@ -301,13 +300,13 @@ public class DisplayObjectUtil
 				center();
 			}
 			function center():void{
-				var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(disObj);
+				var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(disObj, HELP_POINT);
 				
 				var c:Point = new Point();
 				c.x = (disObj.parent.width - disObj.width) * .5 + topLeft.x;
 				c.y = (disObj.parent.height - disObj.height) * .5 + topLeft.y;
 				
-				topLeft = DisplayObjectUtil.getLeftTopPosition(disObj.parent);
+				topLeft = DisplayObjectUtil.getLeftTopPosition(disObj.parent, HELP_POINT);
 				c.x -= topLeft.x;
 				c.y -= topLeft.y;
 				disObj.x = c.x;
@@ -325,11 +324,11 @@ public class DisplayObjectUtil
 	 */
 	public static function centerSpecfiedParent(disObj:DisplayObject, refer:DisplayObject, posX:Number = NaN, posY:Number = NaN):void{
 		if(disObj && refer){			
-			var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(refer);
+			var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(refer, HELP_POINT);
 			var t:Point = refer.parent.localToGlobal(new Point(isNaN(posX) ? refer.x : posX, isNaN(posY) ? refer.y : posY));
 			t.x -= topLeft.x;
 			t.y -= topLeft.y;
-			topLeft = DisplayObjectUtil.getLeftTopPosition(disObj);
+			topLeft = DisplayObjectUtil.getLeftTopPosition(disObj, HELP_POINT);
 			t.x += (refer.width - disObj.width) * .5 + topLeft.x;
 			t.y += (refer.height - disObj.height) * .5 + topLeft.y;
 			t = disObj.parent.globalToLocal(t);
@@ -356,7 +355,7 @@ public class DisplayObjectUtil
 		m.concat(disObj.transform.matrix);
 		m.tx -= disObj.width;
 		//this is minus topleft's registerPoint's position's offset
-		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(disObj);
+		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(disObj, HELP_POINT);
 		m.tx -= leftTop.x;
 		return new Point(m.tx, m.ty);
 	}
@@ -376,7 +375,7 @@ public class DisplayObjectUtil
 		m.concat(disObj.transform.matrix);
 		m.tx += disObj.stage.stageWidth;
 		//this is add topleft's registerPoint's position's offset
-		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(disObj);
+		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(disObj, HELP_POINT);
 		m.tx += leftTop.x;
 		return new Point(m.tx, m.ty);
 	}
@@ -458,7 +457,7 @@ public class DisplayObjectUtil
 		var s:Sprite = new Sprite();
 		resource.parent.addChildAt(s, resource.parent.getChildIndex(resource));
 		s.addChild(resource.parent.removeChild(resource));
-		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(resource);
+		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(resource, HELP_POINT);
 		var originX:Number = resource.x;
 		var originY:Number = resource.y;
 		resource.x = leftTop.x;
