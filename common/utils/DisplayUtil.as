@@ -105,43 +105,36 @@ public class DisplayUtil
 	}
 	
 	/**
-	 * 绘制弧形
-	 * @param	g
-	 * @param	initX     初始x坐标
-	 * @param	initY     初始y坐标
-	 * @param	radius    绘制半径
-	 * @param	size      线条尺寸
-	 * @param	color     色彩 
-	 * @param	angleFrom 起始角度 
-	 * @param	angleTo   结束角度
+	 * 绘制弧形 (仅使用线条填充)
+	 * @param	g		graphics对象
+	 * @param	x		初始x坐标
+	 * @param	y		初始y坐标
+	 * @param	r		绘制半径
+	 * @param	size	线条尺寸
+	 * @param	c		色彩
+	 * @param	af		起始角度
+	 * @param	at		结束角度
 	 */
-	public static function drawArc(g:Graphics, initX:Number, initY:Number, radius:Number, size:Number, 
-							color:uint, angleFrom:Number, angleTo:Number):void{
+	public static function drawArc(g:Graphics, x:Number, y:Number, r:Number, size:Number, c:uint, af:Number, at:Number):void{
 		g.clear();
-		g.lineStyle(size, color);
-		
-		//angleFrom = rangeAngle(angleFrom);
-		//angleTo = rangeAngle(angleTo);
-		
-		var atodR:Number = Math.PI / 180;
-		angleFrom = angleFrom * atodR;
-		angleTo = angleTo * atodR + angleFrom;
-		
-		var diff:Number = Math.abs(angleTo - angleFrom);
+		g.lineStyle(size, c);
+
+		var R:Number = Math.PI / 180;
+		af = af * R;
+		at = at * R + af;
+
+		var diff:Number = Math.abs(at - af);
 		var drawCount:Number = ((diff / (Math.PI * .25)) >> 0) + 1;
-		g.moveTo(Math.cos(angleFrom) * radius + initX, Math.sin(angleFrom) * radius + initY);
-		
+		g.moveTo(Math.cos(af) * r + x, Math.sin(af) * r + y);
+
 		var a:Number = diff / (drawCount * 2);
-		var controlRadius:Number = radius / Math.cos(a);
-		var sa:Number = angleFrom, ea:Number = sa;
-		
+		var cR:Number = r / Math.cos(a); //controlRadius
+		var sa:Number = af, ea:Number = sa;
+
 		for (var i:int = 0; i < drawCount; i ++) {
 			sa = ea + a;
 			ea = sa + a;
-			g.curveTo(initX + Math.cos(sa) * controlRadius, 
-					  initY + Math.sin(sa) * controlRadius, 
-					  initX + Math.cos(ea) * radius, 
-					  initY + Math.sin(ea) * radius);
+			g.curveTo(x + Math.cos(sa) * cR, y + Math.sin(sa) * cR, x + Math.cos(ea) * r, y + Math.sin(ea) * r);
 		}
 	}
 
