@@ -65,41 +65,43 @@ public class DisplayUtil
 	}
 	
 	/**
-	 * 绘制扇形
-	 * @param	percent    range(0 - 1) 对应0 - 360度的弧度表示
-	 * @param	radius     半径
-	 * @param	color      填充色
-	 * @param	clockWise  是否顺时针绘制
-	 * @return  返回sprite对象
-	 * @see 	原始版本 http://www.senocular.com/flash/source/ 
+	 * 绘制扇形 (仅使用整体填充)
+	 * @param	p	range(0 - 1) 对应0 - 360度的弧度表示
+	 * @param	r	半径
+	 * @param	c	填充色
+	 * @param	cw	是否顺时针绘制
+	 * @param	result	根据需要传入Sprite对象
+	 * @see 	原始版本 http://www.senocular.com/flash/source/
+	 * @return
 	 */
-	public static function createSector(percent:Number, radius:Number, color:uint, clockWise:Boolean = true):Sprite {
-		var r:Sprite = new Sprite();
-		var g:Graphics = r.graphics;
+	public static function createArcShape(p:Number, r:Number, c:uint, cw:Boolean = true, result:Sprite = null):Sprite {
+		var rs:Sprite = result;
+		if (!result) {
+			rs = new Sprite();
+		}
+		var g:Graphics = rs.graphics;
 		var s:Number = -Math.PI * .5;
-		var e:Number = percent * (Math.PI * 2) + s;
+		var e:Number = p * (Math.PI * 2) + s;
 		var diff:Number = Math.abs(e - s);
 		var drawCount:Number = ((diff / (Math.PI * .25)) >> 0) + 1;
-		g.beginFill(color, 1);
+		g.clear();
+		g.beginFill(c, 1);
 		g.moveTo(0, 0);
-		g.lineTo(Math.cos(s) * radius, Math.sin(s) * radius);
+		g.lineTo(Math.cos(s) * r, Math.sin(s) * r);
 		var a:Number = diff / (drawCount * 2);
-		if (!clockWise) {
+		if (!cw) {
 			a = -a;
 		}
-		var controlRadius:Number = radius / Math.cos(a);
+		var cR:Number = r / Math.cos(a); //controlRadius
 		var sa:Number = s, ea:Number = sa;
 		for (var i:int = 0; i < drawCount; i ++) {
 			sa = ea + a;
 			ea = sa + a;
-			g.curveTo(Math.cos(sa) * controlRadius, 
-					  Math.sin(sa) * controlRadius, 
-					  Math.cos(ea) * radius, 
-					  Math.sin(ea) * radius);
+			g.curveTo(Math.cos(sa) * cR, Math.sin(sa) * cR, Math.cos(ea) * r, Math.sin(ea) * r);
 		}
 		g.lineTo(0, 0);
 		g.endFill();
-		return r;
+		return rs;
 	}
 	
 	/**
