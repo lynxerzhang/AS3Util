@@ -138,6 +138,32 @@ public class DisplayUtil
 		}
 	}
 
+	/**
+	 * 绘制多边形 (仅使用整体填充)
+	 * @param	g	graphics对象
+	 * @param	x	初始x坐标
+	 * @param	y	初始y坐标
+	 * @param	r	半径
+	 * @param	s	边长
+	 * @param	c	填充颜色值
+	 */
+	public static function drawPolygon(g:Graphics, x:Number, y:Number, r:Number, s:Number, c:uint):void {
+		g.clear();
+		g.beginFill(c, 1);
+		g.moveTo(x, y);
+		if (s < 3) {
+			s = 3;
+		}
+		var drawCount:int = s;
+		var offset:Number = Math.PI * 2 / s;
+		var a:Number = -Math.PI * .5;
+		for (var i:int = 0; i <= drawCount; i ++) {
+			g.lineTo(Math.cos(a) * r + x, Math.sin(a) * r + y);
+			a += offset;
+		}
+		g.endFill();
+	}
+	
 	private static function rangeAngle(angle:Number):Number {
 		var a:Number = angle;
 		a %= 360;
