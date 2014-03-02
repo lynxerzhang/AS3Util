@@ -50,6 +50,8 @@ public class DisplayUtil
 		return s;
 	}
 	
+	private static const HELP_POINT:Point = new Point(0, 0);
+	
 	/**
 	 * 创建一个和指定显示对象相同大小和注册点位置的Sprite对象
 	 * @param d
@@ -57,7 +59,7 @@ public class DisplayUtil
 	 */
 	public static function drawMold(d:DisplayObject):Sprite{
 		var s:Sprite = new Sprite();
-		var top:Point = DisplayObjectUtil.getLeftTopPosition(d);
+		var top:Point = DisplayObjectUtil.getLeftTopPosition(d, HELP_POINT);
 		s.graphics.beginFill(0, 0);
 		s.graphics.drawRect(-top.x, -top.y, d.width, d.height);
 		s.graphics.endFill();
