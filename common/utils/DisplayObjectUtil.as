@@ -11,6 +11,7 @@ import flash.display.MovieClip;
 import flash.display.Shape;
 import flash.display.SimpleButton;
 import flash.display.Sprite;
+import flash.display.Stage;
 import flash.events.Event;
 import flash.events.EventPhase;
 import flash.geom.Matrix;
@@ -62,8 +63,9 @@ public class DisplayObjectUtil
 	
 	private static function disposeMovieClip(mc:MovieClip):void{
 		mc.stop();
-		for(var item:* in mc){
-			delete mc[item];//考虑可能存在动态赋值的属性或方法
+		for (var item:* in mc) {
+			//考虑可能存在动态赋值的属性或方法
+			delete mc[item];
 		}
 	}
 	
@@ -131,22 +133,27 @@ public class DisplayObjectUtil
 	 */
 	public static function getStagePosition(d:DisplayObject):Point {
 		if (d && d.parent) {
-			return d.parent.localToGlobal(new Point(d.x, d.y));
+			HELP_POINT.setTo(d.x, d.y);
+			return d.parent.localToGlobal(HELP_POINT);
 		}
 		return null;
 	}
 	
+	//helper
 	private static const HELP_POINT:Point = new Point(0, 0);
+	private static const HELP_MATRIX:Matrix = new Matrix();
+	private static const HELP_RECT:Rectangle = new Rectangle();
+	private static const HELP_BMPD:BitmapData = new BitmapData(1, 1, true, 0);
 	
 	/**
 	 * 获取指定显示对象的注册点偏移量
-	 * @param d
-	 * @return 
+	 * @param	d
+	 * @param	result
+	 * @return
 	 */
 	public static function getLeftTopPosition(d:DisplayObject, result:Point = null):Point {
-		var p:Point = result;
-		if (!p) {
-			p = new Point();
+		if (!result) {
+			result = new Point();
 		}
 		var rect:Rectangle = d.getBounds(d);
 		var m:Matrix = d.transform.matrix;
@@ -155,12 +162,13 @@ public class DisplayObjectUtil
 		var rx:Number, ry:Number;
 		rx = sX > 0 ? m.a * rect.left : m.a * rect.right;
 		ry = sY > 0 ? m.d * rect.top : m.d * rect.bottom;
-		p.setTo( -rx | 0, -ry | 0);
-		return p;
+		result.setTo( -rx | 0, -ry | 0);
+		return result;
 	}
 	
 	/**
-	 * 检查指定显示对象是否在舞台上, 可以使用Stage属性是否为空为判断条件, 还有个方法是检测显示对象的loaderInfo属性是否为空
+	 * 检查指定显示对象是否在舞台上, 可以使用Stage属性是否为空为判断条件, 
+	 * 还有个方法是检测显示对象的loaderInfo属性是否为空
 	 * 但是当一个loader加载了一个显示对象后, 就不要去检测被加载对象它的LoaderInfo属性, 
 	 * 即使该loader对象不在舞台, 它的loaderInfo属性也不为空
 	 * @param dis
@@ -168,12 +176,13 @@ public class DisplayObjectUtil
 	 */
 	public static function isOnStage(dis:DisplayObject):Boolean {
 		if(dis && dis.stage && dis.visible){
-			var main:Rectangle = new Rectangle(0, 0, dis.stage.stageWidth, dis.stage.stageHeight);
-			var p:Point = dis.parent.localToGlobal(new Point(dis.x, dis.y));
-			var isOnStage:Boolean = main.containsPoint(p);
+			HELP_RECT.setTo(0, 0, dis.stage.stageWidth, dis.stage.stageHeight);
+			HELP_POINT.setTo(dis.x, dis.y);
+			var p:Point = dis.parent.localToGlobal(HELP_POINT);
+			var isOnStage:Boolean = HELP_RECT.containsPoint(p);
 			if (!isOnStage) {
 				var bounds:Rectangle = dis.getBounds(dis.parent);
-				isOnStage = main.intersects(bounds);
+				isOnStage = HELP_RECT.intersects(bounds);
 			}
 			return isOnStage;
 		}
@@ -227,7 +236,7 @@ public class DisplayObjectUtil
 		if(data is Number){
 			return Boolean(Number(data) == 0);
 		}
-		if(data as BitmapData){
+		if(data is BitmapData){
 			BitmapData(data).dispose();
 		}
 		return false;
@@ -235,149 +244,164 @@ public class DisplayObjectUtil
 
 	/**
 	 * 将指定显示对象的坐标居中于整个舞台
-	 * @param disObj
-	 * @param checkOnStage  对是否在舞台上的判断
+	 * @param	dis
+	 * @param	checkStage
 	 */
-	public static function centerInStage(disObj:DisplayObject, checkOnStage:Boolean = false):void{
-		if(disObj){
-			if(!disObj.stage && checkOnStage){
-				disObj.addEventListener(Event.ADDED_TO_STAGE, function(evt:Event):void{
-					disObj.removeEventListener(Event.ADDED_TO_STAGE, arguments.callee);
+	public static function centerInStage(dis:DisplayObject, checkStage:Boolean = false):void{
+		if(dis){
+			if(!dis.stage && checkStage){
+				dis.addEventListener(Event.ADDED_TO_STAGE, function(evt:Event):void{
+					dis.removeEventListener(Event.ADDED_TO_STAGE, arguments.callee);
 					center();
 				});
 			}
-			if(disObj.stage){
+			if(dis.stage){
 				center();
 			}
 			function center():void{
-				var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(disObj, HELP_POINT);
-				var c:Point = new Point();
-				c.x = (disObj.stage.stageWidth - disObj.width) * .5 + topLeft.x;
-				c.y = (disObj.stage.stageHeight - disObj.height) * .5 + topLeft.y;
-				c = disObj.parent.globalToLocal(c);
-				disObj.x = c.x;
-				disObj.y = c.y;
+				var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
+				HELP_POINT.x = (dis.stage.stageWidth - dis.width) * .5 + topLeft.x;
+				HELP_POINT.y = (dis.stage.stageHeight - dis.height) * .5 + topLeft.y;
+				var c:Point = dis.parent.globalToLocal(HELP_POINT);
+				dis.x = c.x;
+				dis.y = c.y;
 			}
 		}
 	}
 	
 	/**
 	 * 获取指定显示对象居中的Point对象, 该Point对象已执行坐标转换
-	 * @param disObj
-	 * @return 
+	 * @param	dis
+	 * @param	result
+	 * @return
 	 */
-	public static function getCenterStagePoint(disObj:DisplayObject):Point{
-		if(!(disObj && disObj.stage)){
+	public static function getCenterStagePoint(dis:DisplayObject, result:Point = null):Point{
+		if(!(dis && dis.stage)){
 			return null;
 		}
-		var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(disObj, HELP_POINT);
-		var c:Point = new Point();
-		c.x = (disObj.stage.stageWidth - disObj.width) * .5 + topLeft.x;
-		c.y = (disObj.stage.stageHeight - disObj.height) * .5 + topLeft.y;
-		c = disObj.parent.globalToLocal(c);
-		return c;
+		if (!result) {
+			result = new Point();
+		}
+		var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
+		result.x = (dis.stage.stageWidth - dis.width) * .5 + topLeft.x;
+		result.y = (dis.stage.stageHeight - dis.height) * .5 + topLeft.y;
+		result = dis.parent.globalToLocal(result);
+		return result;
 	}
 	
 	/**
-	 * 将指定显示对象在其父级中居中显示, 需要注意的是如果子级的长宽大于父级, 那么父级的长宽其实就是子级的了
-	 * @param disObj
-	 * @param checkHasParent
+	 * 将指定显示对象在其父级中居中显示, 需要注意的是如果子级的长宽大于父级, 那么父级的长宽其实就是子级
+	 * @param	dis
+	 * @param	checkParent
 	 */
-	public static function centerParent(disObj:DisplayObject, checkHasParent:Boolean = false):void{
-		if(disObj){
-			if(!disObj.parent && checkHasParent){
-				disObj.addEventListener(Event.ADDED, function(evt:Event):void{
+	public static function centerParent(dis:DisplayObject, checkParent:Boolean = false):void{
+		if(dis){
+			if((!dis.parent && !dis.stage) && checkParent){
+				dis.addEventListener(Event.ADDED, function(evt:Event):void{
 					if(evt.eventPhase == EventPhase.AT_TARGET){
 						//this maybe check whether at target phase or at bubble phase, 
-						//the bubble phase mean disObj added some child
-						//the target phase mean disObj been added to some parent
-						disObj.removeEventListener(Event.ADDED, arguments.callee);
+						//the bubble phase mean dis added some child
+						//the target phase mean dis been added to some parent
+						dis.removeEventListener(Event.ADDED, arguments.callee);
 						center();
 					}
 				});
 			}
-			if(disObj.parent){
+			if (dis.parent || dis.stage) {
+				//maybe dis's parent is stage
 				center();
 			}
 			function center():void{
-				var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(disObj, HELP_POINT);
-				
-				var c:Point = new Point();
-				c.x = (disObj.parent.width - disObj.width) * .5 + topLeft.x;
-				c.y = (disObj.parent.height - disObj.height) * .5 + topLeft.y;
-				
-				topLeft = DisplayObjectUtil.getLeftTopPosition(disObj.parent, HELP_POINT);
-				c.x -= topLeft.x;
-				c.y -= topLeft.y;
-				disObj.x = c.x;
-				disObj.y = c.y;
+				var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
+				HELP_POINT.x = (dis.parent.width - dis.width) * .5 + topLeft.x;
+				HELP_POINT.y = (dis.parent.height - dis.height) * .5 + topLeft.y;
+				topLeft = DisplayObjectUtil.getLeftTopPosition(dis.parent);
+				HELP_POINT.x -= topLeft.x;
+				HELP_POINT.y -= topLeft.y;
+				dis.x = HELP_POINT.x;
+				dis.y = HELP_POINT.y;
 			}
 		}
 	}
 	
 	/**
 	 * 将指定的显示对象居中至指定的另一个显示对象
-	 * @param disObj
-	 * @param refer
-	 * @param posX
-	 * @param posY
+	 * @param	dis
+	 * @param	parent
+	 * @param	x	x坐标偏移量
+	 * @param	y	y坐标偏移量
 	 */
-	public static function centerSpecfiedParent(disObj:DisplayObject, refer:DisplayObject, posX:Number = NaN, posY:Number = NaN):void{
-		if(disObj && refer){			
-			var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(refer, HELP_POINT);
-			var t:Point = refer.parent.localToGlobal(new Point(isNaN(posX) ? refer.x : posX, isNaN(posY) ? refer.y : posY));
+	public static function centerSpecfiedParent(dis:DisplayObject, parent:DisplayObject, x:Number = NaN, y:Number = NaN):void{
+		if(dis && parent){			
+			var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(parent, HELP_POINT);
+			var p:DisplayObjectContainer;
+			if (parent is Stage) {
+				p = parent as DisplayObjectContainer;
+			}
+			else {
+				p = parent.parent;
+			}
+			var t:Point = p.localToGlobal(new Point(isNaN(x) ? parent.x : x, isNaN(y) ? parent.y : y));
 			t.x -= topLeft.x;
 			t.y -= topLeft.y;
-			topLeft = DisplayObjectUtil.getLeftTopPosition(disObj, HELP_POINT);
-			t.x += (refer.width - disObj.width) * .5 + topLeft.x;
-			t.y += (refer.height - disObj.height) * .5 + topLeft.y;
-			t = disObj.parent.globalToLocal(t);
-			disObj.x = t.x;
-			disObj.y = t.y;
+			topLeft = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
+			t.x += (parent.width - dis.width) * .5 + topLeft.x;
+			t.y += (parent.height - dis.height) * .5 + topLeft.y;
+			t = dis.parent.globalToLocal(t);
+			dis.x = t.x;
+			dis.y = t.y;
 		}
 	}
 	
 	/**
 	 * 获取指定显示对象正好位于消失于舞台左侧的坐标点
-	 * @param disObj
-	 * @param checkOnStage
-	 * @return 
+	 * @param	dis
+	 * @param	result
+	 * @return
 	 */
-	public static function getStageLeftHidePoint(disObj:DisplayObject, checkOnStage:Boolean = false):Point{
-		if(!(disObj && disObj.stage)){
+	public static function getStageLeftOutsidePoint(dis:DisplayObject, result:Point = null):Point{
+		if(!(dis && dis.stage)){
 			return null;
 		}
-		//other case, you could test this case and to test with current use case's performance diff
-		//var r:Rectangle = disObj.transform.pixelBounds;
-		//var t:Point = disObj.parent.globalToLocal(new Point(0, 0));
-		var m:Matrix = disObj.transform.concatenatedMatrix;
+		//也可测试如下方法
+		//var r:Rectangle = dis.transform.pixelBounds;
+		//var t:Point = dis.parent.globalToLocal(new Point(0, 0));
+		var m:Matrix = dis.transform.concatenatedMatrix;
 		m.invert();
-		m.concat(disObj.transform.matrix);
-		m.tx -= disObj.width;
+		m.concat(dis.transform.matrix);
+		m.tx -= dis.width;
 		//this is minus topleft's registerPoint's position's offset
-		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(disObj, HELP_POINT);
+		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
 		m.tx -= leftTop.x;
-		return new Point(m.tx, m.ty);
+		if (!result) {
+			result = new Point();
+		}
+		result.setTo(m.tx, m.ty);
+		return result;
 	}
 	
 	/**
-	 * @param disObj
-	 * @param checkOnStage
-	 * @see getStageLeftHidePoint
-	 * @return 
+	 * @param	dis
+	 * @param	result
+	 * @see		getStageLeftOutsidePoint
+	 * @return
 	 */
-	public static function getStageRightHidePoint(disObj:DisplayObject, checkOnStage:Boolean = false):Point{
-		if(!(disObj && disObj.stage)){
+	public static function getStageRightOutsidePoint(dis:DisplayObject, result:Point = null):Point{
+		if(!(dis && dis.stage)){
 			return null;
 		}
-		var m:Matrix = disObj.transform.concatenatedMatrix;
+		var m:Matrix = dis.transform.concatenatedMatrix;
 		m.invert();
-		m.concat(disObj.transform.matrix);
-		m.tx += disObj.stage.stageWidth;
+		m.concat(dis.transform.matrix);
+		m.tx += dis.stage.stageWidth;
 		//this is add topleft's registerPoint's position's offset
-		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(disObj, HELP_POINT);
+		var leftTop:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
 		m.tx += leftTop.x;
-		return new Point(m.tx, m.ty);
+		if (!result) {
+			result = new Point();
+		}
+		result.setTo(m.tx, m.ty);
+		return result;
 	}
 	
 	/**
@@ -385,7 +409,6 @@ public class DisplayObjectUtil
 	 * @param mc
 	 * @param rawMethodName
 	 * @param args
-	 * 
 	 */
 	public static function runMethodInMovie(mc:MovieClip, rawMethodName:String, ...args):void{
 		if(!mc || !mc.hasOwnProperty(rawMethodName)){
@@ -416,24 +439,31 @@ public class DisplayObjectUtil
 	 * 包括了不在舞台的情况, 获得的均是原始值
 	 * 
 	 * @param dis        指定显示对象
+	 * @param result
 	 * @return Rectangle 返回实际长宽的矩形对象
 	 */ 
-	public static function getActualSize(dis:DisplayObject):Rectangle{		
-//		var rect:Rectangle = dis.transform.pixelBounds.clone();
-//		if(!dis.stage){
-//			//maybe a bug issue?? this version could work, 
-//			//but why divide by five? maybe the "twips"???
-//			rect.width /= 5;
-//			rect.height /= 5; //
-//		}
-//		return rect;
+	public static function getActualSize(dis:DisplayObject, result:Rectangle = null):Rectangle{		
+		/*var rect:Rectangle = dis.transform.pixelBounds.clone();
+		if(!dis.stage){
+			//maybe a bug issue?? this version could work, 
+			//but why divide by five? maybe the "twips"???
+			rect.width /= 5;
+			rect.height /= 5; //
+		}
+		return rect;*/
+		if (!result) {
+			result = new Rectangle();
+		}
 		//TODO, 特例, pixelBounds无法返回文本的长宽, 只能返回对应坐标
-		if(dis is TextField){
-			return dis.getBounds(dis);
+		if (dis is TextField) {
+			var t:Rectangle = dis.getBounds(dis);
+			result.setTo(t.x, t.y, t.width, t.height);
+			return result;
 		}
 		//如果dis的父级为Loader对象
-		if(dis.parent is Loader){
-			return new Rectangle(0, 0, dis.width, dis.height);
+		if (dis.parent is Loader) {
+			result.setTo(0, 0, dis.width, dis.height);
+			return result;
 		}
 		//solution two
 		//inspiration from joe@usecake.com and senocular.com
@@ -445,13 +475,14 @@ public class DisplayObjectUtil
 		currentTransform.matrix = globalMatrix;
 		var rect:Rectangle = currentTransform.pixelBounds;
 		currentTransform.matrix = currentMatrix; //reset the position, scale and skew value
-		return rect;
+		result.setTo(rect.x, rect.y, rect.width, rect.height);
+		return result;
 	}
 	
 	/**
-	 * 将注册点调整至左上角位置, 将指定显示对象的注册点调整为左上角(top-left)以方便定位 (只是嵌套一层Sprite)
-	 * @param resource 指定显示对象
-	 * @return Sprite 返回包含指定显示对象的Sprite对象
+	 * 将注册点调整至左上角位置, 将指定显示对象的注册点调整为左上角(top-left)以方便定位 (需要嵌套一层Sprite)
+	 * @param	resource 指定显示对象
+	 * @return	Sprite 返回包含指定显示对象的Sprite对象
 	 */ 
 	public static function handleResetTopLeftPos(resource:Sprite):Sprite{
 		var s:Sprite = new Sprite();
@@ -466,7 +497,6 @@ public class DisplayObjectUtil
 		s.y = -leftTop.y + originY;
 		return s;
 	}
-	
 	
 	/**
 	 * @param dis 指定显示对象
@@ -485,21 +515,25 @@ public class DisplayObjectUtil
 	}
 
 	private static function __redraw(d:DisplayObject):void{
-		var bd:BitmapData = new BitmapData(1, 1, true, 0);
-		bd.draw(d);
-		bd.dispose();
+		HELP_BMPD.fillRect(HELP_BMPD.rect, 0);
+		HELP_BMPD.draw(d);
 	}
 	
 	/**
 	 * 获取在指定长宽下的显示对象可拖拽的范围
-	 * @param dis          指定显示对象
-	 * @param areaWidth    可拖拽长
-	 * @param areaHeight   可拖拽宽
-	 * @return Rectangle 返回一个矩形
-	 */ 
-	public static function getDragRect(dis:DisplayObject, width:Number, height:Number):Rectangle{
+	 * @param	dis		指定显示对象
+	 * @param	width	可拖拽长
+	 * @param	height	可拖拽宽
+	 * @param	result
+	 * @return
+	 */
+	public static function getDragRect(dis:DisplayObject, width:Number, height:Number, result:Rectangle = null):Rectangle{
 		var bounds:Rectangle = dis.getBounds(dis);
-		return new Rectangle(-bounds.x, -bounds.y, width - dis.width, height - dis.height);
+		if (!result) {
+			result = new Rectangle();
+		}
+		result.setTo(-bounds.x, -bounds.y, width - dis.width, height - dis.height);
+		return result;
 	}
 	
 	/**
@@ -521,7 +555,8 @@ public class DisplayObjectUtil
 		var b:Rectangle = dis.getBounds(dis);
 		var t:Matrix = dis.transform.matrix;
 		var d:BitmapData = new BitmapData(b.width * t.a, b.height * t.d, true, 0);
-		d.draw(dis, new Matrix(t.a, 0, 0, t.d, -b.x * t.a, -b.y * t.d));
+		HELP_MATRIX.setTo(t.a, 0, 0, t.d, -b.x * t.a, -b.y * t.d);
+		d.draw(dis, HELP_MATRIX);
 		var r:Rectangle = d.getColorBoundsRect(0xFF000000, 0, false);
 		d.dispose();
 		r.x += b.x * t.a;
@@ -530,14 +565,14 @@ public class DisplayObjectUtil
 	}
 	
 	/**
-	 * @param	container   一个指定容器（Sprite 或者 Movieclip)
-	 * @param	scale9Grids 设定的9slice 矩形对象
-	 * @example 
-	 *	var r:Rectangle = new Rectangle(23, 21, 44, 47);//9slice 尺寸
-         *	convertBitmaptoScale9(_mc, r);//清除原始Bitmap信息，转而在该mc的graphics中绘制
-	 * 需要注意的是该方法没有返回container中的位图的bitmapData对象, 如果这个bitmapData对象调用dispose
-	 * 被销毁, 那么依靠beginBitmapFill进行绘图的显示对象中的图形会被清除
-	 */
+	* @param	container   一个指定容器（Sprite 或者 Movieclip)
+	* @param	scale9Grids 设定的9slice 矩形对象
+	* @example 
+	* var r:Rectangle = new Rectangle(23, 21, 44, 47);//9slice 尺寸
+	* convertBitmaptoScale9(_mc, r);//清除原始Bitmap信息，转而在该mc的graphics中绘制
+	* 需要注意的是该方法没有返回container中的位图的bitmapData对象, 如果这个bitmapData对象调用dispose
+	* 被销毁, 那么依靠beginBitmapFill进行绘图的显示对象中的图形会被清除
+	*/
 	public static function convertBitmaptoScale9(container:DisplayObjectContainer, scale9Grids:Rectangle):void{
 		var b:Bitmap = container.removeChildAt(0) as Bitmap; //获取到的是Bitmap而不是Shape,就是因为在库中取了链接名
 		var topDown:Array = [scale9Grids.top, scale9Grids.bottom, b.height];
