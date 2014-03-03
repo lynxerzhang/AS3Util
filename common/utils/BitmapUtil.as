@@ -5,9 +5,8 @@ import flash.display.BitmapData;
 import flash.display.BitmapDataChannel;
 import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
-import flash.display.GradientType;
+import flash.display.IBitmapDrawable;
 import flash.display.Loader;
-import flash.display.Shape;
 import flash.display.SimpleButton;
 import flash.display.Sprite;
 import flash.display.Stage;
@@ -20,10 +19,11 @@ public class BitmapUtil
 {
 	
 	/**
-	 * 销毁指定容器中的位图对象
-	 * @param d
-	 */
-	public static function removeForBitmap(d:DisplayObjectContainer):void{
+	* 销毁指定容器中的位图对象
+	* @param	d
+	* @param	isRemove
+	*/
+	public static function removeBitmap(d:DisplayObjectContainer, isRemove:Boolean = false):void{
 		if(!d){
 			return;
 		}
@@ -37,65 +37,35 @@ public class BitmapUtil
 					bp.bitmapData.dispose();
 					bp.bitmapData = null;
 				}
+				if (isRemove) {
+					d.removeChildAt(len);
+				}
 			}
 		}
 	}
-	
+
 	/**
-	 * 获取指定显示对象的位图对象
-	 * @param dis
-	 * @return 
-	 */
-	public static function getBitmap(dis:DisplayObject):Bitmap{	
+	* 获取指定显示对象的位图对象
+	* @param	dis
+	* @param	result
+	* @return
+	*/
+	public static function getBitmap(dis:DisplayObject, result:Bitmap = null):Bitmap {
+		var d:Bitmap = result;
+		if (!d) {
+			d = new Bitmap();
+		}
 		var bitmapData:BitmapData = getBitmapData(dis);
-		return new Bitmap(bitmapData);
+		d.bitmapData = bitmapData;
+		return d;
 	}
-	
-	private static const HELP_POINT:Point = new Point(0, 0);
-	
+
 	/**
-	 * 获取指定显示对象的位图数据对象
-	 * @param dis
-	 * @see getBitmapData (这里将ColorTransform, filters 计算在内) 
-	 * @return 
-	 */
-	public static function getCopy(dis:DisplayObject):BitmapData{
-		if(dis.width <= 0 || dis.height <= 0){
-			return null;
-		}
-		if(!checkDraw(dis)){
-			return null;
-		}
-		var wh:Rectangle = DisplayObjectUtil.getActualSize(dis);
-		var c:ColorTransform = dis.transform.colorTransform;
-		var len:int = dis.filters.length;
-		var p:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
-		var b:Rectangle = new Rectangle(0, 0, wh.width, wh.height);
-		if(len > 0){
-			for(var i:int = 0; i < len; i ++){
-				var temp:BitmapData = new BitmapData(wh.width, wh.height, true, 0);
-				var tempRect:Rectangle = temp.generateFilterRect(temp.rect, dis.filters[i]);
-				b = b.union(tempRect);
-				temp.dispose();
-			}
-		}
-		var sx:Number = dis.scaleX;
-		var sy:Number = dis.scaleY;
-		var mt:Matrix = new Matrix(sx, 0, 0, sy, -b.x + p.x, -b.y + p.y);
-		var dt:BitmapData = new BitmapData(b.width, b.height, true, 0);
-		dt.draw(dis, mt, c);
-		return dt;
-	}
-	
-	/**
-	 * 获取指定显示对象的位图对象, 并包装以Sprite对象并返回
-	 * @param dis
-	 * @return 
-	 */
+	* 获取指定显示对象的位图对象, 并包装以Sprite对象并返回
+	* @param dis
+	* @return 
+	*/
 	public static function getCopySprite(dis:DisplayObject):Sprite{
-		if(dis.width <= 0 || dis.height <= 0){
-			return null;
-		}
 		if(!checkDraw(dis)){
 			return null;
 		}
@@ -104,19 +74,21 @@ public class BitmapUtil
 		var len:int = dis.filters.length;
 		var p:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
 		var b:Rectangle = new Rectangle(0, 0, wh.width, wh.height);
-		if(len > 0){
+		if (len > 0) {
+			var tbd:BitmapData;
+			var tRect:Rectangle;
 			for(var i:int = 0; i < len; i ++){
-				var temp:BitmapData = new BitmapData(wh.width, wh.height, true, 0);
-				var tempRect:Rectangle = temp.generateFilterRect(temp.rect, dis.filters[i]);
-				b = b.union(tempRect);
-				temp.dispose();
+				tbd = new BitmapData(wh.width, wh.height, true, 0);
+				tRect = tbd.generateFilterRect(tbd.rect, dis.filters[i]);
+				b = b.union(tRect);
+				tbd.dispose();
 			}
 		}
 		var sx:Number = dis.scaleX;
 		var sy:Number = dis.scaleY;
-		var mt:Matrix = new Matrix(sx, 0, 0, sy, -b.x + p.x, -b.y + p.y);
+		HELP_MATRIX.setTo(sx, 0, 0, sy, -b.x + p.x, -b.y + p.y);
 		var dt:BitmapData = new BitmapData(b.width, b.height, true, 0);
-		dt.draw(dis, mt, c);
+		dt.draw(dis, HELP_MATRIX, c);
 		var s:Sprite = new Sprite();
 		var bt:Bitmap = new Bitmap(dt);
 		s.addChild(bt);
@@ -124,97 +96,99 @@ public class BitmapUtil
 		bt.y = b.y - p.y;
 		return s;
 	}
-	
+
 	/**
-	 * 获取指定显示对象的位图数据对象
-	 * @param d
-	 * @return 
-	 */
-	public static function getBitmapData(d:DisplayObject):BitmapData{
-		if(d.width <= 0 || d.height <= 0){
+	* 获取指定显示对象的位图数据对象
+	* @param	dis
+	* @return
+	*/
+	public static function getBitmapData(dis:DisplayObject):BitmapData{
+		if(!checkDraw(dis)){
 			return null;
 		}
-		if(!checkDraw(d)){
-			return null;
+		var wh:Rectangle = DisplayObjectUtil.getActualSize(dis);
+		var c:ColorTransform = dis.transform.colorTransform;
+		var len:int = dis.filters.length;
+		var p:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
+		var b:Rectangle = new Rectangle(0, 0, wh.width, wh.height);
+		if (len > 0) {
+			var tbd:BitmapData;
+			var tRect:Rectangle;
+			for(var i:int = 0; i < len; i ++){
+				tbd = new BitmapData(wh.width, wh.height, true, 0);
+				tRect = tbd.generateFilterRect(tbd.rect, dis.filters[i]);
+				b = b.union(tRect);
+				tbd.dispose();
+			}
 		}
-		var scaleX:Number = d.scaleX;
-		var scaleY:Number = d.scaleY;
-		var offset:Point = DisplayObjectUtil.getLeftTopPosition(d, HELP_POINT);
-		var bitmapData:BitmapData = new BitmapData(d.width, d.height, true, 0);
-		var mtx:Matrix = new Matrix(scaleX, 0, 0, scaleY, offset.x, offset.y);
-		bitmapData.draw(d, mtx);
+		var sx:Number = dis.scaleX;
+		var sy:Number = dis.scaleY;
+		HELP_MATRIX.setTo(sx, 0, 0, sy, -b.x + p.x, -b.y + p.y);
+		var bitmapData:BitmapData = new BitmapData(b.width, b.height, true, 0);
+		bitmapData.draw(dis, HELP_MATRIX, c);
 		return bitmapData;
 	}
-	
+
 	/**
-	 * 获取指定显示对象的不透明像素区域的位图数据对象
-	 * @param d
-	 * @return 
-	 */
-	public static function getOpaqueDisObj(d:DisplayObject):BitmapData{
-		if(d.width <= 0 || d.height <= 0){
+	* 获取指定显示对象的不透明像素区域的位图数据对象
+	* @param d 传入DisplayObject或BitmapData对象
+	* @return 
+	*/
+	public static function getOpaqueBitmapData(d:IBitmapDrawable, dispose:Boolean = true):BitmapData {
+		var bitmapData:BitmapData;
+		if (d is DisplayObject) {
+			var result:DisplayObject = DisplayObject(d);
+			if(!checkDraw(result)){
+				return null;
+			}
+			bitmapData = getBitmapData(result);
+		}
+		else {
+			bitmapData = d as BitmapData;
+		}
+		if (!bitmapData) {
 			return null;
 		}
-		if(!checkDraw(d)){
-			return null;
+		var area:Rectangle = bitmapData.getColorBoundsRect(0xFF000000, 0x00000000, false);
+		var c:BitmapData = new BitmapData(area.width, area.height, true, 0);
+		c.copyPixels(bitmapData, area, HELP_ZERO_POINT);
+		if (dispose) {
+			bitmapData.dispose(); //will dispose
 		}
-		var bitmapData:BitmapData = getBitmapData(d);
-		var unTransparentArea:Rectangle = bitmapData.getColorBoundsRect(0xFF000000, 0x00000000, false);
-		var c:BitmapData = new BitmapData(unTransparentArea.width, unTransparentArea.height, true, 0);
-		c.copyPixels(bitmapData, unTransparentArea.clone(), new Point(0, 0));
-		bitmapData.dispose();
 		return c;
 	}
-	
+
 	/**
-	 * @param bitmapData
-	 * @see getOpaqueDisObj
-	 * @return 
-	 */
-	public static function getOpaqueBitmapData(bitmapData:BitmapData):BitmapData{
-		var unTransparentArea:Rectangle = bitmapData.getColorBoundsRect(0xFF000000, 0x00000000, false);
-		var c:BitmapData = new BitmapData(unTransparentArea.width, unTransparentArea.height, true, 0);
-		c.copyPixels(bitmapData, unTransparentArea.clone(), new Point(0, 0));
-		bitmapData.dispose();
-		return c;
-	}
-	
-	/**
-	 * 移除指定显示对象中的某种指定像素(首先会将该显示对象转为位图对象)
-	 * @param d
-	 * @param pixel
-	 * @param opaque
-	 * @return 
-	 */
-	public static function removePixel(d:DisplayObject, pixel:uint, opaque:Boolean = false):BitmapData{
-		if(d.width <= 0 || d.height <= 0){
-			return null;
-		}
+	* 移除指定显示对象中的某种指定像素(首先会将该显示对象转为位图对象)
+	* @param	d
+	* @param	pixel
+	* @param	needOpaque
+	* @return
+	*/
+	public static function removePixel(d:DisplayObject, pixel:uint, needOpaque:Boolean = false):BitmapData{
 		if(!checkDraw(d)){
 			return null;
 		}
 		var bmpData:BitmapData = getBitmapData(d);
-		bmpData.threshold(bmpData, bmpData.rect, new Point(0, 0), "==", pixel, 0x00000000);
-		if(opaque){
-			var unTransparentArea:Rectangle = bmpData.getColorBoundsRect(0xFF000000, 0x00000000, false);
-			var c:BitmapData = new BitmapData(unTransparentArea.width, unTransparentArea.height, true, 0);
-			c.copyPixels(bmpData, unTransparentArea.clone(), new Point(0, 0));
+		//If ((pixelValue & mask) operation (threshold & mask)), then set the pixel to color;
+		bmpData.threshold(bmpData, bmpData.rect, HELP_ZERO_POINT, "==", pixel, 0x00000000);
+		if(needOpaque){
+			var area:Rectangle = bmpData.getColorBoundsRect(0xFF000000, 0x00000000, false);
+			var c:BitmapData = new BitmapData(area.width, area.height, true, 0);
+			c.copyPixels(bmpData, area, HELP_ZERO_POINT);
 			bmpData.dispose();
 			bmpData = c;
 		}
 		return bmpData;
 	}
-	
+
 	/**
-	 * 将指定显示对象绘制成一个指定长宽的位图数据对象
-	 * @param dis
-	 * @param range
-	 * @return 
-	 */
+	* 将指定显示对象绘制成一个指定长宽的位图数据对象
+	* @param dis
+	* @param range
+	* @return 
+	*/
 	public static function sampling(dis:DisplayObject, range:Rectangle = null):BitmapData{
-		if((dis.width == 0) || (dis.height == 0)){
-			return null;
-		}
 		if(!checkDraw(dis)){
 			return null;
 		}
@@ -236,61 +210,59 @@ public class BitmapUtil
 		}
 		var bd:BitmapData = new BitmapData(dis.width, dis.height, true, 0);
 		var topLeft:Point = DisplayObjectUtil.getLeftTopPosition(dis, HELP_POINT);
-		bd.draw(dis, new Matrix(s, 0, 0, s, topLeft.x, topLeft.y));
+		HELP_MATRIX.setTo(s, 0, 0, s, topLeft.x, topLeft.y);
+		bd.draw(dis, HELP_MATRIX);
 		return bd;
 	}
-	
+
 	/**
-	 * inspired from showbox (a air game develop tool) and grantskiner's js tool
-	 * 将美术资源的png转换为2块jpg格式(原rgb, alpha, 缩小整体文件大小, 加载2张图片后再使用copyChannel方法合并为透明图片)
-	 * @param rgbBd    rgb通道
-	 * @param alphaBd  透明通道
-	 * @return BitmapData 返回一个合并了透明通道的rgb位图数据对象
-	 */ 
-	public static function combinePng(rgbBd:BitmapData, alphaBd:BitmapData):BitmapData{
-		var rgbCom:BitmapData = rgbBd.clone();
-		var alp:BitmapData = alphaBd.clone();
-		rgbCom.copyChannel(alp, rgbCom.rect, new Point(0, 0), BitmapDataChannel.RED, BitmapDataChannel.ALPHA);
-		rgbCom.copyChannel(alp, rgbCom.rect, new Point(0, 0), BitmapDataChannel.GREEN, BitmapDataChannel.ALPHA);
-		rgbCom.copyChannel(alp, rgbCom.rect, new Point(0, 0), BitmapDataChannel.BLUE, BitmapDataChannel.ALPHA);
-		return rgbCom;
+	* 合并透明通道的rgb位图数据对象
+	* @param	r	rgb通道位图
+	* @param	a	透明通道位图
+	* @return
+	*/
+	public static function combinePng(r:BitmapData, a:BitmapData):BitmapData{
+		var rgb:BitmapData = r.clone();
+		var rect:Rectangle = rgb.rect;
+		rgb.copyChannel(a, rect, HELP_ZERO_POINT, BitmapDataChannel.RED, BitmapDataChannel.ALPHA);
+		rgb.copyChannel(a, rect, HELP_ZERO_POINT, BitmapDataChannel.GREEN, BitmapDataChannel.ALPHA);
+		rgb.copyChannel(a, rect, HELP_ZERO_POINT, BitmapDataChannel.BLUE, BitmapDataChannel.ALPHA);
+		return rgb;
 	}
-	
+
 	/**
-	 * 获取指定位图对象的透明通道
-	 * @param data        指定位图数据
-	 * @return BitmapData 返回一个包含透明通道的位图数据结构
-	 */ 
+	* 获取指定位图对象的透明通道
+	* @param data        指定位图数据
+	* @return BitmapData 返回一个包含透明通道的位图数据结构
+	*/ 
 	public static function getAlphaChannel(data:BitmapData):BitmapData{
-		var alp:BitmapData = new BitmapData(data.width, data.height, true, 0);
-		alp.fillRect(alp.rect, 0xFF000000);
-		alp.copyChannel(data, alp.rect, new Point(0, 0), BitmapDataChannel.ALPHA, BitmapDataChannel.RED);
-		alp.copyChannel(data, alp.rect, new Point(0, 0), BitmapDataChannel.ALPHA, BitmapDataChannel.GREEN);
-		alp.copyChannel(data, alp.rect, new Point(0, 0), BitmapDataChannel.ALPHA, BitmapDataChannel.BLUE);
+		var alp:BitmapData = new BitmapData(data.width, data.height, true, 0xFF000000);
+		var rect:Rectangle = alp.rect;
+		alp.copyChannel(data, rect, HELP_ZERO_POINT, BitmapDataChannel.ALPHA, BitmapDataChannel.RED);
+		alp.copyChannel(data, rect, HELP_ZERO_POINT, BitmapDataChannel.ALPHA, BitmapDataChannel.GREEN);
+		alp.copyChannel(data, rect, HELP_ZERO_POINT, BitmapDataChannel.ALPHA, BitmapDataChannel.BLUE);
 		return alp;
 	}
-	
+
 	/**
-	 * 返回指定位图的指定通道位图对象
-	 * @param raw     原始位图数据
-	 * @param channel 所希望得到的通道数据
-	 * @see BitmapDataChannel
-	 * @see BitmapData's copyChannel method
-	 * @return BitmapData 返回一个新的位图数据结构
-	 */ 
+	* 返回指定位图的指定通道位图对象
+	* @param	raw
+	* @param	channel
+	* @return
+	*/
 	public static function copyBitmapChannel(raw:BitmapData, channel:uint):BitmapData{
 		var d:BitmapData = new BitmapData(raw.width, raw.height, true, 0xFF000000);
-		d.copyChannel(raw, d.rect, new Point(0, 0), channel, channel);
+		d.copyChannel(raw, d.rect, HELP_ZERO_POINT, channel, channel);
 		return d;
 	}
-	
+
 	/**
-	 * 检查指定显示对象在指定舞台坐标点下是否为透明像素
-	 * @param dis
-	 * @param point
-	 * @return 
-	 */
-	public static function checkUnderPointTransParent(dis:DisplayObject, point:Point):Boolean{
+	* 检查指定显示对象在指定舞台坐标点下是否为透明像素 (如果是透明像素, 返回false)
+	* @param dis
+	* @param point
+	* @return 
+	*/
+	public static function checkHitTest(dis:DisplayObject, point:Point):Boolean{
 		if(!dis.parent){
 			return false;
 		}
@@ -299,208 +271,118 @@ public class BitmapUtil
 		offset.x = -offset.x + dis.x; //get the display object's top left position(0, 0)
 		offset.y = -offset.y + dis.y; 
 		var p:Point = dis.parent.localToGlobal(offset); //get the global position value
-		var isTransParent:Boolean = bitmapData.hitTest(new Point(0, 0), 0xFF, new Point(point.x - p.x, point.y - p.y));
+		HELP_POINT.setTo(point.x - p.x, point.y - p.y);
+		var transparent:Boolean = bitmapData.hitTest(HELP_ZERO_POINT, 0xFF, HELP_POINT);
 		bitmapData.dispose();
-		return isTransParent;
+		return transparent;
 	}
-	
+
+	//HELPER
+	private static const HELP_ZERO_POINT:Point = new Point(0, 0);
+	private static const HELP_MATRIX:Matrix = new Matrix();
+	private static const HELP_POINT:Point = new Point();
+
+	//HELPER
+	private static const CHECK_BMPD:BitmapData = new BitmapData(1, 1, true, 0);
+	private static const CHECK_MATRIX:Matrix = new Matrix();
+	private static const CHECK_POINT:Point = new Point();
+
 	/**
-	 * 将以下三种类型变量常量提出, 是为了避免每帧创建所带来的内存浪费
-	 */ 
-	private static const checkTransParent:BitmapData = new BitmapData(1, 1, true, 0);
-	private static const checkMatrix:Matrix = new Matrix();
-	private static var checkPoint:Point = new Point();
-	
-	/**
-	 * 检查指定显示对象在指点鼠标点下是否为透明
-	 * @param dis   指定显示对象
-	 * @param point 指定鼠标点Point对象, 为舞台全局坐标         
-	 */ 
-	public static function checkPointIsTransParent(dis:DisplayObject, point:Point):Boolean{
+	* 检查指定显示对象在指点鼠标点下是否为透明 (如果是透明像素, 返回true)
+	* @param dis   指定显示对象
+	* @param point 指定鼠标点Point对象, 为舞台全局坐标         
+	*/ 
+	public static function checkTransParent(dis:DisplayObject, point:Point):Boolean{
 		if(!dis){
 			return true;
 		}
-		checkTransParent.fillRect(checkTransParent.rect, 0);
-		checkPoint.x = point.x;
-		checkPoint.y = point.y;
-		checkPoint = dis.globalToLocal(checkPoint);
-		checkMatrix.tx = -checkPoint.x|0;
-		checkMatrix.ty = -checkPoint.y|0;
-		checkTransParent.draw(dis, checkMatrix);
-		return ((checkTransParent.getPixel32(0, 0) >>> 24) & 0xFF) < 0x80;
+		CHECK_BMPD.fillRect(CHECK_BMPD.rect, 0);
+		CHECK_POINT.x = point.x;
+		CHECK_POINT.y = point.y;
+		point = dis.globalToLocal(CHECK_POINT);
+		CHECK_POINT.setTo(point.x, point.y);
+		CHECK_MATRIX.tx = -CHECK_POINT.x|0;
+		CHECK_MATRIX.ty = -CHECK_POINT.y|0;
+		CHECK_BMPD.draw(dis, CHECK_MATRIX);
+		return ((CHECK_BMPD.getPixel32(0, 0) >>> 24) & 0xFF) < 0x80;
 	}
-	
+
+
 	/**
-	 * @see getDisObjectUnderPoint
-	 */ 
-	public static function getDisObjectUnderXY(container:DisplayObjectContainer, px:Number, py:Number):DisplayObject{
-		return getDisObjectUnderPoint(container, new Point(px, py));
-	}
-	
-	/**
-	 * 
-	 * 获取指定容器在给定坐标下的显示对象数组集合
-	 * 
-	 * @param container  指定显示容器
-	 * @param px         指定x轴坐标 
-	 * @param py         指定y轴坐标
-	 */ 
-	public static function getUnderXYObjects(container:DisplayObjectContainer, px:Number, py:Number):Array{
-		var disAry:Array = container.getObjectsUnderPoint(new Point(px, py));
-		disAry.forEach(function(dis:DisplayObject, ...args):void{
+	* 获取指定容器在给定坐标下的显示对象数组集合 (返回的数组的排列顺序和显示列表顺序相同)
+	* 
+	* @param container  指定显示容器 (一般就传入stage实例即可)
+	* @param px         指定x轴坐标 
+	* @param py         指定y轴坐标
+	*/ 
+	public static function getObjectsUnderXY(container:DisplayObjectContainer, px:Number, py:Number):Array {
+		HELP_POINT.setTo(px, py);
+		var disAry:Array = container.getObjectsUnderPoint(HELP_POINT);
+		var len:int = disAry.length;
+		var dis:DisplayObject;
+		for (var i:int = 0; i < len; i ++) {
+			dis = disAry[i];
 			if(!(dis is DisplayObjectContainer)){
 				var c:DisplayObject = dis.parent as DisplayObject; //maybe a simpleButton
 				if(c){
-					(args[1] as Array)[int(args[0])] = c;
+					disAry[i] = c;
 				}
 			}
-		});
+		}
 		return disAry;
 	}
-	
+
 	/**
-	 * 检查是否有指定的显示对象包含在当前鼠标坐标下
-	 * 
-	 * @param container    指定显示容器
-	 * @param px           指定显示容器的x轴坐标
-	 * @param py           指定显示容器的y轴坐标
-	 * @param customCheck  检测方法, 需要自己根据实际需求提供
-	 */ 
-	public static function hasSpecfiedObj(container:DisplayObjectContainer, px:Number, py:Number, customCheck:Function):Boolean{
-		var c:Array = getUnderXYObjects(container, px, py);
-		return c.some(function(dis:DisplayObject, ...args):Boolean{
-			return customCheck(dis);
+	* @see getDisObjectUnderPoint
+	*/ 
+	public static function getObjectUnderXY(container:DisplayObjectContainer, px:Number, py:Number):DisplayObject{
+		HELP_POINT.setTo(px, py);
+		return getDisObjectUnderPoint(container, HELP_POINT);
+	}
+
+
+	/**
+	* 根据传入的自定义方法来过滤获取的显示对象列表
+	* @param	c
+	* @param	x
+	* @param	y
+	* @param	check
+	* @return
+	*/
+	public static function filterObjectsUnderXY(c:DisplayObjectContainer, x:Number, y:Number, check:Function):Boolean{
+		var d:Array = getObjectsUnderXY(c, x, y);
+		return d.some(function(dis:DisplayObject, ...args):Boolean{
+			return check(dis);
 		});
 	}
-	
+
 	/**
-	 * 获取指定显示对象的"倒影"位图显示对象
-	 * 
-	 * TODO
-	 * @param	dis
-	 * @param	alphaRatio
-	 * @param	heightRatio
-	 * 
-	 * @see		参考自com.innerdrivestudios.visualeffect.Reflection
-	 * 			目前该实现还无法应对显示对象的scaleX,scaleY为负值的情况
-	 * 
-	 * @return
-	 */
-	public static function getReflectionShadow(dis:DisplayObject, alphaRatio:Number = .4, heightRatio:Number = .4):Bitmap {
-		var bounds:Rectangle = dis.getBounds(dis);
-		var bmpd:BitmapData = new BitmapData(bounds.width, bounds.height, true, 0);
-		bmpd.draw(dis, new Matrix(1, 0, 0, 1, -bounds.x, -bounds.y));
-
-		//如下找出非透明区域
-		var untransRect:Rectangle = bmpd.getColorBoundsRect(0xFF000000, 0xFF000000, true);
-		untransRect.offset(bounds.x, bounds.y);
-		bmpd.dispose();
-
-		var realX:Number = untransRect.x|0;
-		var realY:Number = untransRect.y|0;
-		var realWidth:Number = Math.ceil(untransRect.width);
-		var realHeight:Number = Math.ceil(untransRect.height);
-
-		var alphaMask:Shape = new Shape();
-		alphaMask.cacheAsBitmap = true;
-
-		var alphaMatrix:Matrix = new Matrix();
-		var reflectHeight:Number = Math.ceil(realHeight * heightRatio);
-		var reflectWidth:Number = realWidth;
-		//绘制透明mask
-		alphaMatrix.createGradientBox(reflectWidth, reflectHeight, Math.PI * .5);
-		alphaMask.graphics.beginGradientFill(GradientType.LINEAR, [0x000000, 0xFFFFFF], [alphaRatio, 0], [0, 0xFF], alphaMatrix);
-		alphaMask.graphics.drawRect(0, 0, reflectWidth, reflectHeight);
-		alphaMask.graphics.endFill();
-
-		var reflectMatrix:Matrix = new Matrix();
-		reflectMatrix.translate(-realX, -realY);
-		reflectMatrix.scale(1, -1);
-		reflectMatrix.translate(0, realHeight);
-		
-		//绘制倒影
-		var reflectBmpd:BitmapData = new BitmapData(realWidth, realHeight, true, 0);
-		reflectBmpd.draw(dis, reflectMatrix, null, null, new Rectangle(0, 0, realWidth, realHeight));
-
-		var reflectBm:Bitmap = new Bitmap(reflectBmpd);
-		reflectBm.cacheAsBitmap = true;
-		reflectBm.mask = alphaMask;
-
-		var reflectSp:Sprite = new Sprite();
-		reflectSp.addChild(reflectBm);
-		reflectSp.addChild(alphaMask);
-
-		var shadowBmpd:BitmapData = new BitmapData(reflectSp.width, reflectSp.height, true, 0);
-		shadowBmpd.draw(reflectSp);
-		var shadowBm:Bitmap = new Bitmap(shadowBmpd);
-		shadowBm.smoothing = true;
-
-		reflectBmpd.dispose();
-		reflectBm.mask = null;
-		reflectSp.removeChild(reflectBm);
-		reflectSp.removeChild(alphaMask);
-		reflectBm.cacheAsBitmap = false;
-		alphaMask.cacheAsBitmap = false;
-		
-		//定位, 上述代码的绘制部分未考虑原始显示对象的缩放情况, 
-		//而是通过转换坐标来获取实际舞台坐标,注意需要原始对象已经
-		//添加至舞台
-		var offsetXY:Point = new Point(realX, realY);
-		var whXY:Point = new Point(realX + realWidth, realY + realHeight);
-
-		offsetXY = dis.localToGlobal(offsetXY);
-		offsetXY = dis.parent.globalToLocal(offsetXY);
-		
-		whXY = dis.localToGlobal(whXY);
-		whXY = dis.parent.globalToLocal(whXY);
-		
-		whXY.x = whXY.x - offsetXY.x;
-		whXY.y = whXY.y - offsetXY.y;
-		
-		shadowBm.x = offsetXY.x;
-		shadowBm.y = offsetXY.y + whXY.y;
-		shadowBm.width = whXY.x;
-		shadowBm.height = whXY.y;
-
-		return shadowBm;
-	}
-		
-	
-	/**
-	 * 
-	 * @inspired from the monsterDebugger opensource framework
-	 * 
-	 * should be note that this will return only a displayobject 
-	 * 
-	 * （the simplebutton's internal resource, 
-	 * 
-	 * e.g (shape.parent is SimpleButton, this parent is not a DisplayObjectContainer)）
-	 * 
-	 * @param container             一般建议传送舞台实例(非舞台实例貌似造成一些无法预估的问题, 而且已经排除是坐标转换造成的) 
-	 * @param p                     检测点 最好是舞台全局坐标(如不是方法内部会进行转换)
-	 * @param isMindMouseChildren   是否考虑检测容器mouseChildren属性
-	 * @param isMindTransParent     是否检测指定点下的透明度(不考虑显示层级)
-	 * 
-	 * 
-	 * 关于获取特殊显示对象如SimpleButton, 很奇怪, Flash IDE 一切正常, 但是在FB中, simpleButton
-	 * 中的shape.parent 为null.., 因此无法继续获取了改按钮了, 不确定是否是sdk版本的关系。
-	 * 
-	 * @issue 
-	 * 
-	 * in adobe document
-	 *   Starting with Player version 11.2 / AIR version 3.2, the parent property of the 
-	 * states of a SimpleButton object will report null if queried.
-	 * 
-	 *   getObjectsUnderPoint 这个方法貌似在11.2以后不但是SimpleButton, 
-	 * 即便是一个buttonMode为true的模拟按钮行为的MovieClip也取不到,看来全局
-	 * 使用getObjectsUnderPoint取SimpleButton在11.2之后是不行了
-	 * 
-	 */ 
+	* @inspired from the monsterDebugger opensource framework
+	* should be note this method will return only a displayobject 
+	* (note: the simplebutton's state resource, shape.parent should be SimpleButton, but actually is null)
+	* 
+	* @param container             一般建议传送舞台实例(非舞台实例貌似造成一些无法预估的问题, 而且已经排除是坐标转换造成的) 
+	* @param p                     检测点 最好是舞台全局坐标(如不是方法内部会进行转换)
+	* @param isMindMouseChildren   是否考虑检测容器mouseChildren属性
+	* @param isMindTransParent     是否检测指定点下的透明度(不考虑显示层级)
+	* 
+	* @issue 
+	* in adobe document
+	*   Starting with Player version 11.2 / AIR version 3.2, the parent property of the 
+	* states of a SimpleButton object will report null if queried.
+	* 
+	* 关于获取特殊显示对象如SimpleButton, 很奇怪, Flash IDE 一切正常, 但是在FB中, simpleButton
+	* 中的shape.parent 为null.., 因此无法继续获取了改按钮了, 不确定是否是sdk版本的关系。
+	* 
+	* getObjectsUnderPoint 这个方法貌似在11.2以后不但是SimpleButton, 
+	* 即便是一个buttonMode为true的模拟按钮行为的MovieClip也取不到,看来全局
+	* 使用getObjectsUnderPoint取SimpleButton在11.2之后是不行了
+	*/ 
 	public static function getDisObjectUnderPoint(container:DisplayObjectContainer, 
-												  p:Point, 
-												  isMindMouseChildren:Boolean = false, 
-												  isMindTransParent:Boolean = false,
-												  isMindStageChild:Boolean = false):DisplayObject{
+											  p:Point, 
+											  isMindMouseChildren:Boolean = false, 
+											  isMindTransParent:Boolean = false,
+											  isMindStageChild:Boolean = false):DisplayObject{
 		if(!container || !p){
 			return null;
 		}
@@ -511,12 +393,12 @@ public class BitmapUtil
 		if(!(container is Stage)){
 			c = container.localToGlobal(c);
 		}
-		
+
 		var disAry:Array = container.getObjectsUnderPoint(c);
 		if((!disAry) || (disAry.length == 0)){
 			return container;
 		}
-		
+
 		if(isMindStageChild){
 			//oops..如下判断是为了避免自定义鼠标形状被"错误"圈入其中, 如果sdk大于4.5,
 			//则Mouse类有内置设置自定义鼠标形态方法, 就不需要如下的判断了...
@@ -524,15 +406,15 @@ public class BitmapUtil
 				return item.root != container.stage;
 			});
 		}
-		
+
 		if((!disAry) || (disAry.length == 0)){
 			return container;
 		}
-		
+
 		var backForWardIndex:int = 1;
 		var found:DisplayObject = disAry[disAry.length - backForWardIndex];
 		if(isMindTransParent){
-			while(found && checkPointIsTransParent(found, c)){
+			while(found && checkTransParent(found, c)){
 				if(++backForWardIndex > disAry.length){
 					break;
 				}
@@ -540,11 +422,11 @@ public class BitmapUtil
 			}
 		}
 		disAry.length = 0;
-		
+
 		if(!found){
 			return container;
 		}
-		
+
 		do{
 			disAry.push(found);
 			if(!found.parent){
@@ -573,8 +455,11 @@ public class BitmapUtil
 		}
 		return found;
 	}
-	
+
 	private static function checkDraw(dis:DisplayObject):Boolean{
+		if(dis.width <= 0 || dis.height <= 0){
+			return false;
+		}
 		if(dis is Loader){
 			return (dis as Loader).contentLoaderInfo.childAllowsParent;
 		}
