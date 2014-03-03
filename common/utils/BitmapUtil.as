@@ -51,13 +51,12 @@ public class BitmapUtil
 	* @return
 	*/
 	public static function getBitmap(dis:DisplayObject, result:Bitmap = null):Bitmap {
-		var d:Bitmap = result;
-		if (!d) {
-			d = new Bitmap();
+		if (!result) {
+			result = new Bitmap();
 		}
 		var bitmapData:BitmapData = getBitmapData(dis);
-		d.bitmapData = bitmapData;
-		return d;
+		result.bitmapData = bitmapData;
+		return result;
 	}
 
 	/**
@@ -379,10 +378,10 @@ public class BitmapUtil
 	* 使用getObjectsUnderPoint取SimpleButton在11.2之后是不行了
 	*/ 
 	public static function getDisObjectUnderPoint(container:DisplayObjectContainer, 
-											  p:Point, 
-											  isMindMouseChildren:Boolean = false, 
-											  isMindTransParent:Boolean = false,
-											  isMindStageChild:Boolean = false):DisplayObject{
+													p:Point, 
+													isMindMouseChildren:Boolean = false, 
+													isMindTransParent:Boolean = false,
+													isMindStageChild:Boolean = false):DisplayObject{
 		if(!container || !p){
 			return null;
 		}
