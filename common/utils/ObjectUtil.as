@@ -12,12 +12,12 @@ public class ObjectUtil
 {	
 	/**
 	 * 判断指定动态对象是否为空
-	 * @param o
+	 * @param data
 	 * @return 
 	 */
-	public static function isEmpty(o:Object):Boolean{
-		if(o){
-			for(var item:* in o){
+	public static function isEmpty(data:Object):Boolean{
+		if(data){
+			for(var item:* in data){
 				return false;
 			}
 		}
@@ -26,13 +26,13 @@ public class ObjectUtil
 	
 	/**
 	 * 获取指定对象的内部动态属性数目 
-	 * @param o
+	 * @param data
 	 * @return 
 	 */
-	public static function getLen(o:Object):int{
+	public static function getLen(data:Object):int{
 		var t:int = 0;
-		if(o){
-			for(var item:* in o){
+		if(data){
+			for(var item:* in data){
 				t ++;
 			}
 		}
@@ -69,7 +69,6 @@ public class ObjectUtil
 			cls = (classDefMapCache[s]) as Class;
 		}
 		else{
-			//一个例外
 			//Function                         匿名函数
 			//builtin.as$0::MethodClosure      方法闭包
 			if(s == "builtin.as$0::MethodClosure"){
@@ -80,7 +79,7 @@ public class ObjectUtil
 				cls = classDefMapCache[s] = getDefinitionByName(s) as Class;
 			}
 		}
-		return cls
+		return cls;
 	}
 	
 	/**
@@ -167,9 +166,9 @@ public class ObjectUtil
 	
 	/**
 	 * 返回指定对象的类名 
-	 * @param runIn
-	 * @param removePackage 是否移除包名字符串
-	 * @return 
+	 * @param	obj
+	 * @param	removePackage 是否移除包名字符串
+	 * @return
 	 */
 	public static function getClassName(obj:Object, removePackage:Boolean = true):String{
 		var name:String = getQualifiedClassName(obj);
@@ -181,8 +180,8 @@ public class ObjectUtil
 	
 	/**
 	 * 获取指定对象的包名字符串
-	 * @param runIn
-	 * @return 
+	 * @param	obj
+	 * @return
 	 */
 	public static function getPackageName(obj:Object):String{
 		var name:String = getQualifiedClassName(obj);
@@ -205,13 +204,15 @@ public class ObjectUtil
 
 	/**
 	 * 判断指定对象是否为包外类 (internal class)
+	 * 
 	 * @example 
 	 *  Test是一个包外类
-	 * 	在flashBuilder中的得到如下字符串
-	 * 	Test.as$93::BufferStateIconDisplay
+	 * 	
+	 *  在flashBuilder中的得到如下字符串
+	 *  Test.as$93::BufferStateIconDisplay
+	 * 
 	 *  在Flash IDE中得到如下字符串
 	 *  ::Test
-	 * @param runIn
 	 */ 
 	public static function isInternalClass(obj:Object):Boolean{
 		var name:String = getQualifiedClassName(obj);
@@ -262,9 +263,10 @@ public class ObjectUtil
 	
 	/**
 	 * 复制一个复杂类型对象, 但是如果被复制属性值为复杂类型, 那么该复制仍旧为浅复制。
-	 * @param source
-	 * @param target
-	 * @note 不包含静态属性或者私有, 保护属性
+	 * 不包含静态属性或者私有, 保护属性
+	 * 
+	 * @param source  
+	 * @param target  复制源
 	 */
 	public static function copyComplex(source:Object, target:Object):void{
 		var sourceClstr:String = getQualifiedClassName(source);
@@ -288,7 +290,10 @@ public class ObjectUtil
 	
 	/**
 	 * 判断指定对象是否为所列出的类型之一
-	 */ 
+	 * @param	obj
+	 * @param	typeAry
+	 * @return
+	 */
 	public static function assertTypeIsMatch(obj:*, typeAry:Array):Boolean{
 		if(!obj || !typeAry){
 			return false;
@@ -300,7 +305,7 @@ public class ObjectUtil
 	
 	private static const cleanMasterPoint:Dictionary = new Dictionary();
 	/**
-	 * @see jackson as3's blog "how to fixed XML's memory leak"
+	 * @see		jackson as3's blog "how to fixed XML's memory leak"
 	 * @param	str
 	 * 不过经过测试发现, 即便是XML对象只要不是引用属性(E4X中的@号)的值, 都可以被回收, 不产生对原始XML对象的依赖
 	 * (使用flash.sample.getMasterString()方法测试), 如果被引用了属性, 那么即使调用System.disposeXML也无法被回收。
@@ -323,9 +328,9 @@ public class ObjectUtil
 	 * 获取指定对象的方法字符串集合
 	 * @param	obj       
 	 * @param	includeInherit  是否包含继承父级的方法
-	 * @return  返回字符串类型的Vector对象
+	 * @return  	返回字符串类型的Vector对象
 	 */
-	public static function functionCollection(obj:*, includeInherit:Boolean = false):Vector.<String> {
+	public static function getFunctionCollection(obj:*, includeInherit:Boolean = false):Vector.<String> {
 		var result:Vector.<String> =  new Vector.<String>();	
 		var type:XML = describeType(obj);
 		var len:int, methodName:String, list:XMLList;
@@ -346,13 +351,13 @@ public class ObjectUtil
 	}
 	
 	/**
-	 * 获取指定对象的方法名称, 以字符串格式返回
+	 * 获取指定对象的方法的名称, 以字符串格式返回
 	 * @param	obj
 	 * @param	func
 	 * @return
 	 */
-	public static function functionName(obj:Object, func:Function):String {
-		var collection:Vector.<String> = functionCollection(obj, true);
+	public static function getFunctionName(obj:Object, func:Function):String {
+		var collection:Vector.<String> = getFunctionCollection(obj, true);
 		var foundName:String = "";
 		if (collection && collection.length > 0) {
 			collection.some(function(name:String, ...args):Boolean {
@@ -412,9 +417,9 @@ public class ObjectUtil
 	 */
 	public static function isVector(vectList:*):Boolean {
 		return vectList && (vectList is Vector.<*> 
-								|| vectList is Vector.<int> 
-								|| vectList is Vector.<uint> 
-								|| vectList is Vector.<Number>);
+					|| vectList is Vector.<int> 
+					|| vectList is Vector.<uint> 
+					|| vectList is Vector.<Number>);
 	}
 	
 }
