@@ -136,6 +136,18 @@ dynamic public final class TransformDisplayObjectPoint extends Proxy
 	
 	flash_proxy override function callProperty(name:*, ...rest):*{
 		var n:String = name is QName ? QName(name).localName : name.toString();
+		if (rest.length == 0) {
+			return display[n]();
+		}
+		else if (rest.length == 1) {
+			return display[n](rest[0]);
+		}
+		else if (rest.length == 2) {
+			return display[n](rest[0], rest[1]);
+		}
+		else if (rest.length == 3) {
+			return display[n](rest[0], rest[1], rest[2]);
+		}
 		return display[n].apply(display, rest);
 	}
 	
