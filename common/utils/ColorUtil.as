@@ -63,5 +63,53 @@ public class ColorUtil
 		return parseInt(str, 16);
 	}
 	
+	/**
+	 * 获取2种24位颜色值的指定比例色彩值
+	 * @param	from
+	 * @param	to
+	 * @param	ratio
+	 * @return
+	 */
+	public static function fadeHex24(from:uint, to:uint, ratio:Number):uint {
+		var r:int = from >> 16 & 0xFF;
+		var g:int = from >> 8 & 0xFF;
+		var b:int = from & 0xFF;
+		if (ratio < 0) {
+			ratio = 0;
+		}
+		else if (ratio > 1) {
+			ratio = 1;
+		}
+		var nr:int = r + ((to >> 16 & 0xFF) - r) * ratio;
+		var ng:int = g + ((to >> 8 & 0xFF) - g) * ratio;
+		var nb:int = b + ((to & 0xFF) - b) * ratio;
+		return nr << 16 | ng << 8 | nb;
+	}
+	
+	/**
+	 * 获取2种32位颜色值的指定比例色彩值
+	 * @param	from
+	 * @param	to
+	 * @param	ratio
+	 * @return
+	 */
+	public static function fadeHex32(from:uint, to:uint, ratio:Number):uint {
+		var a:int = from >> 24 & 0xFF;
+		var r:int = from >> 16 & 0xFF;
+		var g:int = from >> 8 & 0xFF;
+		var b:int = from & 0xFF;
+		if (ratio < 0) {
+			ratio = 0;
+		}
+		else if (ratio > 1) {
+			ratio = 1;
+		}
+		var na:int = a + ((to >> 24 & 0xFF) - a) * ratio;
+		var nr:int = r + ((to >> 16 & 0xFF) - r) * ratio;
+		var ng:int = g + ((to >> 8 & 0xFF) - g) * ratio;
+		var nb:int = b + ((to & 0xFF) - b) * ratio;
+		return na << 24 | nr << 16 | ng << 8 | nb;
+	}
+	
 }
 }
