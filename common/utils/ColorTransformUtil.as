@@ -48,11 +48,11 @@ public class ColorTransformUtil
 		else {
 			reset(result);
 		}
-		if (alpha > 1) {
-			alpha = 1;
-		}
 		if (alpha < 0) {
 			alpha = 0;
+		}
+		else if (alpha > 1) {
+			alpha = 1;
 		}
 		result.alphaMultiplier = alpha;
 		return result;
@@ -71,12 +71,14 @@ public class ColorTransformUtil
 		else {
 			reset(result);
 		}
+		
 		if (bright < -1) {
 			bright = -1;
 		}
-		if (bright > 1) {
+		else if (bright > 1) {
 			bright = 1;
 		}
+		
 		if (bright < 0) {
 			bright *= -1;
 		}
@@ -107,12 +109,14 @@ public class ColorTransformUtil
 		else {
 			reset(result);
 		}
+		
 		if (tint < 0) {
 			tint = 0;
 		}
-		if (tint > 1) {
+		else if (tint > 1) {
 			tint = 1;
 		}
+		
 		var red:int = colorHex >> 16 & 0xFF;
 		var green:int = colorHex >> 8 & 0xFF;
 		var blue:int = colorHex & 0xFF;
