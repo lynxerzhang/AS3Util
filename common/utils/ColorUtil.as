@@ -111,5 +111,81 @@ public class ColorUtil
 		return na << 24 | nr << 16 | ng << 8 | nb;
 	}
 	
+	/**
+	 * 获取2种24位颜色值的插值色彩值对
+	 * 
+	 * @param	from
+	 * @param	to
+	 * @param	step
+	 * @param	result
+	 * 
+	 * @see		http://www.pixelwit.com/blog/2008/05/color-fading-array/
+	 * @return
+	 */
+	public static function getFadeHex24Step(from:uint, to:uint, step:int, 
+					result:Vector.<uint> = null):Vector.<uint> {
+		if (step < 1) {
+			step = 1;
+		}
+		if (!result) {
+			result = new Vector.<uint>();
+		}
+		result.length = ++step;
+		
+		var r:int = from >> 16 & 0xFF;
+		var g:int = from >> 8 & 0xFF;
+		var b:int = from & 0xFF;
+		
+		var nr:int = (to >> 16 & 0xFF) - r;
+		var ng:int = (to >> 8 & 0xFF) - g;
+		var nb:int = (to & 0xFF) - b;
+		
+		var ratio:Number = 0;
+		for (var i:int = 0; i <= step; i ++) {
+			ratio = i / step;
+			result[i] = (r + nr * ratio) << 16 | (g + ng * ratio) << 8 | (b + nb * ratio);
+		}
+		return result;
+	}
+	
+	/**
+	 * 获取2种32位颜色值的插值色彩值对
+	 * 
+	 * @param	from
+	 * @param	to
+	 * @param	step
+	 * @param	result
+	 * 
+	 * @see		http://www.pixelwit.com/blog/2008/05/color-fading-array/
+	 * @return
+	 */
+	public static function getFadeHex32Step(from:uint, to:uint, step:int, 
+					result:Vector.<uint> = null):Vector.<uint> {
+		if (step < 1) {
+			step = 1;
+		}
+		if (!result) {
+			result = new Vector.<uint>();
+		}
+		result.length = ++step;
+		
+		var a:int = from >> 24 & 0xFF;
+		var r:int = from >> 16 & 0xFF;
+		var g:int = from >> 8 & 0xFF;
+		var b:int = from & 0xFF;
+		
+		var na:int = (to >> 24 & 0xFF) - a;
+		var nr:int = (to >> 16 & 0xFF) - r;
+		var ng:int = (to >> 8 & 0xFF) - g;
+		var nb:int = (to & 0xFF) - b;
+		
+		var ratio:Number = 0;
+		for (var i:int = 0; i <= step; i ++) {
+			ratio = i / step;
+			result[i] = (a + na * ratio) << 24 | (r + nr * ratio) << 16 
+					| (g + ng * ratio) << 8 | (b + nb * ratio);
+		}
+		return result;
+	}
 }
 }
