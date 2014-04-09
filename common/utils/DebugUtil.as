@@ -179,14 +179,16 @@ public class DebugUtil
 	 * @return
 	 */
 	public static function delayFrame(fun:Function, frames:uint, ...funArgs):void{
+		if (fun in HELPER_DICT) {
+			return;
+		}
 		if(frames < 1){
 			frames = 1;
 		}
-		var s:Shape = HELPER_TICKER;
 		var count:uint = 0;
 		var t:Function = function(evt:Event):void{
 			if(++count == frames){
-				s.removeEventListener(Event.ENTER_FRAME, t);
+				HELPER_TICKER.removeEventListener(Event.ENTER_FRAME, t);
 				if (fun in HELPER_DICT) {
 					delete HELPER_DICT[fun];
 					if(fun != null){
@@ -195,7 +197,7 @@ public class DebugUtil
 				}
 			}
 		}
-		s.addEventListener(Event.ENTER_FRAME, t);
+		HELPER_TICKER.addEventListener(Event.ENTER_FRAME, t);
 		HELPER_DICT[fun] = t;
 	}
 
@@ -204,12 +206,11 @@ public class DebugUtil
 	 */ 
 	public static function deleteFrameDelay(fun:Function):void{
 		if(fun in HELPER_DICT){
-			var s:Shape = HELPER_TICKER;
 			var t:Function = HELPER_DICT[fun];
 			if (t != null) {
-				s.removeEventListener(Event.ENTER_FRAME, t);
+				HELPER_TICKER.removeEventListener(Event.ENTER_FRAME, t);
+				delete HELPER_DICT[fun];
 			}
-			delete HELPER_DICT[fun];
 		}
 	}
 	
@@ -219,30 +220,26 @@ public class DebugUtil
 	 * @param time
 	 * @param funArgs
 	 */ 
-	public static function delayTime(fun:Function, time:Number, ...funArgs):void{
-		var s:Shape = HELPER_TICKER;
+	public static function delayTime(fun:Function, time:Number, ...funArgs):void {
+		if (fun in HELPER_DICT) {
+			return;
+		}
 		var d:Number = getTimer();
 		var t:Number;
-		var ended:Function = function(r:Boolean):void{
-			delete HELPER_DICT[fun];
-			s.removeEventListener(Event.ENTER_FRAME, enterFrame);
-			if(fun != null && r){
-				fun.apply(null, funArgs);
-			}
-		}
-		var del:Function = function():void{
-			ended(false);	
-		}
 		var enterFrame:Function = function(evt:Event):void{
 			t = (getTimer() - d) * .001;
 			if (t >= time) {
+				HELPER_TICKER.removeEventListener(Event.ENTER_FRAME, enterFrame);
 				if (fun in HELPER_DICT) {
-					ended(true);
+					delete HELPER_DICT[fun];
+					if(fun != null){
+						fun.apply(null, funArgs);
+					}
 				}
 			}
 		}
-		s.addEventListener(Event.ENTER_FRAME, enterFrame);
-		HELPER_DICT[fun] = del;
+		HELPER_TICKER.addEventListener(Event.ENTER_FRAME, enterFrame);
+		HELPER_DICT[fun] = enterFrame;
 	}
 	
 	/**
@@ -252,8 +249,9 @@ public class DebugUtil
 	public static function deleteTimeDelay(fun:Function):void{
 		if(fun in HELPER_DICT){
 			var f:Function = HELPER_DICT[fun] as Function;
-			if(f != null){
-				f();
+			if (f != null) {
+				HELPER_TICKER.removeEventListener(Event.ENTER_FRAME, f);
+				delete HELPER_DICT[fun];
 			}
 		}
 	}
