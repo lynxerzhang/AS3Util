@@ -9,10 +9,10 @@ public class StringUtil
 	 * @param args 一个数组传入, 一个对象, 或者一个顺序参数列表
 	 * 
 	 * @example
-	 *		replaceString("helloWor[0][1]", "l", "d");
-	 * 	 	replaceString("helloWor[0][1]", ["l", "d"]);
-	 *	 	replaceString("helloWor[first][last]", {"first":"l", "last":"d"});
-	 *		replaceString("he[0][0]oWorld", "l");
+	 *    replaceString("helloWor[0][1]", "l", "d");
+	 *    replaceString("helloWor[0][1]", ["l", "d"]);
+	 *    replaceString("helloWor[first][last]", {"first":"l", "last":"d"});
+	 *    replaceString("he[0][0]oWorld", "l");
 	 */
 	public static function replaceString(str:String, ...args):String{
 		var r:RegExp, provider:Object;
@@ -227,9 +227,9 @@ public class StringUtil
 	 * 	http://www.breaktrycatch.com/alphanumeric-sorting-in-as3/
 	 *  该实现没有对数值是否包含小数点或者有前缀0做判断         
 	 *  
-	 * 	由此参考了 http://www.davekoelle.com/alphanum.html 中js版本
+	 *  由此参考了 http://www.davekoelle.com/alphanum.html 中js版本
 	 *  同时参考了 http://my.opera.com/GreyWyvern/blog/show.dml/1671288 后继评论中
-	 *	使用正则来生成数组的方法
+	 *  使用正则来生成数组的方法
 	 * @return
 	 */
 	public static function alphaNumericSort(a:String, b:String):int {
@@ -255,14 +255,14 @@ public class StringUtil
 	/**
 	 * 返回以起始字符为标识的嵌套结构, 将匹配的字符串以数组形式返回
 	 * @param	str		目标字符串
-	 * @param	start	起始标识字符串
+	 * @param	start		起始标识字符串
 	 * @param	end		结束标识字符串
-	 * @param	useRegStyle  是否使用RegExp格式约束起始和结束标识字符串
+	 * @param	useRegStyle  	是否使用RegExp格式约束起始和结束标识字符串
 	 * @see 	http://blog.stevenlevithan.com/archives/javascript-match-nested
 	 * 
 	 * @return
 	 */
-	public function matchRecursive(str:String, start:String, end:String, useRegStyle:Boolean = false):Array {
+	public static function matchRecursive(str:String, start:String, end:String, useRegStyle:Boolean = false):Array {
 		if (!useRegStyle) {
 			var metaCharacter:RegExp = /[^\w]/g;//TODO:
 			start = start.replace(metaCharacter, "\\$&");
@@ -275,7 +275,7 @@ public class StringUtil
 			var o:int, c:int, d:Object;
 			do {
 				o = 0;
-				while (d = m.exec(str)) {
+				while ((d = m.exec(str)) != null) {
 					if (s.test(d[0])) {
 						if (!o++) {
 							c = m.lastIndex;
@@ -288,7 +288,7 @@ public class StringUtil
 					}
 				}
 			}
-			while (o && (m.lastIndex = c));
+			while (o && ((m.lastIndex = c) > -1));
 		}
 		return result;
 	}
