@@ -143,7 +143,7 @@ public class SortedVector
 	 * @param	obj
 	 * @return
 	 */
-	public function remove(obj):*
+	public function remove(obj:*):*
 	{
 		var index:int = getIndex(obj);
 		if (index != -1) {
