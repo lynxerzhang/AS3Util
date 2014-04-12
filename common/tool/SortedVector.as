@@ -189,7 +189,10 @@ public class SortedVector
 		else {
 			result.length = 0;
 		}
-		result = vectList.concat();
+		var len:int = vectList.length;
+		for (var i:int = 0; i < len; i ++) {
+			result.push(vectList[i]);
+		}
 		return result;
 	}
 }
