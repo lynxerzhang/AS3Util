@@ -97,6 +97,72 @@ public class TraceUtil
 		s += "dumpDisplayList end ---- > \n";
 		return s;
 	}
+	
+	/**
+	 * 将数组中的对象连接成字符串
+	 * 
+	 * @see 	http://jacksondunstan.com/articles/1880
+	 *
+	 * @param	aryOrVector	数组对象
+	 * @param	subSep		单个字符之间的连接字符
+	 * @param	sep		字符组之间的连接字符
+	 * @param	gap		字符组长度
+	 * @return
+	 */
+	public static function joinLabel(aryOrVector:*, subSep:String, sep:String, gap:int):String
+	{
+		var result:String = "";
+		var len:int = aryOrVector.length;
+		if (gap < 0) {
+			gap *= -1;
+		}
+		for (var i:int = 1; i <= len; i ++) {
+			result += aryOrVector[int(i - 1)];
+			if (i % gap == 0 && i < len) {
+				result += sep;
+			}
+			else {
+				if (i < len) {
+					result += subSep;
+				}
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * 将数组中的对象连接成字符串
+	 * 
+	 * @see		http://jacksondunstan.com/articles/1880
+	 *
+	 * @param	aryOrVector	数组对象
+	 * @param	group		标记字符数组
+	 * @param	groupLabel	标记字符连接符
+	 * @param	subSep		单个字符组内连接符
+	 * @param	sep		字符组之间的连接字符
+	 * @return
+	 */
+	public static function joinGroupLabel(aryOrVector:*, group:Array, groupLabel:String, subSep:String, sep:String):String
+	{
+		var result:String = "";
+		var gap:int = group.length;
+		var len:int = aryOrVector.length;
+		var j:int = 0;
+		for (var i:int = 1; i <= len; i ++) {
+			result += group[int(j++)] + groupLabel + aryOrVector[int(i - 1)];
+			if (i % gap == 0) {
+				j = 0;
+				result += sep;
+			}
+			else {
+				if (i < len) {
+					result += subSep;
+				}
+			}
+		}
+		return result;
+	}
+	
 }
 }
 
