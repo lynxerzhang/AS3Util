@@ -181,17 +181,15 @@ public class SortedVector
 	 * @param	result
 	 * @return
 	 */
-	public function getResult(result:* = null):*
+	public function clone(result:* = null):*
 	{
 		if (result == null) {
 			result = new elementType();
 		}
-		else {
-			result.length = 0;
-		}
+		result.length = vectList.length;
 		var len:int = vectList.length;
 		for (var i:int = 0; i < len; i ++) {
-			result.push(vectList[i]);
+			result[i] = vectList[i];
 		}
 		return result;
 	}
