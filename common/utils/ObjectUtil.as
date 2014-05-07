@@ -372,6 +372,24 @@ public class ObjectUtil
 	}
 	
 	/**
+	 * 获取指定类的静态类型变量名集合
+	 * @param	cls
+	 * @param	result
+	 * @return
+	 */
+	public static function getStaticMemberName(cls:Class, result:Vector.<String> = null):Vector.<String>
+	{
+		var list:XMLList = describeType(cls).constant;
+		if (result == null) {
+			result = new Vector.<String>();
+		}
+		for each(var item:XML in list) {
+			result[result.length] = String(item.@name);
+		}
+		return result;
+	}
+	
+	/**
 	 * 检查指定对象是否为原生的object类型对象
 	 * @param	obj
 	 * @return
