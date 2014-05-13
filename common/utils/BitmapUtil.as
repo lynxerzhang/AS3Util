@@ -196,7 +196,7 @@ public class BitmapUtil
 		}
 		//var rect:Rectangle = dis.transform.pixelBounds;
 		var rect:Rectangle = dis.getBounds(dis);
-		var s:Number;
+		var s:Number = 1;
 		if(range.width < dis.width){
 			dis.width = range.width;
 			dis.height = range.width * (rect.height / rect.width);
