@@ -455,7 +455,8 @@ public class DisplayObjectUtil
 			result = new Rectangle();
 		}
 		//TODO, 特例, pixelBounds无法返回文本的长宽, 只能返回对应坐标
-		if (dis is TextField) {
+		//也无法返回Bitmap的长宽
+		if (dis is TextField || dis is Bitmap) {
 			var t:Rectangle = dis.getBounds(dis);
 			result.setTo(t.x, t.y, t.width, t.height);
 			return result;
