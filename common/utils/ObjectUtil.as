@@ -251,13 +251,37 @@ public class ObjectUtil
 		return d;
 	}
 	
+	private static const INIT_VALUE:Object = {"String":"", "int":-1, "uint":0, "Number":NaN, "Boolean":false};
+	
 	/**
 	 * 清除指定对象中的动态属性
 	 * @param target
 	 */
 	public static function clear(target:Object):void{
-		for(var item:* in target){
-			delete target[item];
+		var isComplexObj:Object = !isRawObject(target);
+		if (isComplexObj) {
+			var c:Class = getDefinitionByName(getQualifiedClassName(target)) as Class;
+			var xml:XML = describeType(c);
+			var list:XMLList = xml.factory.*.(name() == "variable" || (name() == "accessor" && 
+				(attribute("access") == "writeonly" || attribute("access") == "readwrite")));
+			if(list.length() > 0){
+				var type:String;
+				for each(var item:XML in list){
+					type = item.@type;
+					if(INIT_VALUE.hasOwnProperty(type)){
+						target[item.@name] = INIT_VALUE[type];
+					}
+					else{
+						target[item.@name] = null;
+					}
+				}
+			}
+			DebugUtil.disposeXML(xml);
+		}
+		else {
+			for(var d:* in target){
+				delete target[d];
+			}
 		}
 	}
 	
@@ -439,6 +463,5 @@ public class ObjectUtil
 					|| vectList is Vector.<uint> 
 					|| vectList is Vector.<Number>);
 	}
-	
 }
 }
