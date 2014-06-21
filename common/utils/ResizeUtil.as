@@ -3,6 +3,7 @@ package common.utils
 import flash.display.Bitmap;
 import flash.display.DisplayObject;
 import flash.display.PixelSnapping;
+import flash.geom.Point;
 import flash.geom.Rectangle;
 
 public class ResizeUtil
@@ -59,29 +60,37 @@ public class ResizeUtil
 	 * @param targetHeight
 	 * @return 
 	 */	
-	public static function resize(width:Number, height:Number, targetWidth:Number, targetHeight:Number):Number
+	public static function resize(width:Number, height:Number, targetWidth:Number, targetHeight:Number, result:Point = null):Point
 	{
-		var s:Number = 1;
+		if(!result){
+			result = RESIZE_WH_POINT;
+		}
 		if(targetWidth >= width && targetHeight >= height){
-			return s;
+			result.setTo(width, height);
 		}
-		var ratio:Number = width / height;
-		var w:Number = targetWidth;
-		var h:Number = targetHeight;
-		if (ratio >= 1) {
-			h = targetWidth / ratio;
-			if (h > targetHeight) {
-				h = targetHeight;
-				w = h * ratio;
-			}
-		}else {
-			w = targetHeight * ratio;
-			if (w > targetWidth) {
-				w = targetWidth;
-				h = w / ratio;
+		else{
+			var ratio:Number = width / height;
+			var rW:Number = targetWidth;
+			var rH:Number = targetHeight;
+			if (ratio >= 1) {
+				rH = targetWidth / ratio;
+				if (rH > targetHeight) {
+					rH = targetHeight;
+					rW = rH * ratio;
+				}
+				result.setTo(rW, rH);
+			}else {
+				rW = targetHeight * ratio;
+				if (rW > targetWidth) {
+					rW = targetWidth;
+					rH = rW / ratio;
+				}
+				result.setTo(rW, rH);
 			}
 		}
-		return s;
+		return result;
 	}
+	
+	private static const RESIZE_WH_POINT:Point = new Point();
 }
 }
