@@ -36,6 +36,84 @@ public class StringUtil
 	}
 	
 	/**
+	 * 删除额外换行符
+	 */ 	
+	public static function removeExtraNewLine(str:String):String
+	{
+		str = str.split("\r\n").join("\n");
+		return str;
+	}
+	
+	private static const ENG_WORD:RegExp = /[a-z]+/gi;
+	
+	/**
+	 * 检查指定字符是否为英文字符
+	 */ 
+	public static function isEngWord(word:String):Boolean
+	{
+		ENG_WORD.lastIndex = 0;
+		if(ENG_WORD.test(word)){
+			ENG_WORD.lastIndex = 0;
+			var k:Array = word.match(ENG_WORD);
+			if(k && k.length == 1 && k[0].length == word.length){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * 替换指定的字符
+	 * @param input
+	 * @param replace
+	 * @param replaceWith
+	 * @return 
+	 * 
+	 */	
+	public static function replace(str:String, replace:String, replaceWith:String):String
+	{
+		return str.split(replace).join(replaceWith);
+	}
+	
+	/**
+	 * 解码指定字符串中html的字符
+	 * @param s
+	 * @return 
+	 * @see	https://github.com/as3/as3-utils
+	 */	
+	public static function htmlDecode(s:String):String
+	{
+		for(var item:* in HTML_DECODE){
+			s = replace(s, String(item), String(HTML_DECODE[item]));
+		}
+		return s;
+	}
+	
+	private static const HTML_DECODE:Object = {"&nbsp;":" ", 
+							"&amp;":"&", 
+							"&lt;":"<", 
+							"&gt;":">",
+							"&trade;":'™', 
+							"&reg;":"®", 
+							"&copy;":"©", 
+							"&euro;":"€", 
+							"&pound;":"£", 
+							"&mdash;":"—",
+							"&ndash;":"–", 
+							"&hellip;":'…', 
+							"&dagger;":"†", 
+							"&middot;":'·', 
+							"&micro;":"µ", 
+							"&laquo;":"«",
+							"&raquo;":"»", 
+							"&bull;":"•", 
+							"&deg;":"°", 
+							"&ldquo":'"', 
+							"&rsquo;":"'", 
+							"&rdquo;":'"', 
+							"&quot;":'"'};
+	
+	/**
 	 * 剔除指定字符串起始位置的所有空白字符
 	 * @param s
 	 * @return 
