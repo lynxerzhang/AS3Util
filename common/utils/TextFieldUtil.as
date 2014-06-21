@@ -2,11 +2,60 @@ package common.utils
 {
 import flash.system.System;
 import flash.text.TextField;
-import flash.text.TextFormat;
 import flash.text.TextFormatAlign;
 
 public class TextFieldUtil 
 {
+	/**
+	 * 根据传入文本的局部x,y点击坐标，返回当前点击的词语
+	 * @param	txt
+	 * @param	clickX
+	 * @param	clickY
+	 * @param 	matchRegExp	匹配词语的正则 (默认为英语词语)
+	 * @return
+	 */
+	public static function getSelectWord(txt:TextField, clickX:Number, clickY:Number, matchRegExp:RegExp = null):String
+	{
+		var selectWord:String = "";
+		if(txt){
+			var index:int = txt.getCharIndexAtPoint(clickX, clickY);
+			if(index != -1){
+				var lineIndex:int = txt.getLineIndexAtPoint(clickX, clickY);
+				var lineStr:String = txt.getLineText(lineIndex);
+				var lineOffset:Number = txt.getLineOffset(lineIndex);
+				
+				var currentIndex:int = index - lineOffset;
+				var d:Object;
+				
+				if (!matchRegExp) {
+					matchRegExp = ENG_WORD;
+				}
+				
+				if(matchRegExp){
+					matchRegExp.lastIndex = 0;
+					do{
+						d = matchRegExp.exec(lineStr);
+						if(d){
+							if(currentIndex >= d.index && currentIndex <= (d.index + d.toString().length)){
+								selectWord = d.toString();
+								//found it!
+								break;
+							}
+							else if(d.index == matchRegExp.lastIndex){
+								//prevent infinite loop
+								break;
+							}
+						}
+					}
+					while(d)
+				}
+			}
+		}
+		return selectWord;
+	}
+	
+	private static const ENG_WORD:RegExp = /[a-z]+/gi;
+	
 	/**
 	 * 将指定的字符串均匀分配到指定的文本数组中的文本中
 	 * @param	textAry  包含文本对象的数组
@@ -123,8 +172,8 @@ public class TextFieldUtil
 	 * @return
 	 */
 	public static function createHtmlText(str:String, fontName:String, 
-											fontSize:int, fontColor:uint, 
-											underline:Boolean = false, clickAble:Boolean = false):String {
+						fontSize:int, fontColor:uint, 
+						underline:Boolean = false, clickAble:Boolean = false):String {
 		
 		var fontXML:XML, alignXML:XML, underlineXML:XML, clickXML:XML;	
 						
