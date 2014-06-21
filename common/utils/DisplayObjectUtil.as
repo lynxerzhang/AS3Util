@@ -18,7 +18,9 @@ import flash.geom.Matrix;
 import flash.geom.Point;
 import flash.geom.Rectangle;
 import flash.geom.Transform;
+import flash.system.System;
 import flash.text.TextField;
+import flash.utils.describeType;
 import flash.utils.getDefinitionByName;
 import flash.utils.getQualifiedClassName;
 
@@ -124,6 +126,123 @@ public class DisplayObjectUtil
 				container.removeChildAt(len);
 			}
 		}
+	}
+	
+	/**
+	 * 销毁指定显示对象
+	 */ 
+	public static function dispose(dis:DisplayObject, checkSelfDispose:Boolean = false):void{
+		if(dis is Bitmap){
+			disposeBitmap(Bitmap(dis));
+		}
+		else if(dis is SimpleButton){
+			disposeSimpleButton(SimpleButton(dis));
+		}
+		else if(dis is Shape){
+			disposeShape(Shape(dis));
+		}
+		else{
+			if(checkSelfDispose){
+				if(isImplementIDispose(dis)){
+					var qualifiedInterfaceName:String = getMatchInterfaceQualifiedName(dis, "IDispose");
+					if(qualifiedInterfaceName && qualifiedInterfaceName != HELPER_EMPTY_STRING){
+						try{
+							var i_dispose:Class = getDefinitionByName(qualifiedInterfaceName) as Class;
+							if(i_dispose){
+								i_dispose(dis)["dispose"]();
+							}
+						}
+						catch(e:Error){
+							trace("[Error: unable implements IDispose] " + getQualifiedClassName(dis) + " not implements dispose method");
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private static const HELPER_EMPTY_STRING:String = "";
+	
+	/**
+	 * 获取指定接口名
+	 * @param	dis
+	 * @param	interfaceName
+	 * @return
+	 */
+	public static function getMatchInterfaceQualifiedName(dis:*, interfaceName:String, exactMatch:Boolean = false):String{
+		if(!((dis is DisplayObject) || (dis is Class))){
+			return HELPER_EMPTY_STRING;
+		}
+		var cls:Class = dis as Class;
+		if(dis is DisplayObject){
+			cls = Object(dis as DisplayObject).constructor;
+		}
+		var xmlList:XMLList = describeType(cls).factory.implementsInterface;
+		var faceName:String;
+		var findMatch:Boolean = false;
+		var qualifiedInterfaceName:String;
+		for each(var item:XML in xmlList){
+			faceName = String(item.@type);
+			if (exactMatch) {
+				var index:int = faceName.indexOf("::");
+				var subName:String;
+				if(index > -1){
+					subName = faceName.slice(index + 2, faceName.length);
+				}
+				else {
+					subName = faceName;
+				}
+				findMatch = subName == faceName;
+			}
+			else {
+				findMatch = StringUtil.endWith(faceName, interfaceName);
+			}
+			if(findMatch){
+				qualifiedInterfaceName = faceName;
+			}
+		}
+		return findMatch ? qualifiedInterfaceName : HELPER_EMPTY_STRING;
+	}
+	
+	/**
+	 * 判断显示对象是否实现了IDispose接口
+	 * @param	dis
+	 * @return
+	 */
+	public static function isImplementIDispose(dis:*):Boolean{
+		return isImplement(dis, "IDispose", true);
+	}
+	
+	/**
+	 * 判定自定义显示对象是否实现了指定接口 
+	 * @param	dis
+	 * @param	interfaceName
+	 * @param	caseInsensitive
+	 * @return
+	 */
+	public static function isImplement(dis:*, interfaceName:String, caseInsensitive:Boolean = false):Boolean{
+		if(!((dis is DisplayObject) || (dis is Class))){
+			return false;
+		}
+		var cls:Class = dis as Class;
+		if(dis is DisplayObject){
+			cls = Object(dis as DisplayObject).constructor;
+		}
+		if(caseInsensitive){
+			interfaceName = interfaceName.toLowerCase();
+		}
+		var xml:XML = describeType(cls);
+		var filter:Function = function(node:XML):Boolean{
+			var type:String = String(node.@type);
+			var index:int = type.indexOf("::");
+			if(index > -1){
+				type = type.slice(index + 2, type.length);
+			}
+			return type == interfaceName;
+		}
+		var isImpl:Boolean = xml.factory.implementsInterface.(filter(valueOf())).length() > 0;
+		System.disposeXML(xml);
+		return isImpl;
 	}
 	
 	/**
