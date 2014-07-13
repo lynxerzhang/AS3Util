@@ -138,16 +138,18 @@ public class Slot
 				else{
 					fun.apply(null, args); 
 				}
-				if(onceCheck[fun].executeOnce){
-					remove(fun);
-				}
-				else {
-					if(fill < i){
-						base[fill] = fun;
-						onceCheck[fun].index = fill;
-						base[i] = null;
+				if(onceCheck[fun]){
+					if(onceCheck[fun].executeOnce){
+						remove(fun);
 					}
-					fill++;
+					else {
+						if(fill < i){
+							base[fill] = fun;
+							onceCheck[fun].index = fill;
+							base[i] = null;
+						}
+						fill++;
+					}
 				}
 			}
 		}
