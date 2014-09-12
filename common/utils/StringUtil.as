@@ -16,7 +16,7 @@ public class StringUtil
 	 */
 	public static function replaceString(str:String, ...args):String{
 		var r:RegExp, provider:Object;
-		if(args.length == 1 && typeof(args[0]) == "object" && !args[0] is Array){
+		if(args.length == 1 && typeof(args[0]) == "object" && !(args[0] is Array)){
 			r = /\((?i:[a-z]++)\) | \{(?i:[a-z]++)\} | \[(?i:[a-z]++)\]/gx;
 			provider = args[0] as Object;
 		}
