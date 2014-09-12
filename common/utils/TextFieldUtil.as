@@ -6,6 +6,73 @@ import flash.text.TextFormatAlign;
 
 public class TextFieldUtil 
 {
+	private static const decorateTFAry:Array = [];
+	
+	/**
+	 *	修饰指定文本中的字符串颜色
+	 *	@param txt	指定文本
+	 *	@param str	文本中需要显示的字符串
+	 * 	@param args	替换字符串
+	 * 
+	 *	@example
+	 *	var str:String = "hellow{0:0xFF6600}{1:0xFF0000}";
+	 *	decorateTextField(txt, str, ["or", "ld"]);
+	 *	decorateTextField(txt, str, "or", "ld");
+	 */ 
+	public static function decorateTextField(txt:TextField, str:String, ...args):void
+	{
+		var r:RegExp, provider:Object;
+		if(args.length == 1 && typeof(args[0]) == "object" && !(args[0] is Array)){
+			r = /\{(?i:[a-z]++:(0x[0-9A-Fa-f]{6}|0-9A-Fa-f]{8}))\}/gx;
+			provider = args[0] as Object;
+		}
+		else{
+			r = /\{\d+:(0x[0-9A-Fa-f]{6}|0-9A-Fa-f]{8})\}/gx;
+			if(args[0] is Array){
+				provider = args[0] as Array;
+			}
+			else{
+				provider = args;
+			}
+		}
+		
+		if(r){
+			decorateTFAry.length = 0;
+			r.lastIndex = 0;
+			
+			var execObj:Object = r.exec(str); //will return array
+			var execObjLen:int;
+			var matchKey:String;
+			var groupStr:String;
+			var matchStr:String;
+			var hexColorStr:String;
+			
+			do{
+				execObjLen = execObj.length;
+				if(execObj && execObjLen > 0){
+					matchStr = String(execObj[0]);
+					groupStr = matchStr.slice(1, matchStr.indexOf(":"));
+					matchKey = provider[groupStr];
+					hexColorStr = String(execObj[1]);
+					str = str.slice(0, execObj.index) + matchKey + str.slice(execObj.index + matchStr.length);
+					decorateTFAry.push({"rgb":hexColorStr, "index":execObj.index, "end":execObj.index + matchKey.length});
+					if(execObj.index == r.lastIndex){
+						break;
+					}
+					r.lastIndex = execObj.index + matchKey.length;
+				}
+			}while(execObj && (execObj = r.exec(str)));
+			
+			txt.text = str;
+			var format:TextFormat = txt.getTextFormat();
+			var decorateLen:int = decorateTFAry.length;
+			for(var k:int = 0; k < decorateLen; k ++){
+				format.color = decorateTFAry[k].rgb;
+				txt.setTextFormat(format, decorateTFAry[k].index, decorateTFAry[k].end);
+			}
+		}
+	}
+	
 	/**
 	 * 根据传入文本的局部x,y点击坐标，返回当前点击的词语
 	 * @param	txt
