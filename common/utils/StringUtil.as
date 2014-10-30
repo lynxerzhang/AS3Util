@@ -3,6 +3,43 @@ package common.utils
 
 public class StringUtil 
 {	
+	private static const HELPER_MATCH_RESULT:Array = [];
+	/**
+	 * 根据给定的正则表达式返回匹配的字符串
+	 * 
+	 * @param str		指定字符串
+	 * @param reg		待匹配的正则表达式
+	 * @param result	返回匹配结果数组
+	 */ 
+	public static function getMatch(str:String, reg:RegExp, result:Array = null):Array
+	{
+		if(!result){
+			result = HELPER_MATCH_RESULT;
+		}
+		result.length = 0;
+		if(reg){
+			reg.lastIndex = 0;
+			if(reg.test(str)){
+				reg.lastIndex = 0;
+				var d:Object;
+				do{
+					d = reg.exec(str);
+					if(d){
+						if(d.index == reg.lastIndex){
+							//prevent infinite loop
+							break;
+						}
+						if(d.length >= 1){
+							result.push(d[0]);
+						}
+					}
+				}
+				while(d)
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * 修饰字符串
 	 * @param str 目标字符串 
