@@ -54,6 +54,16 @@ public class NumberUtil
 	}
 	
 	/**
+	 * 获取指定范围内的随机uint值
+	 * @param min
+	 * @param max
+	 * @return uint
+	 */ 
+	public static function randomUnit(min:uint, max:uint):uint{
+		return ((Math.random() * (max - min + 1))|0) + min;
+	}
+	
+	/**
 	 * 获取指定整形数值是否为偶数
 	 * @param num
 	 * @return 
