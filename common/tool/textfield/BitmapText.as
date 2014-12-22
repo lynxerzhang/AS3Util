@@ -103,7 +103,7 @@ public class BitmapText extends Sprite
 	}
 	
 	/**
-	 * 
+	 * 销毁
 	 */
 	public function dispose():void {
 		this.removeEventListener(Event.ADDED_TO_STAGE, addToStageHandler);
@@ -119,6 +119,13 @@ public class BitmapText extends Sprite
 			}
 			textBitmap = null;
 		}
+	}
+	
+	/**
+	 * 重绘
+	 */
+	public function validate():void{
+		drawTextField();
 	}
 	
 	private var text:TextField;
