@@ -21,6 +21,7 @@ public class DisplayUtil
 		var t:TextField = new TextField();
 		t.autoSize = TextFieldAutoSize.LEFT;
 		t.wordWrap = true;
+		t.multiline = true;
 		t.selectable = enabled;
 		t.mouseEnabled = enabled;
 		if(!isNaN(w)){
