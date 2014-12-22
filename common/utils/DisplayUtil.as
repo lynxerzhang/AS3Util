@@ -71,12 +71,13 @@ public class DisplayUtil
 	 * @param	p	range(0 - 1) 对应0 - 360度的弧度表示
 	 * @param	r	半径
 	 * @param	c	填充色
+	 * @param 	al	填充色透明度
 	 * @param	cw	是否顺时针绘制
 	 * @param	result	根据需要传入Sprite对象
 	 * @see 	原始版本 http://www.senocular.com/flash/source/
 	 * @return
 	 */
-	public static function createArcShape(p:Number, r:Number, c:uint, cw:Boolean = true, result:Sprite = null):Sprite {
+	public static function createArcShape(p:Number, r:Number, c:uint, al:Number = 1, cw:Boolean = true, result:Sprite = null):Sprite {
 		var rs:Sprite = result;
 		if (!result) {
 			rs = new Sprite();
@@ -87,7 +88,7 @@ public class DisplayUtil
 		var diff:Number = Math.abs(e - s);
 		var drawCount:Number = ((diff / (Math.PI * .25)) >> 0) + 1;
 		g.clear();
-		g.beginFill(c, 1);
+		g.beginFill(c, al);
 		g.moveTo(0, 0);
 		g.lineTo(Math.cos(s) * r, Math.sin(s) * r);
 		var a:Number = diff / (drawCount * 2);
@@ -104,6 +105,38 @@ public class DisplayUtil
 		g.lineTo(0, 0);
 		g.endFill();
 		return rs;
+	}
+	
+	/**
+	 * @see 	createArcShape
+	 * @return
+	 */
+	public static function drawArcGraphics(p:Number, r:Number, c:uint, al:Number, result:Graphics, cw:Boolean = true):void {
+		var g:Graphics = result;
+		var s:Number = -Math.PI * .5;
+		var e:Number = p * (Math.PI * 2) + s;
+		var diff:Number = Math.abs(e - s);
+		var drawCount:Number = ((diff / (Math.PI * .25)) >> 0) + 1;
+		
+		g.clear();
+		g.beginFill(c, al);
+		g.moveTo(0, 0);
+		g.lineTo(Math.cos(s) * r, Math.sin(s) * r);
+		
+		var a:Number = diff / (drawCount * 2);
+		if (!cw) {
+			a = -a;
+		}
+		
+		var cR:Number = r / Math.cos(a); //controlRadius
+		var sa:Number = s, ea:Number = sa;
+		for (var i:int = 0; i < drawCount; i ++) {
+			sa = ea + a;
+			ea = sa + a;
+			g.curveTo(Math.cos(sa) * cR, Math.sin(sa) * cR, Math.cos(ea) * r, Math.sin(ea) * r);
+		}
+		g.lineTo(0, 0);
+		g.endFill();
 	}
 	
 	/**
