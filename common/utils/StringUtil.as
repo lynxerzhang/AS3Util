@@ -39,7 +39,55 @@ public class StringUtil
 		}
 		return result;
 	}
-
+	
+	/**
+	 * @see getMatch
+	 * @param str		指定字符串
+	 * @param reg		待匹配的正则表达式
+	 * @param result	返回匹配结果数组
+	 * @param titleName	用于标识数组中存储对象的type字符串
+	 */
+	public static function createTypeMatch(str:String, reg:RegExp, result:Array = null, 
+								titleName:String = null):Array
+	{
+		if(!result){
+			result = [];
+		}
+		else{
+			result.length = 0;
+		}
+		
+		if(reg){
+			reg.lastIndex = 0;
+			if(reg.test(str)){
+				reg.lastIndex = 0;
+				var d:Object;
+				var r:Object;
+				do{
+					d = reg.exec(str);
+					if(d){
+						if(d.index == reg.lastIndex){
+							//prevent infinite loop
+							break;
+						}
+						if(d.length >= 1){
+							r = {};
+							//
+							if(titleName != null){
+								r.type = titleName;
+							}
+							r.index = d.index;
+							r.content = d[0];
+							result.push(r);
+						}
+					}
+				}
+				while(d)
+			}
+		}
+		return result;
+	}
+	
 	/**
 	 * 修饰字符串
 	 * @param str 目标字符串 
