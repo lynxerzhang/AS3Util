@@ -172,6 +172,21 @@ public class DebugUtil
 	private static const HELPER_TICKER:Shape = new Shape();
 	
 	/**
+	 * 获取swf版本号
+	 * @see http://www.senocular.com/flash/actionscript/?file=ActionScript_3.0/com/senocular/utils/SWFReader.as
+	 */
+	public static function getSwfVersion():uint {
+		var s:LoaderInfo = LoaderInfo.getLoaderInfoByDefinition(HELPER_TICKER)
+		var d:ByteArray = s.bytes;
+		d.endian = Endian.LITTLE_ENDIAN;
+		d.position = 0;
+		var swfFC:uint = d.readUnsignedByte();
+		var swfW:uint = d.readUnsignedByte();
+		var swfS:uint = d.readUnsignedByte();
+		return d.readUnsignedByte();
+	}
+	
+	/**
 	 * 将指定方法延迟指定的帧数执行
 	 * @param	fun
 	 * @param	frames
