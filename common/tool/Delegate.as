@@ -23,6 +23,15 @@ public class Delegate
 	}
 	
 	/**
+	 * delegate call
+	 */
+	public static function delegateCall(fun:Function, ...args):Function{
+		return function(...rest):void{
+			fun.call(null, rest.concat(args));
+		}
+	}
+	
+	/**
 	 * 类似于bindable, 但是可以自由组合所需参数
 	 * @param	s		可以为作用域, 也可为方法本身
 	 * @param	m		可为参数, 方法, 或者方法名
