@@ -121,6 +121,53 @@ public class StringUtil
 	}
 	
 	/**
+	 * 修饰字符串并返回修饰字符串的起始和终止索引
+	 */
+	public static function replaceString2(str:String, ...args):Array{
+		var r:RegExp, provider:Object;
+		if(args.length == 1 && typeof(args[0]) == "object" && !(args[0] is Array)){
+			r = /\((?i:[a-z]++)\) | \{(?i:[a-z]++)\} | \[(?i:[a-z]++)\]/gx;
+			provider = args[0] as Object;
+		}
+		else{
+			r = /\(\d+\) | \{\d+\} | \[\d+\]/gx;
+			if(args[0] is Array){
+				provider = args[0] as Array;
+			}
+			else{
+				provider = args;
+			}
+		}
+		var matchIndex:Array = [];
+		var results:String;
+		str = str.replace(r, function(match:String, ...t):String{
+			results = String(provider[match.slice(1, match.length - 1)]);
+			matchIndex.push(t[0], t[1], match, results);
+			return results;
+		});
+		
+		var formatAry:Array = [];
+		var i:int = 0;
+		formatAry.push({s:matchIndex[i], e:matchIndex[i] + String(matchIndex[i + 3]).length});
+		
+		var offset:int = 0;
+		var addOffset:int = 0;
+		
+		i = 4;
+		var sIndex:int = 0;
+		var eIndex:int = 0;
+		for(var len:int = matchIndex.length; i < len; i +=4){
+			offset += String(matchIndex[i - 2]).length;
+			addOffset += String(matchIndex[i - 1]).length;
+			sIndex = matchIndex[i] - offset + addOffset;
+			eIndex =  sIndex +  String(matchIndex[i + 3]).length;
+			formatAry.push({s:sIndex, e:eIndex});	
+		}
+		formatAry.content = str;
+		return formatAry;
+	}
+	
+	/**
 	 * 删除额外换行符
 	 */ 	
 	public static function removeExtraNewLine(str:String):String
