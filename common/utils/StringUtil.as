@@ -168,6 +168,13 @@ public class StringUtil
 	}
 	
 	/**
+	 * 按照指定次数复制字符串	
+ 	 */ 
+	public static function repeat(value:String, repeatCount:int):String{
+		return new Array(repeatCount + 1).join(value);
+	}
+	
+	/**
 	 * 删除额外换行符
 	 */ 	
 	public static function removeExtraNewLine(str:String):String
