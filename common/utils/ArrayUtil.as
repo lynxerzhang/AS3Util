@@ -182,5 +182,19 @@ public class ArrayUtil
 		return c;
 	}
 	
+	/**
+	 * return an array by repeating the given value n times.
+	 * @param	value
+	 * @param	repeatCount
+	 * @return
+	 */
+	public static function createRepeat(value:*, repeatCount:int):Array {
+		return new Array(repeatCount).map(function(res:*, ...args):*{
+			if(value is Class){
+				return new value();
+			}
+			return value;
+		});
+	}
 }
 }
