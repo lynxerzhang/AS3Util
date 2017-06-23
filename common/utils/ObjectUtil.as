@@ -463,5 +463,29 @@ public class ObjectUtil
 					|| vectList is Vector.<uint> 
 					|| vectList is Vector.<Number>);
 	}
+	
+	/**
+	 * 创建"节流"函数
+	 * @param	fun
+	 * @param	waitMilSec
+	 * @param 	args
+	 * @return
+	 */
+	public static function createThrottle(fun:Function, waitMilSec:Number, ...args):Function {
+		var now:Number = 0, previous:Number = 0, remaining:Number = 0;
+		return function():void{
+			now = new Date().getTime();
+			remaining = waitMilSec - (now - previous);
+			if(remaining <= 0 || remaining > waitMilSec){
+				previous = now;
+				if(args.length == 0){
+					fun();
+				}
+				else{
+					fun.apply(null, args);
+				}
+			}
+		}
+	}
 }
 }
