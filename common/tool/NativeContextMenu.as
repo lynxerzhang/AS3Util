@@ -86,6 +86,30 @@ public class NativeContextMenu
 		}
 	}
 	
+	/**
+	 * 
+	 */
+	public function setItemGroupLabel(label:String, newLabel:String):void
+	{
+		var itemData:Object = funDict[label];
+		if(itemData){
+			var item:ContextMenuItem = itemData.item;
+			item.caption = newLabel;
+		}
+	}
+	
+	/**
+	 * 
+	 */
+	public function setItemGroupEnabled(label:String, enabled:Boolean):void
+	{
+		var itemData:Object = funDict[label];
+		if(itemData){
+			var item:ContextMenuItem = itemData.item;
+			item.enabled = enabled;
+		}
+	}
+	
 	public function get contextMenu():ContextMenu 
 	{ 
 		return _contextMenu; 
