@@ -33,5 +33,19 @@ public class FTEUtil
 		textblock.releaseLineCreationData();
 		return textLine;
 	}
+	
+	/**
+	 * 获取指定TextLine的长度 （如果文本中含有空白字符，那么textwidth和width属性都会舍去这个空白字符）
+	 */
+	public static function getTextLineWidth(textLine:TextLine):Number
+	{
+		var width:Number = 0;
+		if(textLine.atomCount != 0){
+			var endIndex:int = textLine.atomCount - 1;
+			var bounds:Rectangle = textLine.getAtomBounds(endIndex);
+			width = bounds.right;
+		}
+		return width;
+	}
 }
 }
