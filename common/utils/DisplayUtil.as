@@ -146,7 +146,7 @@ public class DisplayUtil
 	 * @param	x		初始x坐标
 	 * @param	y		初始y坐标
 	 * @param	r		绘制半径
-	 * @param	size	线条尺寸
+	 * @param	size		线条尺寸
 	 * @param	c		色彩
 	 * @param	af		起始角度
 	 * @param	at		结束角度
@@ -176,14 +176,14 @@ public class DisplayUtil
 	
 	/**
 	 * 绘制线性渐变
-	 * @param	g			graphics对象
+	 * @param	g		graphics对象
 	 * @param	startHex	初始色彩数值
 	 * @param	endHex		结束色彩数值
 	 * @param	width		长度
 	 * @param	height		高度
 	 * @param	rotation	旋转值(弧度)
-	 * @param	ew			ellipseWidth
-	 * @param	eh			ellipseHeight
+	 * @param	ew		ellipseWidth
+	 * @param	eh		ellipseHeight
 	 */
 	public static function drawLinearGradient(g:Graphics, startHex:uint, endHex:uint, 
 						width:Number, height:Number, 
@@ -193,11 +193,11 @@ public class DisplayUtil
 		matr.createGradientBox(width, height, rotation, 0, 0);
 		var spreadMethod:String = SpreadMethod.PAD;
 		g.beginGradientFill(GradientType.LINEAR, 
-							[startHex, endHex], 
-							[1, 1], 
-							[0, 255], 
-							matr, 
-							spreadMethod);
+					[startHex, endHex], 
+					[1, 1], 
+					[0, 255], 
+					matr, 
+					spreadMethod);
 		g.drawRoundRect(0, 0, width, height, ew, eh);
 		g.endFill();
 	}
