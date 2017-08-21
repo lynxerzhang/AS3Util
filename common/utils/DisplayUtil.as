@@ -173,7 +173,35 @@ public class DisplayUtil
 			g.curveTo(x + Math.cos(sa) * cR, y + Math.sin(sa) * cR, x + Math.cos(ea) * r, y + Math.sin(ea) * r);
 		}
 	}
-
+	
+	/**
+	 * 绘制线性渐变
+	 * @param	g			graphics对象
+	 * @param	startHex	初始色彩数值
+	 * @param	endHex		结束色彩数值
+	 * @param	width		长度
+	 * @param	height		高度
+	 * @param	rotation	旋转值(弧度)
+	 * @param	ew			ellipseWidth
+	 * @param	eh			ellipseHeight
+	 */
+	public static function drawLinearGradient(g:Graphics, startHex:uint, endHex:uint, 
+						width:Number, height:Number, 
+						rotation:Number, ew:Number, eh:Number):void{
+		g.clear();
+		var matr:Matrix = new Matrix();
+		matr.createGradientBox(width, height, rotation, 0, 0);
+		var spreadMethod:String = SpreadMethod.PAD;
+		g.beginGradientFill(GradientType.LINEAR, 
+							[startHex, endHex], 
+							[1, 1], 
+							[0, 255], 
+							matr, 
+							spreadMethod);
+		g.drawRoundRect(0, 0, width, height, ew, eh);
+		g.endFill();
+	}
+	
 	/**
 	 * 绘制多边形 (仅使用整体填充)
 	 * @param	g	graphics对象
