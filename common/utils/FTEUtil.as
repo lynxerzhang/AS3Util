@@ -47,5 +47,22 @@ public class FTEUtil
 		}
 		return width;
 	}
+	
+	/**
+	 * 获取指定字符串长度
+	 * var anchor:String = "🐲🐲💩💩💩❤️❤️";
+	 * trace(getLength(anchor)); //7
+	 */
+	public static function getLength(str:String):int 
+	{
+		var textBlock:TextBlock = new TextBlock();
+		var fontDescription:FontDescription = new FontDescription();
+		var format:ElementFormat = new ElementFormat(fontDescription, 12);
+		var textElement:TextElement = new TextElement(str, format);
+		textBlock.content = textElement;
+		var textLine:TextLine = textBlock.createTextLine();
+		textBlock.releaseLineCreationData();
+		return textLine.atomCount;
+	}
 }
 }
