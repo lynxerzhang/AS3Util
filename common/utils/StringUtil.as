@@ -544,5 +544,40 @@ public class StringUtil
 	
 	private static var chineseWord:RegExp = /[\u4e00-\u9fa5]/g;
 	
+	
+	private static const STYLE_HELP_ARY:Array = [];
+	private static const STYLE_REG:RegExp = /{(.*?)}/g;
+	
+	/**
+	 * 剔除字符串中含有成对的{}字符，并记录索引，可以为后继文本变色提供索引
+	 * @param str
+	 * @return 
+	 */
+	public static function styleString(str:String):Array
+	{
+		var reg:RegExp = STYLE_REG;
+		var result:Array = STYLE_HELP_ARY;
+		result.length = 0;
+		if(reg.test(str)){
+			reg.lastIndex = 0;
+			var d:Object;
+			var s:int = 0;
+			while((d = reg.exec(str)) != null){
+				s = str.indexOf(d[1], s);
+				result.push([s, s + d[1].length]);
+				s += 1;
+			}
+			var len:int = result.length;
+			for(var i:int = 0; i < len; i ++){
+				result[i][0] -= (1 + i * 2);
+				result[i][1] -= (1 + i * 2);
+			}
+			result.content = str.replace(reg, "$1");
+		}
+		else{
+			result.content = str;
+		}
+		return result;
+	}	
 }
 }
