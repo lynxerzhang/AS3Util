@@ -565,13 +565,19 @@ public class StringUtil
 			while((d = reg.exec(str)) != null){
 				s = str.indexOf(d[1], s);
 				result.push([s, s + d[1].length]);
-				s += 1;
+				s = s + d[1].length;
 			}
 			var len:int = result.length;
 			for(var i:int = 0; i < len; i ++){
 				result[i][0] -= (1 + i * 2);
 				result[i][1] -= (1 + i * 2);
 			}
+			result = result.filter(function(item:*, ...args):Boolean{
+				if(item[0] == item[1]){
+					return false;
+				}
+				return true;
+			});
 			result.content = str.replace(reg, "$1");
 		}
 		else{
