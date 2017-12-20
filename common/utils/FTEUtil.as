@@ -55,6 +55,9 @@ public class FTEUtil
 	 */
 	public static function getLength(str:String):int 
 	{
+		if(!str || str == ""){
+			return 0;
+		}
 		var textBlock:TextBlock = new TextBlock();
 		var fontDescription:FontDescription = new FontDescription();
 		var format:ElementFormat = new ElementFormat(fontDescription, 12);
