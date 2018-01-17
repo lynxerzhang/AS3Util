@@ -703,7 +703,7 @@ public class DisplayObjectUtil
 		var leftRightStepper:int = 0;
 		for(var i:int = 0; i < 3; i ++){
 			for(var j:int = 0; j < 3; j ++){
-				g.beginBitmapFill(bd, null, true, true);
+				g.beginBitmapFill(bd, null, false, true);
 				g.drawRect(leftRightStepper, topDownStepper,
 					leftRight[i] - leftRightStepper, topDown[j] - topDownStepper);
 				g.endFill();
